@@ -10,7 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, uploadFile } from "@/lib/storage";
 import { initialsOf } from "@/lib/format";
 import { toast } from "sonner";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, MessageCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+
 
 export const Route = createFileRoute("/_authenticated/account-settings")({
   component: AccountSettings,
