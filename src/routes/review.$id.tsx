@@ -29,8 +29,8 @@ function ReviewPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate({ to: "/auth", search: { redirect: `/review/${id}` } as any });
-  }, [authLoading, user, id, navigate]);
+    if (!authLoading && !user) navigate({ to: "/auth" });
+  }, [authLoading, user, navigate]);
 
   if (notFound) {
     return (
