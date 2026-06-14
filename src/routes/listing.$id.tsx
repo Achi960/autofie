@@ -31,16 +31,20 @@ function ListingDetail() {
     const load = async () => {
       const { data, error } = await supabase
         .from("listings")
-        .select(`*,
-                 listing_photos(url, is_cover, sort_order),
-                 profiles!listings_user_id_fkey(full_name, phone),
-                 dealer_profiles!dealer_profiles_user_id_fkey(business_name, region, status)`)
+        .select(`*, listing_photos(url, is_cover, sort_order)`)
         .eq("id", id)
         .maybeSingle();
       if (!alive) return;
       if (error || !data) { setNotFound(true); setLoading(false); return; }
-      setListing(data);
-      // signed photos
+
+      // Fetch profile + dealer info separately (no direct FK between listings <-> profiles)
+      const [{ data: prof }, { data: deal }] = await Promise.all([
+        supabase.from("profiles").select("full_name, phone").eq("id", data.user_id).maybeSingle(),
+        supabase.from("dealer_profiles").select("business_name, region, status").eq("user_id", data.user_id).maybeSingle(),
+      ]);
+      const enriched: any = { ...data, profiles: prof ?? null, dealer_profiles: deal ?? null };
+      setListing(enriched);
+
       const sorted = [...(data.listing_photos ?? [])].sort((a: any, b: any) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order);
       const paths = sorted.length ? sorted.map((p: any) => p.url) : data.cover_photo_url ? [data.cover_photo_url] : [];
       const signed = (await signedUrls("listing-photos", paths)).filter(Boolean) as string[];
