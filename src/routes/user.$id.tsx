@@ -241,6 +241,13 @@ function UserProfilePage() {
         )}
       </div>
 
+      {/* Reviews */}
+      <div className="mx-auto max-w-5xl px-4 pb-10">
+        <ReviewsSection dealerId={id} dealerName={name} />
+      </div>
+
+
+
       <Dialog open={!!listOpen} onOpenChange={(v) => !v && setListOpen(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
