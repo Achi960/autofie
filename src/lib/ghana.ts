@@ -94,16 +94,26 @@ export const CAR_BRANDS: Record<string, string[]> = {
 
 export const ALL_BRANDS = Object.keys(CAR_BRANDS);
 
+import catCar from "@/assets/cat-car.jpg";
+import catMotorcycle from "@/assets/cat-motorcycle.jpg";
+import catBus from "@/assets/cat-bus.jpg";
+import catTruck from "@/assets/cat-truck.jpg";
+import catHeavy from "@/assets/cat-heavy.jpg";
+import catParts from "@/assets/cat-parts.jpg";
+import catAccessories from "@/assets/cat-accessories.jpg";
+import catServices from "@/assets/cat-services.jpg";
+
 export const CATEGORIES = [
-  { slug: "car", label: "Cars", emoji: "🚗" },
-  { slug: "motorcycle", label: "Motorcycles & Scooters", emoji: "🏍️" },
-  { slug: "bus", label: "Buses & Microbuses", emoji: "🚌" },
-  { slug: "truck", label: "Trucks & Trailers", emoji: "🚛" },
-  { slug: "heavy_equipment", label: "Construction & Heavy Machinery", emoji: "🚜" },
-  { slug: "parts", label: "Vehicle Parts & Accessories", emoji: "🛞" },
-  { slug: "accessories", label: "Accessories", emoji: "🎒" },
-  { slug: "services", label: "Services", emoji: "🛠️" },
+  { slug: "car", label: "Cars", image: catCar },
+  { slug: "motorcycle", label: "Motorcycles & Scooters", image: catMotorcycle },
+  { slug: "bus", label: "Buses & Microbuses", image: catBus },
+  { slug: "truck", label: "Trucks & Trailers", image: catTruck },
+  { slug: "heavy_equipment", label: "Construction & Heavy Machinery", image: catHeavy },
+  { slug: "parts", label: "Vehicle Parts & Accessories", image: catParts },
+  { slug: "accessories", label: "Accessories", image: catAccessories },
+  { slug: "services", label: "Services", image: catServices },
 ] as const;
+
 
 export const CAR_COLOURS: { name: string; hex: string }[] = [
   { name: "Black", hex: "#000000" },
