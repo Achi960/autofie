@@ -1,5 +1,14 @@
 // Ghana administrative regions and a representative set of districts.
 // This is a sensible seed list — edit freely.
+import catCar from "@/assets/cat-car.jpg";
+import catMotorcycle from "@/assets/cat-motorcycle.jpg";
+import catBus from "@/assets/cat-bus.jpg";
+import catTruck from "@/assets/cat-truck.jpg";
+import catHeavy from "@/assets/cat-heavy.jpg";
+import catParts from "@/assets/cat-parts.jpg";
+import catAccessories from "@/assets/cat-accessories.jpg";
+import catServices from "@/assets/cat-services.jpg";
+
 
 export const REGIONS: Record<string, string[]> = {
   "Greater Accra": ["Accra Metro", "Tema Metro", "Ga East", "Ga West", "Ga South", "Ga Central", "Adentan", "Ledzokuku", "Krowor", "Ashaiman", "La Nkwantanang Madina", "Ningo Prampram"],
