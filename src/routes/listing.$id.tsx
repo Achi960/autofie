@@ -1,14 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Phone, MessageCircle, Heart, MapPin, Gauge, Calendar, Fuel, Settings, Palette, BadgeCheck } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, signedUrls } from "@/lib/storage";
 import { formatGHS, formatMileage, initialsOf } from "@/lib/format";
 import { useAuth } from "@/lib/auth-context";
+import { FollowButton } from "@/components/FollowButton";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/listing/$id")({
