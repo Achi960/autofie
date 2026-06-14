@@ -102,7 +102,7 @@ function BrowsePage() {
   }, [category, search.q, search.make, search.region, search.condition, search.transmission, search.fuel, search.body, search.min_price, search.max_price, search.page]);
 
   const setFilter = (key: string, value: string | undefined) => {
-    navigate({ search: (s) => ({ ...s, [key]: value || undefined, page: 1 }) });
+    navigate({ search: (s: Record<string, unknown>) => ({ ...s, [key]: value || undefined, page: 1 }) });
   };
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -160,12 +160,12 @@ function BrowsePage() {
             {pages > 1 && (
               <div className="mt-8 flex items-center justify-center gap-2">
                 <Button variant="outline" size="sm" disabled={currentPage <= 1}
-                  onClick={() => navigate({ search: (s) => ({ ...s, page: currentPage - 1 }) })}>
+                  onClick={() => navigate({ search: (s: Record<string, unknown>) => ({ ...s, page: currentPage - 1 }) })}>
                   Previous
                 </Button>
                 <span className="text-sm text-muted-foreground">Page {currentPage} of {pages}</span>
                 <Button variant="outline" size="sm" disabled={currentPage >= pages}
-                  onClick={() => navigate({ search: (s) => ({ ...s, page: currentPage + 1 }) })}>
+                  onClick={() => navigate({ search: (s: Record<string, unknown>) => ({ ...s, page: currentPage + 1 }) })}>
                   Next
                 </Button>
               </div>
