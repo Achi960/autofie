@@ -15,7 +15,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as BrowseCategoryRouteImport } from './routes/browse.$category'
 import { Route as AuthenticatedSubmitListingRouteImport } from './routes/_authenticated/submit-listing'
+import { Route as AuthenticatedMySavedRouteImport } from './routes/_authenticated/my-saved'
 import { Route as AuthenticatedMyListingsRouteImport } from './routes/_authenticated/my-listings'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedCompleteDealerProfileRouteImport } from './routes/_authenticated/complete-dealer-profile'
 import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin/listings'
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
@@ -50,9 +52,19 @@ const AuthenticatedSubmitListingRoute =
     path: '/submit-listing',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMySavedRoute = AuthenticatedMySavedRouteImport.update({
+  id: '/my-saved',
+  path: '/my-saved',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMyListingsRoute = AuthenticatedMyListingsRouteImport.update({
   id: '/my-listings',
   path: '/my-listings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCompleteDealerProfileRoute =
@@ -78,7 +90,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
+  '/messages': typeof AuthenticatedMessagesRoute
   '/my-listings': typeof AuthenticatedMyListingsRoute
+  '/my-saved': typeof AuthenticatedMySavedRoute
   '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
@@ -89,7 +103,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
+  '/messages': typeof AuthenticatedMessagesRoute
   '/my-listings': typeof AuthenticatedMyListingsRoute
+  '/my-saved': typeof AuthenticatedMySavedRoute
   '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
@@ -102,7 +118,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/my-listings': typeof AuthenticatedMyListingsRoute
+  '/_authenticated/my-saved': typeof AuthenticatedMySavedRoute
   '/_authenticated/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
@@ -115,7 +133,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/complete-dealer-profile'
+    | '/messages'
     | '/my-listings'
+    | '/my-saved'
     | '/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
@@ -126,7 +146,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/complete-dealer-profile'
+    | '/messages'
     | '/my-listings'
+    | '/my-saved'
     | '/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
@@ -138,7 +160,9 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/complete-dealer-profile'
+    | '/_authenticated/messages'
     | '/_authenticated/my-listings'
+    | '/_authenticated/my-saved'
     | '/_authenticated/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
@@ -198,11 +222,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSubmitListingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/my-saved': {
+      id: '/_authenticated/my-saved'
+      path: '/my-saved'
+      fullPath: '/my-saved'
+      preLoaderRoute: typeof AuthenticatedMySavedRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/my-listings': {
       id: '/_authenticated/my-listings'
       path: '/my-listings'
       fullPath: '/my-listings'
       preLoaderRoute: typeof AuthenticatedMyListingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/complete-dealer-profile': {
@@ -231,7 +269,9 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCompleteDealerProfileRoute: typeof AuthenticatedCompleteDealerProfileRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedMyListingsRoute: typeof AuthenticatedMyListingsRoute
+  AuthenticatedMySavedRoute: typeof AuthenticatedMySavedRoute
   AuthenticatedSubmitListingRoute: typeof AuthenticatedSubmitListingRoute
   AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
   AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
@@ -240,7 +280,9 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCompleteDealerProfileRoute:
     AuthenticatedCompleteDealerProfileRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedMyListingsRoute: AuthenticatedMyListingsRoute,
+  AuthenticatedMySavedRoute: AuthenticatedMySavedRoute,
   AuthenticatedSubmitListingRoute: AuthenticatedSubmitListingRoute,
   AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
   AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
