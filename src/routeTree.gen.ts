@@ -25,7 +25,6 @@ import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
 import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
 import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authenticated/admin/listing.$id'
-import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -112,6 +111,12 @@ const AuthenticatedAdminListingIdRoute =
   AuthenticatedAdminListingIdRouteImport.update({
     id: '/admin/listing/$id',
     path: '/admin/listing/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedChatListingIdOtherIdRoute =
+  AuthenticatedChatListingIdOtherIdRouteImport.update({
+    id: '/chat/$listingId/$otherId',
+    path: '/chat/$listingId/$otherId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
