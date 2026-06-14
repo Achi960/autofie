@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-  initialStep?: "choose" | "signin" | "register";
 }
 
 type Step = "choose" | "signin" | "register";
@@ -51,12 +50,10 @@ const registerSchema = z.object({
   agree: z.literal(true, { message: "You must agree to the rules" }),
 });
 
-export function AuthModal({ open, onOpenChange, onSuccess, initialStep = "choose" }: AuthModalProps) {
-  const [step, setStep] = useState<Step>(initialStep);
+export function AuthModal({ open, onOpenChange, onSuccess }: AuthModalProps) {
+  const [step, setStep] = useState<Step>("choose");
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
-
-  useEffect(() => { if (open) setStep(initialStep); }, [open, initialStep]);
 
   // sign-in
   const [siEmail, setSiEmail] = useState("");
