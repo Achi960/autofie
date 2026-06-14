@@ -127,7 +127,7 @@ function HomePage() {
               params={{ category: c.slug }}
               className="flex flex-col items-center gap-2 rounded-xl border bg-card p-4 text-center transition hover:border-primary hover:shadow-sm"
             >
-              <CategoryIcon slug={c.slug} />
+              <span className="text-3xl leading-none">{c.emoji}</span>
               <span className="text-xs font-medium text-foreground">{c.label}</span>
             </Link>
           ))}
