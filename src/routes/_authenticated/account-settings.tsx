@@ -76,6 +76,7 @@ function AccountSettings() {
   const save = async () => {
     if (!user) return;
     if (!firstName.trim() || !lastName.trim()) { toast.error("First and last name required"); return; }
+    if (whatsappEnabled && !whatsappNumber.trim()) { toast.error("Enter your WhatsApp number to enable WhatsApp"); return; }
     setSaving(true);
     const full = `${firstName.trim()} ${lastName.trim()}`.trim();
     const { error } = await supabase.from("profiles").update({
@@ -83,11 +84,14 @@ function AccountSettings() {
       last_name: lastName.trim(),
       full_name: full,
       phone: phone.trim() || null,
-    }).eq("id", user.id);
+      whatsapp_enabled: whatsappEnabled,
+      whatsapp_number: whatsappEnabled ? whatsappNumber.trim() : null,
+    } as any).eq("id", user.id);
     setSaving(false);
     if (error) toast.error(error.message);
     else toast.success("Profile saved");
   };
+
 
   if (loading) return (
     <div className="min-h-screen bg-background"><Navbar />
