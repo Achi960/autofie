@@ -84,8 +84,9 @@ function MyListings() {
                   <p className="text-sm text-primary font-semibold">{formatGHS(r.price)}</p>
                   <StatusPill status={r.status} />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Link to="/listing/$id" params={{ id: r.id }}><Button variant="outline" size="sm">View</Button></Link>
+                  <Link to="/edit-listing/$id" params={{ id: r.id }}><Button variant="outline" size="sm">Edit</Button></Link>
                   <Button size="sm" variant={r.status === "closed" ? "default" : "outline"} onClick={() => toggleClose(r)}>
                     {r.status === "closed" ? "Reactivate" : "Close"}
                   </Button>
@@ -94,6 +95,9 @@ function MyListings() {
             ))}
           </TabsContent>
         </Tabs>
+        <div className="mt-4 text-right">
+          <Link to="/my-listings/closed" className="text-sm font-medium text-primary hover:underline">View closed listings →</Link>
+        </div>
       </div>
     </div>
   );

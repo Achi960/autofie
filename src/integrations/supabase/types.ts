@@ -65,6 +65,27 @@ export type Database = {
         }
         Relationships: []
       }
+      follows: {
+        Row: {
+          created_at: string
+          dealer_id: string
+          follower_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          dealer_id: string
+          follower_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          dealer_id?: string
+          follower_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       listing_photos: {
         Row: {
           created_at: string
@@ -268,6 +289,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           first_name: string | null
           full_name: string | null
@@ -277,6 +299,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           first_name?: string | null
           full_name?: string | null
@@ -286,6 +309,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           first_name?: string | null
           full_name?: string | null
@@ -363,6 +387,16 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      list_my_threads: {
+        Args: never
+        Returns: {
+          last_at: string
+          last_message: string
+          listing_id: string
+          other_id: string
+          unread_count: number
+        }[]
+      }
     }
     Enums: {
       app_role: "buyer" | "dealer_pending" | "dealer_verified" | "admin"
