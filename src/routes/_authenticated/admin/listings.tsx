@@ -43,6 +43,20 @@ function AdminListings() {
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
   useEffect(() => {
+    if (!isAdmin) return;
+    const channel = supabase
+      .channel("admin-listings-pending")
+      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, (payload) => {
+        load();
+        if (payload.eventType === "INSERT") {
+          toast.info("New listing submitted for review");
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isAdmin]);
+
+  useEffect(() => {
     rows.forEach((r) => {
       if (r.cover_photo_url && covers[r.id] === undefined) {
         signedUrl("listing-photos", r.cover_photo_url).then((u) => setCovers((c) => ({ ...c, [r.id]: u })));

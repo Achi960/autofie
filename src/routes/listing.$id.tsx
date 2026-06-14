@@ -89,6 +89,7 @@ function ListingDetail() {
 
   const phone = listing.contact || listing.profiles?.phone;
   const dealerVerified = listing.dealer_profiles?.status === "approved";
+  const contactDisplayName = listing.contact_name || listing.dealer_profiles?.business_name || listing.profiles?.full_name || "Dealer";
   const dealerName = listing.dealer_profiles?.business_name || listing.profiles?.full_name || "Dealer";
 
   const onCallClick = () => {
@@ -141,6 +142,7 @@ function ListingDetail() {
                 <Spec label="Condition" value={listing.condition} />
                 <Spec label="Engine" value={listing.engine} />
                 <Spec label="Registration" value={listing.registration_status} />
+                <Spec label="Year of registration" value={listing.registration_year} />
               </div>
 
               {listing.description && (
@@ -156,12 +158,16 @@ function ListingDetail() {
           <aside className="space-y-4">
             <div className="rounded-xl border bg-card p-5">
               <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12"><AvatarFallback className="bg-primary/10 text-primary">{initialsOf(dealerName)}</AvatarFallback></Avatar>
+                <Avatar className="h-12 w-12"><AvatarFallback className="bg-primary/10 text-primary">{initialsOf(contactDisplayName)}</AvatarFallback></Avatar>
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 font-semibold text-foreground">
-                    {dealerName}
+                    {contactDisplayName}
                     {dealerVerified && <BadgeCheck className="h-4 w-4 text-success" />}
                   </p>
+                  {listing.contact_name && dealerName !== contactDisplayName && (
+                    <p className="text-xs text-muted-foreground">{dealerName}</p>
+                  )}
+                  {phone && <p className="text-sm text-muted-foreground">{phone}</p>}
                   {dealerVerified && <Badge variant="outline" className="mt-1 border-success/30 bg-success/10 text-success">Verified dealer</Badge>}
                 </div>
               </div>
