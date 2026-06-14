@@ -15,10 +15,6 @@ export const notifyAdminWhatsapp = createServerFn({ method: "POST" })
     if (data.message.length > 1500) throw new Error("message too long");
     return data;
   })
-    if (!data?.message || typeof data.message !== "string") throw new Error("message required");
-    if (data.message.length > 1500) throw new Error("message too long");
-    return data;
-  })
   .handler(async ({ data }) => {
     const lovableKey = process.env.LOVABLE_API_KEY;
     const twilioKey = process.env.TWILIO_API_KEY;
