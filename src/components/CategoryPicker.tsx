@@ -27,7 +27,7 @@ export function CategoryPicker({ value, onChange }: Props) {
         >
           {current ? (
             <span className="flex items-center gap-3">
-              <span className="text-xl leading-none">{current.emoji}</span>
+              <img src={current.image} alt="" width={28} height={28} loading="lazy" className="h-7 w-7 rounded object-cover" />
               <span className="font-medium">{current.label}</span>
             </span>
           ) : (
@@ -35,6 +35,7 @@ export function CategoryPicker({ value, onChange }: Props) {
           )}
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </button>
+
       </DialogTrigger>
       <DialogContent className="max-w-md p-0">
         <DialogHeader className="border-b px-4 py-3">
