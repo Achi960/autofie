@@ -113,12 +113,6 @@ const AuthenticatedAdminListingIdRoute =
     path: '/admin/listing/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedChatListingIdOtherIdRoute =
-  AuthenticatedChatListingIdOtherIdRouteImport.update({
-    id: '/chat/$listingId/$otherId',
-    path: '/chat/$listingId/$otherId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
