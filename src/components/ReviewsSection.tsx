@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { initialsOf } from "@/lib/format";
 import { signedUrl } from "@/lib/storage";
 import { toast } from "sonner";
+import { notifyAdminWhatsapp } from "@/lib/admin-notify.functions";
 
 export type ReviewRow = {
   id: string;
@@ -132,6 +133,11 @@ export function ReviewsSection({ dealerId, dealerName, summaryOnly, autoOpen, on
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success(editingId ? "Review updated" : "Review posted");
+    if (!editingId) {
+      notifyAdminWhatsapp({
+        data: { message: `⭐ New review (${rating}★) for ${dealerName} on Autofie\n\n"${comment.slice(0, 200)}"\n\nView: ${window.location.origin}/user/${dealerId}` },
+      }).catch(() => {});
+    }
     setFormOpen(false);
     setEditingId(null);
     setRating(0);
