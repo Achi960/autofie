@@ -202,9 +202,9 @@ function BrowsePage() {
   );
 }
 
-function FilterSelect({ label, value, options, onChange }: { label: string; value?: string; options: string[]; onChange: (v: string | undefined) => void }) {
+function FilterSelect({ label, value, options, onChange, disabled }: { label: string; value?: string; options: string[]; onChange: (v: string | undefined) => void; disabled?: boolean }) {
   return (
-    <Select value={value ?? "__all"} onValueChange={(v) => onChange(v === "__all" ? undefined : v)}>
+    <Select value={value ?? "__all"} onValueChange={(v) => onChange(v === "__all" ? undefined : v)} disabled={disabled}>
       <SelectTrigger><SelectValue placeholder={label} /></SelectTrigger>
       <SelectContent>
         <SelectItem value="__all">Any {label.toLowerCase()}</SelectItem>
