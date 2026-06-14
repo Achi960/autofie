@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/storage";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useUnreadMessages } from "@/lib/use-unread-messages";
+import { useUnreadNotifications } from "@/lib/use-unread-notifications";
 
 export function Navbar() {
   const { user, isAdmin, isVerifiedDealer, isPendingDealer, signOut } = useAuth();
@@ -21,6 +22,8 @@ export function Navbar() {
   const navigate = useNavigate();
   const unread = useUnreadMessages();
   const unreadLabel = unread > 99 ? "99+" : String(unread);
+  const unreadNotifs = useUnreadNotifications();
+  const unreadNotifsLabel = unreadNotifs > 99 ? "99+" : String(unreadNotifs);
 
   useEffect(() => {
     if (!user) { setProfile(null); setAvatarSrc(null); return; }
@@ -64,11 +67,11 @@ export function Navbar() {
                     </span>
                   )}
                 </Link>
-                <button aria-label={`Notifications${unread ? ` (${unread} unread)` : ""}`} className="relative rounded-full p-2 hover:bg-white/15" onClick={() => navigate({ to: "/messages" })}>
+                <button aria-label={`Notifications${unreadNotifs ? ` (${unreadNotifs} unread)` : ""}`} className="relative rounded-full p-2 hover:bg-white/15" onClick={() => navigate({ to: "/notifications" })}>
                   <Bell className="h-5 w-5" />
-                  {unread > 0 && (
+                  {unreadNotifs > 0 && (
                     <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground ring-2 ring-primary">
-                      {unreadLabel}
+                      {unreadNotifsLabel}
                     </span>
                   )}
                 </button>
