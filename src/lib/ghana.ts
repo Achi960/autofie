@@ -103,14 +103,7 @@ export const CAR_BRANDS: Record<string, string[]> = {
 
 export const ALL_BRANDS = Object.keys(CAR_BRANDS);
 
-import catCar from "@/assets/cat-car.jpg";
-import catMotorcycle from "@/assets/cat-motorcycle.jpg";
-import catBus from "@/assets/cat-bus.jpg";
-import catTruck from "@/assets/cat-truck.jpg";
-import catHeavy from "@/assets/cat-heavy.jpg";
-import catParts from "@/assets/cat-parts.jpg";
-import catAccessories from "@/assets/cat-accessories.jpg";
-import catServices from "@/assets/cat-services.jpg";
+
 
 export const CATEGORIES = [
   { slug: "car", label: "Cars", image: catCar },
