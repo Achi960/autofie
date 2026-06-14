@@ -30,10 +30,17 @@ function AdminDealers() {
   }, [authLoading, isAdmin, navigate]);
 
   const load = async () => {
-    const { data } = await supabase.from("dealer_profiles")
-      .select("*, profiles!dealer_profiles_user_id_fkey(full_name, phone)")
+    const { data: dealers, error } = await supabase.from("dealer_profiles")
+      .select("*")
       .order("submitted_at", { ascending: false });
-    setApps(data ?? []);
+    if (error) { toast.error(error.message); return; }
+    const ids = (dealers ?? []).map(d => d.user_id);
+    let profilesById: Record<string, { full_name: string | null; phone: string | null }> = {};
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, phone").in("id", ids);
+      profilesById = Object.fromEntries((profs ?? []).map(p => [p.id, { full_name: p.full_name, phone: p.phone }]));
+    }
+    setApps((dealers ?? []).map(d => ({ ...d, profiles: profilesById[d.user_id] ?? null })));
   };
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
