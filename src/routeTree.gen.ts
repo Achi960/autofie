@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
@@ -36,6 +37,11 @@ import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authe
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/_authenticated/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/_authenticated/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/privacy'
     | '/terms'
     | '/account-settings'
     | '/complete-dealer-profile'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/privacy'
     | '/terms'
     | '/account-settings'
     | '/complete-dealer-profile'
@@ -288,6 +299,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/privacy'
     | '/terms'
     | '/_authenticated/account-settings'
     | '/_authenticated/complete-dealer-profile'
@@ -314,6 +326,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   BrowseCategoryRoute: typeof BrowseCategoryRoute
   ListingIdRoute: typeof ListingIdRoute
@@ -328,6 +341,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -530,6 +550,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   BrowseCategoryRoute: BrowseCategoryRoute,
   ListingIdRoute: ListingIdRoute,
