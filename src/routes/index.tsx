@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, ShieldCheck, BadgeCheck, Users, MessageCircle, Star, MapPin, Lock, Zap, Quote } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
