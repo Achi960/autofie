@@ -9,8 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { ColourPicker } from "@/components/ColourPicker";
-import { CAR_BRANDS, ALL_BRANDS, REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, type CategorySlug } from "@/lib/ghana";
-import { fieldsFor } from "@/lib/category-fields";
+import { REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, type CategorySlug } from "@/lib/ghana";
+import { fieldsFor, brandLibFor, brandsFor } from "@/lib/category-fields";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
@@ -85,7 +85,9 @@ function SubmitListing() {
     );
   }
 
-  const models = make && CAR_BRANDS[make] ? CAR_BRANDS[make] : [];
+  const brandLib = brandLibFor(category);
+  const brands = brandsFor(category);
+  const models = make && brandLib[make] ? brandLib[make] : [];
   const districts = region ? REGIONS[region] ?? [] : [];
 
   const onPickPhotos = (files: FileList | null) => {
@@ -168,7 +170,7 @@ function SubmitListing() {
               <Field label={cfg.makeLabel}>
                 <Select value={make} onValueChange={(v) => { setMake(v); setModel(""); }}>
                   <SelectTrigger><SelectValue placeholder={`Select ${cfg.makeLabel.toLowerCase()}`} /></SelectTrigger>
-                  <SelectContent className="max-h-72">{ALL_BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
+                  <SelectContent className="max-h-72">{brands.map(b => <SelectItem key={b} value={b}>{b.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
                 </Select>
               </Field>
               <Field label={cfg.modelLabel}>

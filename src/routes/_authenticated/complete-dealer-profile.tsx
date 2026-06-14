@@ -56,6 +56,13 @@ function DealerProfileForm() {
     if (!existing && (!idFront || !idBack || !selfie)) {
       toast.error("Upload all three photos"); return;
     }
+    // If already approved, confirm that re-submitting will pause their verified status
+    if (isVerifiedDealer) {
+      const ok = window.confirm(
+        "Editing your verification will put your account back into review. You won't be able to post new listings until an admin approves the changes (usually under 24 hours). Continue?"
+      );
+      if (!ok) return;
+    }
     setSubmitting(true);
     try {
       const upload = async (f: File | null, name: string) => {
@@ -81,10 +88,15 @@ function DealerProfileForm() {
       const { error } = await supabase.from("dealer_profiles").upsert(payload);
       if (error) throw error;
 
-      // mark role as pending
+      // Demote the role back to dealer_pending so they cannot post until re-approved
+      if (isVerifiedDealer) {
+        await supabase.from("user_roles").delete().eq("user_id", user.id).eq("role", "dealer_verified");
+      }
       await supabase.from("user_roles").upsert({ user_id: user.id, role: "dealer_pending" }, { onConflict: "user_id,role" });
       await refreshRoles();
-      toast.success("Application submitted! An admin will review it shortly.");
+      toast.success(isVerifiedDealer
+        ? "Changes submitted. We'll re-verify your account shortly."
+        : "Application submitted! An admin will review it shortly.");
       navigate({ to: "/" });
     } catch (e: any) {
       toast.error(e.message ?? "Submission failed");
@@ -105,7 +117,7 @@ function DealerProfileForm() {
         {isVerifiedDealer && (
           <StatusBanner variant="success" icon={<CheckCircle2 className="h-5 w-5" />}
             title="You're a verified dealer"
-            description="You can post listings any time." />
+            description="Edit any field below to update your record. Submitting changes will pause your verified status until an admin reviews them again." />
         )}
         {isPendingDealer && !isVerifiedDealer && (
           <StatusBanner variant="info" icon={<Clock className="h-5 w-5" />}
@@ -147,7 +159,7 @@ function DealerProfileForm() {
 
           <Button onClick={submit} disabled={submitting} className="w-full">
             {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {existing ? "Update application" : "Submit application"}
+            {isVerifiedDealer ? "Submit changes for re-verification" : (existing ? "Update application" : "Submit application")}
           </Button>
         </div>
       </div>

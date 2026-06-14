@@ -1,13 +1,18 @@
 import type { CategorySlug } from "@/lib/ghana";
+import { CAR_BRANDS, ALL_BRANDS } from "@/lib/ghana";
+import {
+  MOTORCYCLE_BRANDS,
+  BUS_BRANDS,
+  TRUCK_BRANDS,
+  HEAVY_EQUIPMENT_BRANDS,
+  type CategoryBrandLib,
+} from "@/lib/brands";
 
 export type MakeMode = "list" | "text" | "off";
 
 export interface CategoryFieldConfig {
-  /** Show the "vehicle details" block at all (make/model/year/etc) */
   vehicle: boolean;
-  /** Make/Model input style. "list" uses CAR_BRANDS, "text" is free text, "off" hides them. */
   make: MakeMode;
-  /** Label for the make field — e.g. "Make", "Brand", "Manufacturer" */
   makeLabel: string;
   modelLabel: string;
   year: boolean;
@@ -17,11 +22,9 @@ export interface CategoryFieldConfig {
   bodyType: boolean;
   colour: boolean;
   engine: boolean;
-  /** Label for engine field (e.g. "Engine", "Engine cc", "Operating hours") */
   engineLabel: string;
   registration: boolean;
   condition: boolean;
-  /** Default title placeholder */
   titlePlaceholder: string;
 }
 
@@ -48,13 +51,12 @@ export function fieldsFor(cat: CategorySlug | ""): CategoryFieldConfig {
     case "car":
       return { ...DEFAULTS };
     case "bus":
-      return { ...DEFAULTS, bodyType: false, titlePlaceholder: "e.g. 2016 Toyota Hiace 14-seater" };
+      return { ...DEFAULTS, makeLabel: "Make", bodyType: false, titlePlaceholder: "e.g. 2016 Toyota Hiace 14-seater" };
     case "truck":
-      return { ...DEFAULTS, bodyType: false, titlePlaceholder: "e.g. 2014 Hino 500 Series Tipper" };
+      return { ...DEFAULTS, makeLabel: "Make", bodyType: false, titlePlaceholder: "e.g. 2014 Hino 500 Series Tipper" };
     case "motorcycle":
       return {
         ...DEFAULTS,
-        make: "text",
         makeLabel: "Brand",
         bodyType: false,
         transmission: false,
@@ -65,7 +67,6 @@ export function fieldsFor(cat: CategorySlug | ""): CategoryFieldConfig {
     case "heavy_equipment":
       return {
         ...DEFAULTS,
-        make: "text",
         makeLabel: "Brand",
         modelLabel: "Model / type",
         transmission: false,
@@ -77,59 +78,46 @@ export function fieldsFor(cat: CategorySlug | ""): CategoryFieldConfig {
       };
     case "parts":
       return {
-        ...DEFAULTS,
-        vehicle: true,
-        make: "text",
-        makeLabel: "Fits brand (optional)",
-        modelLabel: "Fits model (optional)",
-        year: false,
-        mileage: false,
-        transmission: false,
-        fuel: false,
-        bodyType: false,
-        engine: false,
-        registration: false,
-        colour: false,
-        condition: true,
+        ...DEFAULTS, vehicle: true, make: "text",
+        makeLabel: "Fits brand (optional)", modelLabel: "Fits model (optional)",
+        year: false, mileage: false, transmission: false, fuel: false, bodyType: false,
+        engine: false, registration: false, colour: false, condition: true,
         titlePlaceholder: "e.g. Toyota Corolla 2014 headlight (LH)",
       };
     case "accessories":
       return {
-        ...DEFAULTS,
-        vehicle: true,
-        make: "text",
-        makeLabel: "Brand (optional)",
-        modelLabel: "Model (optional)",
-        year: false,
-        mileage: false,
-        transmission: false,
-        fuel: false,
-        bodyType: false,
-        engine: false,
-        registration: false,
-        colour: true,
-        condition: true,
+        ...DEFAULTS, vehicle: true, make: "text",
+        makeLabel: "Brand (optional)", modelLabel: "Model (optional)",
+        year: false, mileage: false, transmission: false, fuel: false, bodyType: false,
+        engine: false, registration: false, colour: true, condition: true,
         titlePlaceholder: "e.g. Pioneer Car Stereo with Bluetooth",
       };
     case "services":
       return {
-        ...DEFAULTS,
-        vehicle: false,
-        make: "off",
-        makeLabel: "",
-        modelLabel: "",
-        year: false,
-        mileage: false,
-        transmission: false,
-        fuel: false,
-        bodyType: false,
-        engine: false,
-        registration: false,
-        colour: false,
-        condition: false,
+        ...DEFAULTS, vehicle: false, make: "off",
+        makeLabel: "", modelLabel: "",
+        year: false, mileage: false, transmission: false, fuel: false, bodyType: false,
+        engine: false, registration: false, colour: false, condition: false,
         titlePlaceholder: "e.g. Mobile car AC repair — Accra",
       };
     default:
       return DEFAULTS;
   }
+}
+
+/** Returns the brand → models dictionary to use for a given category. */
+export function brandLibFor(cat: CategorySlug | ""): CategoryBrandLib {
+  switch (cat) {
+    case "motorcycle": return MOTORCYCLE_BRANDS;
+    case "bus": return BUS_BRANDS;
+    case "truck": return TRUCK_BRANDS;
+    case "heavy_equipment": return HEAVY_EQUIPMENT_BRANDS;
+    case "car": return CAR_BRANDS;
+    default: return CAR_BRANDS;
+  }
+}
+
+export function brandsFor(cat: CategorySlug | ""): string[] {
+  if (cat === "car" || cat === "") return ALL_BRANDS;
+  return Object.keys(brandLibFor(cat));
 }

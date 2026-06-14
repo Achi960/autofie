@@ -7,17 +7,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CAR_BRANDS, ALL_BRANDS, REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS } from "@/lib/ghana";
+import { ColourPicker } from "@/components/ColourPicker";
+import { REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, type CategorySlug } from "@/lib/ghana";
+import { fieldsFor, brandLibFor, brandsFor } from "@/lib/category-fields";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
+import { signedUrl, uploadFile } from "@/lib/storage";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X, Star, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/edit-listing/$id")({
   component: EditListing,
 });
 
 const CURRENT_YEAR = new Date().getFullYear();
+
+type ExistingPhoto = { id: string; url: string; src: string | null; is_cover: boolean; sort_order: number };
 
 function EditListing() {
   const { id } = Route.useParams();
@@ -26,6 +31,9 @@ function EditListing() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [f, setF] = useState<any>(null);
+  const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
+  const [newPhotos, setNewPhotos] = useState<File[]>([]);
+  const [photosBusy, setPhotosBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -33,6 +41,12 @@ function EditListing() {
       if (error || !data) { toast.error("Listing not found"); navigate({ to: "/my-listings" }); return; }
       if (user && data.user_id !== user.id) { toast.error("Not your listing"); navigate({ to: "/my-listings" }); return; }
       setF(data);
+      const { data: ph } = await supabase.from("listing_photos").select("*").eq("listing_id", id).order("sort_order");
+      const withSrc = await Promise.all((ph ?? []).map(async (p) => ({
+        id: p.id, url: p.url, is_cover: p.is_cover, sort_order: p.sort_order,
+        src: await signedUrl("listing-photos", p.url),
+      })));
+      setExistingPhotos(withSrc);
       setLoading(false);
     })();
   }, [id, user]);
@@ -43,14 +57,79 @@ function EditListing() {
     </div>
   );
 
+  const cfg = fieldsFor((f.category as CategorySlug) || "");
   const set = (k: string, v: any) => setF({ ...f, [k]: v });
   const districts = f.region ? REGIONS[f.region] ?? [] : [];
-  const models = f.make && CAR_BRANDS[f.make] ? CAR_BRANDS[f.make] : [];
+  const brandLib = brandLibFor((f.category as CategorySlug) || "");
+  const brands = brandsFor((f.category as CategorySlug) || "");
+  const models = f.make && brandLib[f.make] ? brandLib[f.make] : [];
+
+  const totalPhotos = existingPhotos.length + newPhotos.length;
+
+  const onPickPhotos = (files: FileList | null) => {
+    if (!files) return;
+    const remaining = 10 - totalPhotos;
+    if (remaining <= 0) { toast.error("Max 10 photos"); return; }
+    setNewPhotos([...newPhotos, ...Array.from(files).slice(0, remaining)]);
+  };
+
+  const setCover = async (photoId: string) => {
+    setPhotosBusy(true);
+    try {
+      const target = existingPhotos.find(p => p.id === photoId);
+      if (!target) return;
+      await supabase.from("listing_photos").update({ is_cover: false }).eq("listing_id", id);
+      await supabase.from("listing_photos").update({ is_cover: true }).eq("id", photoId);
+      await supabase.from("listings").update({ cover_photo_url: target.url }).eq("id", id);
+      setExistingPhotos(existingPhotos.map(p => ({ ...p, is_cover: p.id === photoId })));
+      toast.success("Cover updated");
+    } catch (e: any) { toast.error(e.message ?? "Failed"); }
+    finally { setPhotosBusy(false); }
+  };
+
+  const deletePhoto = async (photoId: string) => {
+    if (existingPhotos.length <= 1 && newPhotos.length === 0) { toast.error("Listings need at least one photo"); return; }
+    setPhotosBusy(true);
+    try {
+      const target = existingPhotos.find(p => p.id === photoId);
+      if (!target) return;
+      await supabase.from("listing_photos").delete().eq("id", photoId);
+      try { await supabase.storage.from("listing-photos").remove([target.url]); } catch {}
+      const remaining = existingPhotos.filter(p => p.id !== photoId);
+      // If we removed the cover, pick the first remaining as new cover
+      if (target.is_cover && remaining.length) {
+        await supabase.from("listing_photos").update({ is_cover: true }).eq("id", remaining[0].id);
+        await supabase.from("listings").update({ cover_photo_url: remaining[0].url }).eq("id", id);
+        remaining[0] = { ...remaining[0], is_cover: true };
+      }
+      setExistingPhotos(remaining);
+      toast.success("Photo removed");
+    } catch (e: any) { toast.error(e.message ?? "Failed"); }
+    finally { setPhotosBusy(false); }
+  };
 
   const save = async (resubmit: boolean) => {
     if (!f.title || !f.price || !f.region || !f.district) { toast.error("Fill title, price, region, district"); return; }
+    if (totalPhotos === 0) { toast.error("Add at least one photo"); return; }
     setSaving(true);
     try {
+      // Upload any new photos first
+      if (newPhotos.length && user) {
+        const startOrder = existingPhotos.length;
+        const rows = [] as { listing_id: string; url: string; is_cover: boolean; sort_order: number }[];
+        for (let i = 0; i < newPhotos.length; i++) {
+          const file = newPhotos[i];
+          const ext = file.name.split(".").pop() || "jpg";
+          const path = `${user.id}/${id}/${startOrder + i}-${Date.now()}.${ext}`;
+          await uploadFile("listing-photos", path, file);
+          rows.push({ listing_id: id, url: path, is_cover: existingPhotos.length === 0 && i === 0, sort_order: startOrder + i });
+        }
+        await supabase.from("listing_photos").insert(rows);
+        if (existingPhotos.length === 0 && rows.length) {
+          await supabase.from("listings").update({ cover_photo_url: rows[0].url }).eq("id", id);
+        }
+      }
+
       const { error } = await supabase.from("listings").update({
         title: f.title, description: f.description || null,
         make: f.make || null, model: f.model || null,
@@ -82,42 +161,110 @@ function EditListing() {
         <p className="mt-1 text-sm text-muted-foreground">Re-submit to send the changes back to an admin for review.</p>
 
         <div className="mt-6 space-y-6 rounded-xl border bg-card p-6">
+          {/* PHOTO MANAGER */}
+          <div className="space-y-2">
+            <Label>Photos ({totalPhotos}/10) — tap a photo to set it as cover</Label>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+              {existingPhotos.map((p) => (
+                <div key={p.id} className="group relative aspect-square overflow-hidden rounded-md border">
+                  {p.src ? <img src={p.src} alt="" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-muted" />}
+                  {p.is_cover && (
+                    <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">Cover</span>
+                  )}
+                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    {!p.is_cover && (
+                      <button type="button" disabled={photosBusy} onClick={() => setCover(p.id)}
+                        className="rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white"><Star className="inline h-3 w-3" /> Cover</button>
+                    )}
+                    <button type="button" disabled={photosBusy} onClick={() => deletePhoto(p.id)}
+                      className="ml-auto rounded bg-destructive px-1.5 py-0.5 text-[10px] text-destructive-foreground"><Trash2 className="inline h-3 w-3" /></button>
+                  </div>
+                </div>
+              ))}
+              {newPhotos.map((file, i) => (
+                <div key={`new-${i}`} className="relative aspect-square overflow-hidden rounded-md border border-dashed">
+                  <img src={URL.createObjectURL(file)} alt="" className="h-full w-full object-cover" />
+                  <span className="absolute left-1 top-1 rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-accent-foreground">New</span>
+                  <button type="button" onClick={() => setNewPhotos(newPhotos.filter((_, j) => j !== i))}
+                    className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"><X className="h-3 w-3" /></button>
+                </div>
+              ))}
+              {totalPhotos < 10 && (
+                <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed text-xs text-muted-foreground hover:border-primary">
+                  <Upload className="h-5 w-5" />Add
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => onPickPhotos(e.target.files)} />
+                </label>
+              )}
+            </div>
+          </div>
+
           <Field label="Title"><Input value={f.title ?? ""} onChange={(e) => set("title", e.target.value)} maxLength={120} /></Field>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Make">
-              <Select value={f.make ?? ""} onValueChange={(v) => setF({ ...f, make: v, model: "" })}>
-                <SelectTrigger><SelectValue placeholder="Select make" /></SelectTrigger>
-                <SelectContent className="max-h-72">{ALL_BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
-              </Select>
-            </Field>
-            <Field label="Model">
-              <Select value={f.model ?? ""} onValueChange={(v) => set("model", v)} disabled={!f.make}>
-                <SelectTrigger><SelectValue placeholder="Select model" /></SelectTrigger>
-                <SelectContent>{models.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
-              </Select>
-            </Field>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Year"><Input type="number" value={f.year ?? ""} onChange={(e) => set("year", e.target.value)} min={1980} max={CURRENT_YEAR + 1} /></Field>
-            <Field label="Mileage (km)"><Input type="number" value={f.mileage ?? ""} onChange={(e) => set("mileage", e.target.value)} min={0} /></Field>
-            <Field label="Colour"><Input value={f.colour ?? ""} onChange={(e) => set("colour", e.target.value)} maxLength={30} /></Field>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <SS label="Condition" value={f.condition ?? ""} onChange={(v) => set("condition", v)} options={CONDITIONS as unknown as string[]} />
-            <SS label="Transmission" value={f.transmission ?? ""} onChange={(v) => set("transmission", v)} options={TRANSMISSIONS as unknown as string[]} />
-            <SS label="Fuel" value={f.fuel ?? ""} onChange={(v) => set("fuel", v)} options={FUELS as unknown as string[]} />
-            <SS label="Body type" value={f.body_type ?? ""} onChange={(v) => set("body_type", v)} options={BODY_TYPES as unknown as string[]} />
-            <SS label="Registration" value={f.registration_status ?? ""} onChange={(v) => setF({ ...f, registration_status: v, registration_year: v === "Registered" ? f.registration_year : null })} options={REGISTRATION_STATUS as unknown as string[]} />
-            {f.registration_status === "Registered" && (
-              <Field label="Year of registration">
-                <Input type="number" value={f.registration_year ?? ""} onChange={(e) => set("registration_year", e.target.value)} min={1980} max={CURRENT_YEAR + 1} />
+          {cfg.make !== "off" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={cfg.makeLabel}>
+                {cfg.make === "list" ? (
+                  <Select value={f.make ?? ""} onValueChange={(v) => setF({ ...f, make: v, model: "" })}>
+                    <SelectTrigger><SelectValue placeholder={`Select ${cfg.makeLabel.toLowerCase()}`} /></SelectTrigger>
+                    <SelectContent className="max-h-72">{brands.map(b => <SelectItem key={b} value={b}>{b.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
+                  </Select>
+                ) : (
+                  <Input value={f.make ?? ""} onChange={(e) => set("make", e.target.value)} maxLength={40} />
+                )}
               </Field>
-            )}
-            <Field label="Engine"><Input value={f.engine ?? ""} onChange={(e) => set("engine", e.target.value)} maxLength={20} /></Field>
-          </div>
+              <Field label={cfg.modelLabel}>
+                {cfg.make === "list" ? (
+                  <Select value={f.model ?? ""} onValueChange={(v) => set("model", v)} disabled={!f.make}>
+                    <SelectTrigger><SelectValue placeholder={`Select ${cfg.modelLabel.toLowerCase()}`} /></SelectTrigger>
+                    <SelectContent>{models.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                  </Select>
+                ) : (
+                  <Input value={f.model ?? ""} onChange={(e) => set("model", e.target.value)} maxLength={40} />
+                )}
+              </Field>
+            </div>
+          )}
+
+          {(cfg.year || cfg.mileage) && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {cfg.year && <Field label="Year"><Input type="number" value={f.year ?? ""} onChange={(e) => set("year", e.target.value)} min={1980} max={CURRENT_YEAR + 1} /></Field>}
+              {cfg.mileage && (
+                <Field label="Mileage (km)">
+                  <Input inputMode="numeric"
+                    value={f.mileage ? Number(f.mileage).toLocaleString("en-GH") : ""}
+                    onChange={(e) => set("mileage", e.target.value.replace(/[^\d]/g, ""))} />
+                </Field>
+              )}
+            </div>
+          )}
+
+          {cfg.colour && (
+            <Field label="Colour"><ColourPicker value={f.colour ?? ""} onChange={(v) => set("colour", v)} /></Field>
+          )}
+
+          {(cfg.condition || cfg.transmission || cfg.fuel || cfg.bodyType || cfg.registration || cfg.engine) && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {cfg.condition && <SS label="Condition" value={f.condition ?? ""} onChange={(v) => set("condition", v)} options={CONDITIONS as unknown as string[]} />}
+              {cfg.transmission && <SS label="Transmission" value={f.transmission ?? ""} onChange={(v) => set("transmission", v)} options={TRANSMISSIONS as unknown as string[]} />}
+              {cfg.fuel && <SS label="Fuel" value={f.fuel ?? ""} onChange={(v) => set("fuel", v)} options={FUELS as unknown as string[]} />}
+              {cfg.bodyType && <SS label="Body type" value={f.body_type ?? ""} onChange={(v) => set("body_type", v)} options={BODY_TYPES as unknown as string[]} />}
+              {cfg.registration && (
+                <SS label="Registration" value={f.registration_status ?? ""}
+                  onChange={(v) => setF({ ...f, registration_status: v, registration_year: v === "Registered" ? f.registration_year : null })}
+                  options={REGISTRATION_STATUS as unknown as string[]} />
+              )}
+              {cfg.registration && f.registration_status === "Registered" && (
+                <Field label="Year of registration">
+                  <Input type="number" value={f.registration_year ?? ""} onChange={(e) => set("registration_year", e.target.value)} min={1980} max={CURRENT_YEAR + 1} />
+                </Field>
+              )}
+              {cfg.engine && (
+                <Field label={cfg.engineLabel}>
+                  <Input value={f.engine ?? ""} onChange={(e) => set("engine", e.target.value)} maxLength={20} placeholder={cfg.engineLabel === "Operating hours" ? "e.g. 4,500" : "e.g. 1.8L"} />
+                </Field>
+              )}
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Region">
@@ -129,13 +276,21 @@ function EditListing() {
             <Field label="District">
               <Select value={f.district ?? ""} onValueChange={(v) => set("district", v)} disabled={!f.region}>
                 <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
-                <SelectContent>{districts.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                <SelectContent>{districts.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
           </div>
 
           <div className="grid items-end gap-4 sm:grid-cols-2">
-            <Field label="Price (GH₵)"><Input type="number" value={f.price ?? ""} onChange={(e) => set("price", e.target.value)} min={0} /></Field>
+            <Field label="Price (GH₵)">
+              <div className="flex items-center gap-2 rounded-md border bg-background px-3">
+                <span className="text-sm font-medium text-muted-foreground">GH₵</span>
+                <Input inputMode="numeric"
+                  value={f.price ? Number(f.price).toLocaleString("en-GH") : ""}
+                  onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))}
+                  className="border-0 px-0 shadow-none focus-visible:ring-0" />
+              </div>
+            </Field>
             <label className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
               <Switch checked={!!f.negotiable} onCheckedChange={(v) => set("negotiable", v)} />
               <span className="text-sm">Price is negotiable</span>
