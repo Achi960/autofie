@@ -332,6 +332,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string
+          created_at: string
+          dealer_id: string
+          id: string
+          rating: number
+          replied_at: string | null
+          reply: string | null
+          reviewer_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string
+          created_at?: string
+          dealer_id: string
+          id?: string
+          rating: number
+          replied_at?: string | null
+          reply?: string | null
+          reviewer_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          dealer_id?: string
+          id?: string
+          rating?: number
+          replied_at?: string | null
+          reply?: string | null
+          reviewer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       saved_listings: {
         Row: {
           created_at: string
