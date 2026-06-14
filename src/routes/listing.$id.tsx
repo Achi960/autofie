@@ -19,12 +19,14 @@ export const Route = createFileRoute("/listing/$id")({
 function ListingDetail() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [listing, setListing] = useState<any | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [coverIdx, setCoverIdx] = useState(0);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [dealerAvatar, setDealerAvatar] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -33,21 +35,21 @@ function ListingDetail() {
         .from("listings")
         .select(`*,
                  listing_photos(url, is_cover, sort_order),
-                 profiles!listings_user_id_fkey(full_name, phone),
+                 profiles!listings_user_id_fkey(full_name, phone, avatar_url, created_at),
                  dealer_profiles!dealer_profiles_user_id_fkey(business_name, region, status)`)
         .eq("id", id)
         .maybeSingle();
       if (!alive) return;
       if (error || !data) { setNotFound(true); setLoading(false); return; }
       setListing(data);
-      // signed photos
-      const sorted = [...(data.listing_photos ?? [])].sort((a: any, b: any) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order);
-      const paths = sorted.length ? sorted.map((p: any) => p.url) : data.cover_photo_url ? [data.cover_photo_url] : [];
+      const sorted = [...((data as any).listing_photos ?? [])].sort((a: any, b: any) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order);
+      const paths = sorted.length ? sorted.map((p: any) => p.url) : (data as any).cover_photo_url ? [(data as any).cover_photo_url] : [];
       const signed = (await signedUrls("listing-photos", paths)).filter(Boolean) as string[];
       if (!alive) return;
       setPhotos(signed);
+      const avatarPath = (data as any).profiles?.avatar_url;
+      if (avatarPath) signedUrl("avatars", avatarPath).then((u) => alive && setDealerAvatar(u));
       setLoading(false);
-      // fire-and-forget view increment
       supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "views" });
     };
     load();
@@ -97,9 +99,13 @@ function ListingDetail() {
   };
   const onChatClick = () => {
     if (!user) { toast.error("Sign in to chat"); return; }
+    if (user.id === listing.user_id) { toast.error("This is your own listing"); return; }
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "chat_clicks" });
-    toast.info("Messaging coming in phase 2");
+    navigate({ to: "/messages/$listingId/$otherId", params: { listingId: listing.id, otherId: listing.user_id } });
   };
+
+  const memberSince = listing?.profiles?.created_at ? new Date(listing.profiles.created_at) : null;
+  const yearsActive = memberSince ? Math.max(0, Math.floor((Date.now() - memberSince.getTime()) / (365.25 * 24 * 3600 * 1000))) : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -157,13 +163,22 @@ function ListingDetail() {
           <aside className="space-y-4">
             <div className="rounded-xl border bg-card p-5">
               <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12"><AvatarFallback className="bg-primary/10 text-primary">{initialsOf(dealerName)}</AvatarFallback></Avatar>
+                <Avatar className="h-12 w-12">
+                  {dealerAvatar && <AvatarImage src={dealerAvatar} alt={dealerName} />}
+                  <AvatarFallback className="bg-primary/10 text-primary">{initialsOf(dealerName)}</AvatarFallback>
+                </Avatar>
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 font-semibold text-foreground">
                     {dealerName}
                     {dealerVerified && <BadgeCheck className="h-4 w-4 text-success" />}
                   </p>
                   {dealerVerified && <Badge variant="outline" className="mt-1 border-success/30 bg-success/10 text-success">Verified dealer</Badge>}
+                  {memberSince && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Member since {memberSince.toLocaleDateString("en-GH", { month: "short", year: "numeric" })}
+                      {yearsActive > 0 && ` · ${yearsActive} year${yearsActive === 1 ? "" : "s"} on Autofie`}
+                    </p>
+                  )}
                 </div>
               </div>
 
