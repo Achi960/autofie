@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -83,9 +83,9 @@ function AdminNotificationsPage() {
                     <p className="mt-1 text-[11px] text-muted-foreground">{new Date(n.created_at).toLocaleString()}</p>
                   </div>
                   {n.link && (
-                    <Link to={n.link} className="text-xs font-medium text-primary hover:underline">
+                    <a href={n.link} className="text-xs font-medium text-primary hover:underline">
                       Open
-                    </Link>
+                    </a>
                   )}
                   {!n.read && <span className="mt-1 inline-block h-2 w-2 rounded-full bg-destructive" />}
                 </div>
