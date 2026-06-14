@@ -298,11 +298,7 @@ function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t bg-surface py-6">
-        <div className="mx-auto max-w-7xl px-4 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} AutoFie. Built for Ghana.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
