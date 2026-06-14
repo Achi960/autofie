@@ -1,47 +1,50 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const ADMIN_WHATSAPP = "+233245209130";
-const GATEWAY = "https://connector-gateway.lovable.dev/twilio";
+const ADMIN_PHONE = "+233245209130";
 
 /**
- * Sends a WhatsApp message to the admin via the Twilio connector gateway.
- * Requires the caller to be signed in; gracefully no-ops if Twilio isn't linked.
+ * Sends an SMS to the admin via Africa's Talking.
+ * Uses sandbox automatically when AT_USERNAME === "sandbox".
+ * Gracefully no-ops if credentials aren't configured.
  */
 export const notifyAdminWhatsapp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { message: string }) => {
     if (!data?.message || typeof data.message !== "string") throw new Error("message required");
-    if (data.message.length > 1500) throw new Error("message too long");
+    if (data.message.length > 800) throw new Error("message too long");
     return data;
   })
   .handler(async ({ data }) => {
-    const lovableKey = process.env.LOVABLE_API_KEY;
-    const twilioKey = process.env.TWILIO_API_KEY;
-    const from = process.env.TWILIO_WHATSAPP_FROM; // e.g. +14155238886 (Twilio sandbox)
-    if (!lovableKey || !twilioKey || !from) {
-      console.warn("[admin-notify] Twilio not configured; skipping WhatsApp alert");
-      return { sent: false, reason: "twilio_not_configured" };
+    const username = process.env.AT_USERNAME;
+    const apiKey = process.env.AT_API_KEY;
+    const senderId = process.env.AT_SENDER_ID || undefined;
+    if (!username || !apiKey) {
+      console.warn("[admin-notify] Africa's Talking not configured; skipping SMS");
+      return { sent: false, reason: "at_not_configured" };
     }
+    const host =
+      username === "sandbox" ? "https://api.sandbox.africastalking.com" : "https://api.africastalking.com";
     try {
       const body = new URLSearchParams({
-        From: `whatsapp:${from}`,
-        To: `whatsapp:${ADMIN_WHATSAPP}`,
-        Body: data.message,
+        username,
+        to: ADMIN_PHONE,
+        message: data.message,
       });
-      const res = await fetch(`${GATEWAY}/Messages.json`, {
+      if (senderId) body.set("from", senderId);
+      const res = await fetch(`${host}/version1/messaging`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${lovableKey}`,
-          "X-Connection-Api-Key": twilioKey,
+          apiKey,
+          Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body,
       });
+      const text = await res.text();
       if (!res.ok) {
-        const t = await res.text();
-        console.error(`[admin-notify] Twilio ${res.status}: ${t}`);
-        return { sent: false, reason: "twilio_error" };
+        console.error(`[admin-notify] AT ${res.status}: ${text}`);
+        return { sent: false, reason: "at_error" };
       }
       return { sent: true };
     } catch (e) {
