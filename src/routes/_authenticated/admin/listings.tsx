@@ -103,7 +103,7 @@ function AdminListings() {
                   <p className={`text-xs font-medium ${w.cls}`}>Waiting {w.txt}</p>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Link to="/listing/$id" params={{ id: r.id }}><Button variant="outline" size="sm">Preview</Button></Link>
+                  <Link to="/admin/listing/$id" params={{ id: r.id }}><Button size="sm" className="w-full">Review</Button></Link>
                   <Button size="sm" onClick={() => approve(r)} className="bg-success text-success-foreground hover:bg-success/90">Approve</Button>
                   <Button size="sm" variant="outline" onClick={() => setReviewing(r)}>Reject</Button>
                 </div>
