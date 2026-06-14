@@ -112,7 +112,7 @@ function BrowsePage() {
       setListings((prev) => shuffleByMinute(prev, search.page ?? 1));
     }, 60_000);
     return () => { alive = false; clearInterval(id); };
-  }, [category, search.q, search.make, search.region, search.condition, search.transmission, search.fuel, search.body, search.min_price, search.max_price, search.page]);
+  }, [category, search.q, search.make, search.region, search.district, search.condition, search.min_price, search.max_price, search.page]);
 
   const setFilter = (key: string, value: string | undefined) => {
     navigate({ search: (s: Record<string, unknown>) => ({ ...s, [key]: value || undefined, page: 1 }) });
