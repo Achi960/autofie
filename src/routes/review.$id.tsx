@@ -55,7 +55,7 @@ function ReviewPage() {
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-foreground">Review {name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Share your honest experience to help other buyers on Autofie.
+            Share your honest experience to help other buyers on AutoFie.
           </p>
           <Link to="/user/$id" params={{ id }} className="mt-2 inline-block text-sm text-primary hover:underline">
             View {name}'s profile →

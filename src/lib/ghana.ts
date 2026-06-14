@@ -160,7 +160,7 @@ export const LISTING_REJECTION_REASONS = [
 ];
 
 export const LISTING_CLOSE_REASONS = [
-  "Sold through Autofie",
+  "Sold through AutoFie",
   "Sold elsewhere",
   "No longer for sale",
   "Other",

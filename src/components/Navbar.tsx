@@ -50,7 +50,7 @@ export function Navbar() {
       <header className="sticky top-0 z-40 w-full bg-primary text-primary-foreground shadow-sm">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-3 sm:px-6">
           <Link to="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-            <span>Autofie</span>
+            <span>AutoFie</span>
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-2">
