@@ -95,15 +95,38 @@ export const CAR_BRANDS: Record<string, string[]> = {
 export const ALL_BRANDS = Object.keys(CAR_BRANDS);
 
 export const CATEGORIES = [
-  { slug: "car", label: "Cars" },
-  { slug: "motorcycle", label: "Motorcycles" },
-  { slug: "bus", label: "Buses" },
-  { slug: "truck", label: "Trucks" },
-  { slug: "heavy_equipment", label: "Heavy Equipment" },
-  { slug: "parts", label: "Parts" },
-  { slug: "accessories", label: "Accessories" },
-  { slug: "services", label: "Services" },
+  { slug: "car", label: "Cars", emoji: "🚗" },
+  { slug: "motorcycle", label: "Motorcycles & Scooters", emoji: "🏍️" },
+  { slug: "bus", label: "Buses & Microbuses", emoji: "🚌" },
+  { slug: "truck", label: "Trucks & Trailers", emoji: "🚛" },
+  { slug: "heavy_equipment", label: "Construction & Heavy Machinery", emoji: "🚜" },
+  { slug: "parts", label: "Vehicle Parts & Accessories", emoji: "🛞" },
+  { slug: "accessories", label: "Accessories", emoji: "🎒" },
+  { slug: "services", label: "Services", emoji: "🛠️" },
 ] as const;
+
+export const CAR_COLOURS: { name: string; hex: string }[] = [
+  { name: "Black", hex: "#000000" },
+  { name: "White", hex: "#FFFFFF" },
+  { name: "Silver", hex: "#C0C0C0" },
+  { name: "Grey", hex: "#808080" },
+  { name: "Red", hex: "#D32F2F" },
+  { name: "Blue", hex: "#1565C0" },
+  { name: "Navy Blue", hex: "#0A1F44" },
+  { name: "Sky Blue", hex: "#87CEEB" },
+  { name: "Green", hex: "#2E7D32" },
+  { name: "Dark Green", hex: "#0F3D2E" },
+  { name: "Yellow", hex: "#FBC02D" },
+  { name: "Orange", hex: "#F57C00" },
+  { name: "Brown", hex: "#5D4037" },
+  { name: "Beige", hex: "#D8C8A8" },
+  { name: "Gold", hex: "#D4AF37" },
+  { name: "Maroon", hex: "#7B1E1E" },
+  { name: "Purple", hex: "#6A1B9A" },
+  { name: "Pink", hex: "#EC407A" },
+  { name: "Bronze", hex: "#8C6A3C" },
+  { name: "Other", hex: "#9E9E9E" },
+];
 
 export type CategorySlug = (typeof CATEGORIES)[number]["slug"];
 

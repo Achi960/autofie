@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CATEGORIES, CAR_BRANDS, ALL_BRANDS, REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, type CategorySlug } from "@/lib/ghana";
+import { CategoryPicker } from "@/components/CategoryPicker";
+import { ColourPicker } from "@/components/ColourPicker";
+import { CAR_BRANDS, ALL_BRANDS, REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, type CategorySlug } from "@/lib/ghana";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
@@ -47,6 +49,20 @@ function SubmitListing() {
   const [contactPhone, setContactPhone] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  // Auto-populate name + phone from the signed-in user's profile
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle()
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        if (!contactName && data.full_name) setContactName(data.full_name);
+        if (!contactPhone && data.phone) setContactPhone(data.phone);
+      });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   if (!isVerifiedDealer) {
     return (
@@ -132,10 +148,7 @@ function SubmitListing() {
 
         <div className="mt-6 space-y-6 rounded-xl border bg-card p-6">
           <Field label="Category">
-            <Select value={category} onValueChange={(v) => setCategory(v as CategorySlug)}>
-              <SelectTrigger><SelectValue placeholder="Pick category" /></SelectTrigger>
-              <SelectContent>{CATEGORIES.map(c => <SelectItem key={c.slug} value={c.slug}>{c.label}</SelectItem>)}</SelectContent>
-            </Select>
+            <CategoryPicker value={category} onChange={(v) => setCategory(v)} />
           </Field>
 
           <Field label="Title"><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="2018 Toyota Corolla XLE Foreign Used" maxLength={120} /></Field>
@@ -155,11 +168,20 @@ function SubmitListing() {
             </Field>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Year"><Input type="number" inputMode="numeric" value={year} onChange={(e) => setYear(e.target.value)} min={1980} max={CURRENT_YEAR + 1} /></Field>
-            <Field label="Mileage (km)"><Input type="number" inputMode="numeric" value={mileage} onChange={(e) => setMileage(e.target.value)} min={0} /></Field>
-            <Field label="Colour"><Input value={colour} onChange={(e) => setColour(e.target.value)} maxLength={30} /></Field>
+            <Field label="Mileage (km)">
+              <Input
+                inputMode="numeric"
+                value={mileage ? Number(mileage).toLocaleString("en-GH") : ""}
+                onChange={(e) => setMileage(e.target.value.replace(/[^\d]/g, ""))}
+              />
+            </Field>
           </div>
+
+          <Field label="Colour">
+            <ColourPicker value={colour} onChange={setColour} />
+          </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <SimpleSelect label="Condition" value={condition} onChange={setCondition} options={CONDITIONS as unknown as string[]} />
@@ -191,7 +213,18 @@ function SubmitListing() {
           </div>
 
           <div className="grid items-end gap-4 sm:grid-cols-2">
-            <Field label="Price (GH₵)"><Input type="number" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} min={0} /></Field>
+            <Field label="Price (GH₵)">
+              <div className="flex items-center gap-2 rounded-md border bg-background px-3">
+                <span className="text-sm font-medium text-muted-foreground">GH₵</span>
+                <Input
+                  inputMode="numeric"
+                  value={price ? Number(price).toLocaleString("en-GH") : ""}
+                  onChange={(e) => setPrice(e.target.value.replace(/[^\d]/g, ""))}
+                  placeholder="50,000"
+                  className="border-0 px-0 shadow-none focus-visible:ring-0"
+                />
+              </div>
+            </Field>
             <label className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
               <Switch checked={negotiable} onCheckedChange={setNegotiable} />
               <span className="text-sm">Price is negotiable</span>
