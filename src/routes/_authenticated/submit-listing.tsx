@@ -134,10 +134,7 @@ function SubmitListing() {
 
         <div className="mt-6 space-y-6 rounded-xl border bg-card p-6">
           <Field label="Category">
-            <Select value={category} onValueChange={(v) => setCategory(v as CategorySlug)}>
-              <SelectTrigger><SelectValue placeholder="Pick category" /></SelectTrigger>
-              <SelectContent>{CATEGORIES.map(c => <SelectItem key={c.slug} value={c.slug}>{c.label}</SelectItem>)}</SelectContent>
-            </Select>
+            <CategoryPicker value={category} onChange={(v) => setCategory(v)} />
           </Field>
 
           <Field label="Title"><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="2018 Toyota Corolla XLE Foreign Used" maxLength={120} /></Field>
