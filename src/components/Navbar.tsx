@@ -93,6 +93,9 @@ export function Navbar() {
                         <DropdownMenuSeparator />
                       </>
                     )}
+                    <DropdownMenuItem onClick={() => user && navigate({ to: "/user/$id", params: { id: user.id } })}>
+                      <UserIcon className="mr-2 h-4 w-4" /> My profile
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate({ to: "/account-settings" })}>
                       <Settings className="mr-2 h-4 w-4" /> Account settings
                     </DropdownMenuItem>
