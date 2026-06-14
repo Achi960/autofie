@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UserIdRouteImport } from './routes/user.$id'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as BrowseCategoryRouteImport } from './routes/browse.$category'
 import { Route as AuthenticatedSubmitListingRouteImport } from './routes/_authenticated/submit-listing'
@@ -38,6 +39,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserIdRoute = UserIdRouteImport.update({
+  id: '/user/$id',
+  path: '/user/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListingIdRoute = ListingIdRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
+  '/user/$id': typeof UserIdRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
+  '/user/$id': typeof UserIdRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/_authenticated/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
+  '/user/$id': typeof UserIdRoute
   '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/_authenticated/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
+    | '/user/$id'
     | '/admin/dealers'
     | '/admin/listings'
     | '/edit-listing/$id'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
+    | '/user/$id'
     | '/admin/dealers'
     | '/admin/listings'
     | '/edit-listing/$id'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/_authenticated/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
+    | '/user/$id'
     | '/_authenticated/admin/dealers'
     | '/_authenticated/admin/listings'
     | '/_authenticated/edit-listing/$id'
@@ -228,6 +240,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BrowseCategoryRoute: typeof BrowseCategoryRoute
   ListingIdRoute: typeof ListingIdRoute
+  UserIdRoute: typeof UserIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/$id': {
+      id: '/user/$id'
+      path: '/user/$id'
+      fullPath: '/user/$id'
+      preLoaderRoute: typeof UserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/listing/$id': {
@@ -386,6 +406,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BrowseCategoryRoute: BrowseCategoryRoute,
   ListingIdRoute: ListingIdRoute,
+  UserIdRoute: UserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
