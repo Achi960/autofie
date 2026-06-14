@@ -4,11 +4,15 @@ import { ArrowLeft, Phone, Send } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { signedUrl } from "@/lib/storage";
 import { useAuth } from "@/lib/auth-context";
 import { initialsOf } from "@/lib/format";
+import { isOnline, lastSeenLabel, playMessageBeep } from "@/lib/presence";
+import { ProfileDialog } from "@/components/ProfileDialog";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/chat/$listingId/$otherId")({
   component: ChatPage,
