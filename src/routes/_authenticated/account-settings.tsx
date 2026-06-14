@@ -144,7 +144,25 @@ function AccountSettings() {
             <p className="text-xs text-muted-foreground">Contact support to change your email.</p>
           </div>
 
-          <Button onClick={save} disabled={saving} size="lg" className="w-full">
+          <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-success/15 p-2 text-success"><MessageCircle className="h-5 w-5" /></div>
+                <div>
+                  <p className="font-medium text-foreground">WhatsApp button</p>
+                  <p className="text-xs text-muted-foreground">Show a WhatsApp button on your listings so buyers can message you on WhatsApp.</p>
+                </div>
+              </div>
+              <Switch checked={whatsappEnabled} onCheckedChange={setWhatsappEnabled} />
+            </div>
+            {whatsappEnabled && (
+              <div className="space-y-1.5"><Label>WhatsApp number</Label>
+                <Input inputMode="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} maxLength={20} placeholder="e.g. +233 24 123 4567" />
+                <p className="text-xs text-muted-foreground">Include country code. Buyers will be sent here directly from your listing.</p>
+              </div>
+            )}
+          </div>
+
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save changes
           </Button>
         </div>
