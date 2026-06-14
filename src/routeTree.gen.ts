@@ -23,6 +23,7 @@ import { Route as AuthenticatedAccountSettingsRouteImport } from './routes/_auth
 import { Route as AuthenticatedEditListingIdRouteImport } from './routes/_authenticated/edit-listing.$id'
 import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin/listings'
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
+import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
 import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authenticated/admin/listing.$id'
 
 const AuthRoute = AuthRouteImport.update({
@@ -100,6 +101,12 @@ const AuthenticatedAdminDealersRoute =
     path: '/admin/dealers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedChatListingIdOtherIdRoute =
+  AuthenticatedChatListingIdOtherIdRouteImport.update({
+    id: '/chat/$listingId/$otherId',
+    path: '/chat/$listingId/$otherId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminListingIdRoute =
   AuthenticatedAdminListingIdRouteImport.update({
     id: '/admin/listing/$id',
@@ -122,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
   '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
+  '/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -138,6 +146,7 @@ export interface FileRoutesByTo {
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
   '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
+  '/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -156,6 +165,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/_authenticated/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
   '/_authenticated/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
+  '/_authenticated/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/admin/listings'
     | '/edit-listing/$id'
     | '/admin/listing/$id'
+    | '/chat/$listingId/$otherId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/admin/listings'
     | '/edit-listing/$id'
     | '/admin/listing/$id'
+    | '/chat/$listingId/$otherId'
   id:
     | '__root__'
     | '/'
@@ -207,6 +219,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/listings'
     | '/_authenticated/edit-listing/$id'
     | '/_authenticated/admin/listing/$id'
+    | '/_authenticated/chat/$listingId/$otherId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -317,6 +330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDealersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/chat/$listingId/$otherId': {
+      id: '/_authenticated/chat/$listingId/$otherId'
+      path: '/chat/$listingId/$otherId'
+      fullPath: '/chat/$listingId/$otherId'
+      preLoaderRoute: typeof AuthenticatedChatListingIdOtherIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/listing/$id': {
       id: '/_authenticated/admin/listing/$id'
       path: '/admin/listing/$id'
@@ -338,6 +358,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
   AuthenticatedEditListingIdRoute: typeof AuthenticatedEditListingIdRoute
   AuthenticatedAdminListingIdRoute: typeof AuthenticatedAdminListingIdRoute
+  AuthenticatedChatListingIdOtherIdRoute: typeof AuthenticatedChatListingIdOtherIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -352,6 +373,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
   AuthenticatedEditListingIdRoute: AuthenticatedEditListingIdRoute,
   AuthenticatedAdminListingIdRoute: AuthenticatedAdminListingIdRoute,
+  AuthenticatedChatListingIdOtherIdRoute:
+    AuthenticatedChatListingIdOtherIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -367,3 +390,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
