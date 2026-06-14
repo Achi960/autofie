@@ -451,6 +451,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
