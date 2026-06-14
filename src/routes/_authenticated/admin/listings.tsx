@@ -34,10 +34,11 @@ function AdminListings() {
   }, [authLoading, isAdmin, navigate]);
 
   const load = async () => {
-    const { data } = await supabase.from("listings")
-      .select("*, profiles!listings_user_id_fkey(full_name, phone)")
+    const { data, error } = await supabase.from("listings")
+      .select("*, profiles(full_name, phone)")
       .eq("status", "pending")
       .order("created_at", { ascending: true });
+    if (error) { console.error("admin listings load error", error); toast.error(error.message); }
     setRows(data ?? []);
   };
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);

@@ -14,6 +14,7 @@ interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  initialStep?: "choose" | "signin" | "register";
 }
 
 type Step = "choose" | "signin" | "register";
@@ -50,8 +51,8 @@ const registerSchema = z.object({
   agree: z.literal(true, { message: "You must agree to the rules" }),
 });
 
-export function AuthModal({ open, onOpenChange, onSuccess }: AuthModalProps) {
-  const [step, setStep] = useState<Step>("choose");
+export function AuthModal({ open, onOpenChange, onSuccess, initialStep = "choose" }: AuthModalProps) {
+  const [step, setStep] = useState<Step>(initialStep);
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
 
