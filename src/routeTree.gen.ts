@@ -9,10 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as BrowseCategoryRouteImport } from './routes/browse.$category'
+import { Route as AuthenticatedSubmitListingRouteImport } from './routes/_authenticated/submit-listing'
+import { Route as AuthenticatedMyListingsRouteImport } from './routes/_authenticated/my-listings'
+import { Route as AuthenticatedCompleteDealerProfileRouteImport } from './routes/_authenticated/complete-dealer-profile'
+import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin/listings'
+import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -28,39 +44,132 @@ const BrowseCategoryRoute = BrowseCategoryRouteImport.update({
   path: '/browse/$category',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSubmitListingRoute =
+  AuthenticatedSubmitListingRouteImport.update({
+    id: '/submit-listing',
+    path: '/submit-listing',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMyListingsRoute = AuthenticatedMyListingsRouteImport.update({
+  id: '/my-listings',
+  path: '/my-listings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCompleteDealerProfileRoute =
+  AuthenticatedCompleteDealerProfileRouteImport.update({
+    id: '/complete-dealer-profile',
+    path: '/complete-dealer-profile',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminListingsRoute =
+  AuthenticatedAdminListingsRouteImport.update({
+    id: '/admin/listings',
+    path: '/admin/listings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminDealersRoute =
+  AuthenticatedAdminDealersRouteImport.update({
+    id: '/admin/dealers',
+    path: '/admin/dealers',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
+  '/my-listings': typeof AuthenticatedMyListingsRoute
+  '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
+  '/admin/dealers': typeof AuthenticatedAdminDealersRoute
+  '/admin/listings': typeof AuthenticatedAdminListingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
+  '/my-listings': typeof AuthenticatedMyListingsRoute
+  '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
+  '/admin/dealers': typeof AuthenticatedAdminDealersRoute
+  '/admin/listings': typeof AuthenticatedAdminListingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
+  '/_authenticated/my-listings': typeof AuthenticatedMyListingsRoute
+  '/_authenticated/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
+  '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
+  '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/browse/$category' | '/listing/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/complete-dealer-profile'
+    | '/my-listings'
+    | '/submit-listing'
+    | '/browse/$category'
+    | '/listing/$id'
+    | '/admin/dealers'
+    | '/admin/listings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/browse/$category' | '/listing/$id'
-  id: '__root__' | '/' | '/browse/$category' | '/listing/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/complete-dealer-profile'
+    | '/my-listings'
+    | '/submit-listing'
+    | '/browse/$category'
+    | '/listing/$id'
+    | '/admin/dealers'
+    | '/admin/listings'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/complete-dealer-profile'
+    | '/_authenticated/my-listings'
+    | '/_authenticated/submit-listing'
+    | '/browse/$category'
+    | '/listing/$id'
+    | '/_authenticated/admin/dealers'
+    | '/_authenticated/admin/listings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   BrowseCategoryRoute: typeof BrowseCategoryRoute
   ListingIdRoute: typeof ListingIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,14 +191,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrowseCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/submit-listing': {
+      id: '/_authenticated/submit-listing'
+      path: '/submit-listing'
+      fullPath: '/submit-listing'
+      preLoaderRoute: typeof AuthenticatedSubmitListingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-listings': {
+      id: '/_authenticated/my-listings'
+      path: '/my-listings'
+      fullPath: '/my-listings'
+      preLoaderRoute: typeof AuthenticatedMyListingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/complete-dealer-profile': {
+      id: '/_authenticated/complete-dealer-profile'
+      path: '/complete-dealer-profile'
+      fullPath: '/complete-dealer-profile'
+      preLoaderRoute: typeof AuthenticatedCompleteDealerProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/listings': {
+      id: '/_authenticated/admin/listings'
+      path: '/admin/listings'
+      fullPath: '/admin/listings'
+      preLoaderRoute: typeof AuthenticatedAdminListingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/dealers': {
+      id: '/_authenticated/admin/dealers'
+      path: '/admin/dealers'
+      fullPath: '/admin/dealers'
+      preLoaderRoute: typeof AuthenticatedAdminDealersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCompleteDealerProfileRoute: typeof AuthenticatedCompleteDealerProfileRoute
+  AuthenticatedMyListingsRoute: typeof AuthenticatedMyListingsRoute
+  AuthenticatedSubmitListingRoute: typeof AuthenticatedSubmitListingRoute
+  AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
+  AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCompleteDealerProfileRoute:
+    AuthenticatedCompleteDealerProfileRoute,
+  AuthenticatedMyListingsRoute: AuthenticatedMyListingsRoute,
+  AuthenticatedSubmitListingRoute: AuthenticatedSubmitListingRoute,
+  AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
+  AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   BrowseCategoryRoute: BrowseCategoryRoute,
   ListingIdRoute: ListingIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
