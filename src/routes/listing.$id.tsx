@@ -39,9 +39,10 @@ function ListingDetail() {
 
       // Fetch profile + dealer info separately (no direct FK between listings <-> profiles)
       const [{ data: prof }, { data: deal }] = await Promise.all([
-        supabase.from("profiles").select("full_name, phone").eq("id", data.user_id).maybeSingle(),
+        supabase.from("profiles").select("full_name, phone, whatsapp_enabled, whatsapp_number").eq("id", data.user_id).maybeSingle(),
         supabase.from("dealer_profiles").select("business_name, region, status").eq("user_id", data.user_id).maybeSingle(),
       ]);
+
       const enriched: any = { ...data, profiles: prof ?? null, dealer_profiles: deal ?? null };
       setListing(enriched);
 
