@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -95,6 +96,22 @@ function AuthPage() {
             </div>
             <Button onClick={send} disabled={loading} className="w-full">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Send code
+            </Button>
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Or</span></div>
+            </div>
+            <Button type="button" variant="outline" className="w-full" disabled={loading} onClick={async () => {
+              setLoading(true);
+              const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+              if (result.error) { toast.error(result.error.message || "Google sign-in failed"); setLoading(false); return; }
+              if (result.redirected) return;
+              setLoading(false);
+            }}>
+              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.6 14.6 2.7 12 2.7 6.9 2.7 2.7 6.9 2.7 12s4.2 9.3 9.3 9.3c5.4 0 8.9-3.8 8.9-9.1 0-.6-.1-1.1-.2-1.6H12z"/>
+              </svg>
+              Continue with Google
             </Button>
           </div>
         ) : (
