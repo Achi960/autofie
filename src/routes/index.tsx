@@ -54,6 +54,7 @@ function HomePage() {
         views: row.listing_stats?.views ?? 0,
         dealer_name: row.profiles?.full_name ?? null,
         dealer_verified: row.dealer_profiles?.status === "approved",
+        dealer_id: row.user_id,
       }));
       setListings(mapped);
       setLoading(false);

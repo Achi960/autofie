@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MapPin, Gauge, Settings, BadgeCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Heart, MapPin, Gauge, Settings, BadgeCheck, MessageSquare } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatGHS, formatMileage, initialsOf } from "@/lib/format";
@@ -20,6 +19,7 @@ export interface ListingCardData {
   views?: number;
   dealer_name?: string | null;
   dealer_verified?: boolean;
+  dealer_id?: string | null;
 }
 
 export function ListingCard({
@@ -107,6 +107,17 @@ export function ListingCard({
               <BadgeCheck className="h-4 w-4 shrink-0 text-success" aria-label="Verified dealer" />
             )}
           </div>
+          {listing.dealer_id && (
+            <Link
+              to="/messages/$listingId/$otherId"
+              params={{ listingId: listing.id, otherId: listing.dealer_id }}
+              aria-label="Message dealer"
+              className="rounded-full p-1.5 text-primary hover:bg-primary/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MessageSquare className="h-4 w-4" />
+            </Link>
+          )}
         </div>
       </div>
     </article>
