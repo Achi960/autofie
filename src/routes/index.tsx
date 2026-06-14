@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, ShieldCheck, BadgeCheck, Users, MessageCircle, Star, MapPin, Lock, Zap, Quote } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
@@ -298,11 +299,7 @@ function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t bg-surface py-6">
-        <div className="mx-auto max-w-7xl px-4 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} AutoFie. Built for Ghana.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
