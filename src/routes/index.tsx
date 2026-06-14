@@ -156,14 +156,13 @@ function HomePage() {
 
       {/* Dealer CTA */}
       <section className="mx-auto max-w-7xl px-4 py-12">
-        <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-orange-500 p-8 text-primary-foreground sm:p-12">
+        <div className="overflow-hidden rounded-2xl bg-secondary p-8 text-secondary-foreground sm:p-12">
           <div className="max-w-xl">
             <h2 className="text-2xl font-bold sm:text-3xl">Sell faster on Autofie</h2>
             <p className="mt-2 opacity-90">Join hundreds of verified dealers across Ghana. Post unlimited ads. Reach serious buyers.</p>
             <Button
               size="lg"
-              variant="secondary"
-              className="mt-5 bg-white text-primary hover:bg-white/90"
+              className="mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 if (!user) return; // navbar handles the auth modal trigger
                 if (isVerifiedDealer) navigate({ to: "/submit-listing" });
