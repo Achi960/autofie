@@ -161,6 +161,7 @@ export type Database = {
           colour: string | null
           condition: string | null
           contact: string | null
+          contact_name: string | null
           cover_photo_url: string | null
           created_at: string
           description: string | null
@@ -192,6 +193,7 @@ export type Database = {
           colour?: string | null
           condition?: string | null
           contact?: string | null
+          contact_name?: string | null
           cover_photo_url?: string | null
           created_at?: string
           description?: string | null
@@ -223,6 +225,7 @@ export type Database = {
           colour?: string | null
           condition?: string | null
           contact?: string | null
+          contact_name?: string | null
           cover_photo_url?: string | null
           created_at?: string
           description?: string | null
