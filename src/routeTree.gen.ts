@@ -23,6 +23,7 @@ import { Route as AuthenticatedAccountSettingsRouteImport } from './routes/_auth
 import { Route as AuthenticatedEditListingIdRouteImport } from './routes/_authenticated/edit-listing.$id'
 import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin/listings'
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
+import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authenticated/admin/listing.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -99,6 +100,12 @@ const AuthenticatedAdminDealersRoute =
     path: '/admin/dealers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminListingIdRoute =
+  AuthenticatedAdminListingIdRouteImport.update({
+    id: '/admin/listing/$id',
+    path: '/admin/listing/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -129,6 +137,7 @@ export interface FileRoutesByTo {
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -146,6 +155,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/_authenticated/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/_authenticated/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/admin/dealers'
     | '/admin/listings'
     | '/edit-listing/$id'
+    | '/admin/listing/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/admin/dealers'
     | '/admin/listings'
     | '/edit-listing/$id'
+    | '/admin/listing/$id'
   id:
     | '__root__'
     | '/'
@@ -194,6 +206,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/dealers'
     | '/_authenticated/admin/listings'
     | '/_authenticated/edit-listing/$id'
+    | '/_authenticated/admin/listing/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -304,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDealersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/listing/$id': {
+      id: '/_authenticated/admin/listing/$id'
+      path: '/admin/listing/$id'
+      fullPath: '/admin/listing/$id'
+      preLoaderRoute: typeof AuthenticatedAdminListingIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -317,6 +337,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
   AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
   AuthenticatedEditListingIdRoute: typeof AuthenticatedEditListingIdRoute
+  AuthenticatedAdminListingIdRoute: typeof AuthenticatedAdminListingIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -330,6 +351,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
   AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
   AuthenticatedEditListingIdRoute: AuthenticatedEditListingIdRoute,
+  AuthenticatedAdminListingIdRoute: AuthenticatedAdminListingIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
