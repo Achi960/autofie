@@ -66,8 +66,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Autofie — Ghana's car dealer marketplace" },
-      { name: "description", content: "Buy and sell cars, trucks, motorcycles and parts from verified dealers across Ghana." },
+      { title: "Autofie.com — Ghana's Verified Car Marketplace" },
+      { name: "description", content: "Every dealer on Autofie is identity-verified. No fake listings. No scams. Buy and sell cars across Ghana." },
       { name: "theme-color", content: "#1a1a2e" },
       { property: "og:title", content: "Autofie.com — Ghana's Verified Car Marketplace" },
       { property: "og:description", content: "Every dealer on Autofie is identity-verified. No fake listings. No scams." },
