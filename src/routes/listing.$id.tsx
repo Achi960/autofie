@@ -18,6 +18,7 @@ export const Route = createFileRoute("/listing/$id")({
 function ListingDetail() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [listing, setListing] = useState<any | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [coverIdx, setCoverIdx] = useState(0);
