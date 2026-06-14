@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
 import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
 import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authenticated/admin/listing.$id'
+import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
