@@ -10,6 +10,7 @@ import { initialsOf } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/storage";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useUnreadMessages } from "@/lib/use-unread-messages";
 
 export function Navbar() {
   const { user, isAdmin, isVerifiedDealer, isPendingDealer, signOut } = useAuth();
@@ -18,6 +19,8 @@ export function Navbar() {
   const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const navigate = useNavigate();
+  const unread = useUnreadMessages();
+  const unreadLabel = unread > 99 ? "99+" : String(unread);
 
   useEffect(() => {
     if (!user) { setProfile(null); setAvatarSrc(null); return; }
@@ -53,11 +56,21 @@ export function Navbar() {
                 <Link to="/my-saved" aria-label="Saved" className="rounded-full p-2 hover:bg-white/15">
                   <Heart className="h-5 w-5" />
                 </Link>
-                <Link to="/messages" aria-label="Messages" className="rounded-full p-2 hover:bg-white/15">
+                <Link to="/messages" aria-label={`Messages${unread ? ` (${unread} unread)` : ""}`} className="relative rounded-full p-2 hover:bg-white/15">
                   <MessageSquare className="h-5 w-5" />
+                  {unread > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground ring-2 ring-primary">
+                      {unreadLabel}
+                    </span>
+                  )}
                 </Link>
-                <button aria-label="Notifications" className="rounded-full p-2 hover:bg-white/15" onClick={() => navigate({ to: "/messages" })}>
+                <button aria-label={`Notifications${unread ? ` (${unread} unread)` : ""}`} className="relative rounded-full p-2 hover:bg-white/15" onClick={() => navigate({ to: "/messages" })}>
                   <Bell className="h-5 w-5" />
+                  {unread > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground ring-2 ring-primary">
+                      {unreadLabel}
+                    </span>
+                  )}
                 </button>
                 <ThemeToggle />
                 {(isVerifiedDealer || isPendingDealer) && (
