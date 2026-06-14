@@ -8,6 +8,7 @@ import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { CATEGORIES } from "@/lib/ghana";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { shuffleByMinute } from "@/lib/shuffle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
