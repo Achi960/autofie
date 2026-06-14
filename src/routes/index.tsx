@@ -35,15 +35,26 @@ function HomePage() {
     const load = async () => {
       const { data } = await supabase
         .from("listings")
-        .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url,
-                 user_id,
-                 listing_stats(views),
-                 profiles!listings_user_id_fkey(full_name),
-                 dealer_profiles!dealer_profiles_user_id_fkey(status)`)
+        .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url, user_id,
+                 listing_stats(views)`)
         .eq("status", "approved")
         .order("created_at", { ascending: false })
         .limit(48);
       if (!alive || !data) { setLoading(false); return; }
+
+      // Fetch related profile & dealer info in parallel (no FK between listings <-> profiles)
+      const userIds = Array.from(new Set(data.map((r: any) => r.user_id).filter(Boolean)));
+      const [{ data: profs }, { data: deals }] = await Promise.all([
+        userIds.length
+          ? supabase.from("profiles").select("id, full_name").in("id", userIds)
+          : Promise.resolve({ data: [] as any[] }),
+        userIds.length
+          ? supabase.from("dealer_profiles").select("user_id, status").in("user_id", userIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const dealMap = new Map((deals ?? []).map((d: any) => [d.user_id, d]));
+
       const mapped: ListingCardData[] = data.map((row: any) => ({
         id: row.id,
         title: row.title,
@@ -54,8 +65,8 @@ function HomePage() {
         mileage: row.mileage,
         cover_photo_url: row.cover_photo_url,
         views: row.listing_stats?.views ?? 0,
-        dealer_name: row.profiles?.full_name ?? null,
-        dealer_verified: row.dealer_profiles?.status === "approved",
+        dealer_name: profMap.get(row.user_id)?.full_name ?? null,
+        dealer_verified: dealMap.get(row.user_id)?.status === "approved",
       }));
       setAllListings(mapped);
       setListings(shuffleByMinute(mapped).slice(0, 12));
