@@ -1,13 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Phone, Send } from "lucide-react";
+import { ArrowLeft, Phone, Send, Smile, Paperclip, Mic, Square, Trash2, X, Image as ImageIcon } from "lucide-react";
+import EmojiPicker, { type EmojiClickData, Theme as EmojiTheme } from "emoji-picker-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-import { signedUrl } from "@/lib/storage";
+import { signedUrl, uploadFile } from "@/lib/storage";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme";
 import { initialsOf } from "@/lib/format";
 import { isOnline, lastSeenLabel, playMessageBeep } from "@/lib/presence";
 
@@ -23,7 +25,10 @@ type Msg = {
   sender_id: string;
   receiver_id: string;
   listing_id: string | null;
-  content: string;
+  content: string | null;
+  attachment_url: string | null;
+  attachment_type: "image" | "audio" | null;
+  attachment_duration_ms: number | null;
   created_at: string;
   read: boolean;
 };
@@ -35,9 +40,57 @@ const QUICK_REPLIES = [
   "Can I come for a test drive?",
 ];
 
+function formatDuration(ms: number | null) {
+  if (!ms || ms < 0) return "0:00";
+  const s = Math.round(ms / 1000);
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}:${r.toString().padStart(2, "0")}`;
+}
+
+function AttachmentView({ msg }: { msg: Msg }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    if (msg.attachment_url) {
+      signedUrl("chat-media", msg.attachment_url).then((u) => { if (alive) setUrl(u); });
+    }
+    return () => { alive = false; };
+  }, [msg.attachment_url]);
+
+  if (!msg.attachment_url) return null;
+  if (msg.attachment_type === "image") {
+    return (
+      <a href={url ?? "#"} target="_blank" rel="noreferrer" className="block">
+        {url ? (
+          <img src={url} alt="attachment" className="max-h-72 w-auto max-w-full rounded-lg object-cover" />
+        ) : (
+          <div className="h-40 w-40 animate-pulse rounded-lg bg-muted" />
+        )}
+      </a>
+    );
+  }
+  if (msg.attachment_type === "audio") {
+    return (
+      <div className="flex flex-col gap-1">
+        {url ? (
+          <audio controls src={url} className="max-w-full" />
+        ) : (
+          <div className="h-10 w-56 animate-pulse rounded bg-muted" />
+        )}
+        {msg.attachment_duration_ms && (
+          <span className="text-[10px] opacity-70">🎙 {formatDuration(msg.attachment_duration_ms)}</span>
+        )}
+      </div>
+    );
+  }
+  return null;
+}
+
 function ChatPage() {
   const { listingId, otherId } = Route.useParams();
   const { user } = useAuth();
+  const { resolved: themeResolved } = useTheme();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
@@ -47,12 +100,21 @@ function ChatPage() {
   const [listing, setListing] = useState<{ id: string; title: string; price: number; cover_photo_url: string | null } | null>(null);
   const [askPhone, setAskPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
-  
-  const [, forceTick] = useState(0); // re-render every 30s to refresh "last seen" label
+  const [emojiOpen, setEmojiOpen] = useState(false);
+
+  // Voice recording
+  const [recording, setRecording] = useState(false);
+  const [recordSeconds, setRecordSeconds] = useState(0);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<BlobPart[]>([]);
+  const recordStartRef = useRef<number>(0);
+  const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const [, forceTick] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initial load + realtime subscribe
   useEffect(() => {
     if (!user) return;
     let alive = true;
@@ -64,8 +126,7 @@ function ChatPage() {
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`)
         .order("created_at", { ascending: true });
       if (!alive) return;
-      setMessages((msgs ?? []) as Msg[]);
-      // mark received as read
+      setMessages((msgs ?? []) as unknown as Msg[]);
       await supabase.from("messages").update({ read: true })
         .eq("listing_id", listingId).eq("sender_id", otherId).eq("receiver_id", user.id).eq("read", false);
 
@@ -86,7 +147,7 @@ function ChatPage() {
     const channel = supabase
       .channel(`chat:${listingId}:${user.id}:${otherId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `listing_id=eq.${listingId}` }, (payload) => {
-        const m = payload.new as Msg;
+        const m = payload.new as unknown as Msg;
         const involves = (m.sender_id === user.id && m.receiver_id === otherId) || (m.sender_id === otherId && m.receiver_id === user.id);
         if (!involves) return;
         setMessages((prev) => prev.some((x) => x.id === m.id) ? prev : [...prev, m]);
@@ -97,7 +158,6 @@ function ChatPage() {
       })
       .subscribe();
 
-    // Refresh the other user's last_seen every 30s while the chat is open
     const presenceInterval = setInterval(async () => {
       const { data } = await supabase.from("profiles").select("last_seen_at").eq("id", otherId).maybeSingle();
       if (!alive) return;
@@ -115,8 +175,10 @@ function ChatPage() {
 
   const isSelfChat = user?.id === otherId;
 
-  const send = async (body: string) => {
-    if (!user || !body.trim() || sending) return;
+  const sendMessage = async (opts: { body?: string; attachment?: { path: string; type: "image" | "audio"; durationMs?: number } }) => {
+    if (!user || sending) return;
+    const body = (opts.body ?? "").trim();
+    if (!body && !opts.attachment) return;
     if (isSelfChat) { toast.error("You can't message yourself"); return; }
     setSending(true);
     const optimistic: Msg = {
@@ -124,33 +186,124 @@ function ChatPage() {
       sender_id: user.id,
       receiver_id: otherId,
       listing_id: listingId,
-      content: body.trim(),
+      content: body || null,
+      attachment_url: opts.attachment?.path ?? null,
+      attachment_type: opts.attachment?.type ?? null,
+      attachment_duration_ms: opts.attachment?.durationMs ?? null,
       created_at: new Date().toISOString(),
       read: false,
     };
     setMessages((p) => [...p, optimistic]);
     setText("");
-    const { data, error } = await supabase.from("messages").insert({
+    const insertPayload: any = {
       sender_id: user.id,
       receiver_id: otherId,
       listing_id: listingId,
-      content: body.trim(),
-    }).select().single();
+      content: body || null,
+    };
+    if (opts.attachment) {
+      insertPayload.attachment_url = opts.attachment.path;
+      insertPayload.attachment_type = opts.attachment.type;
+      insertPayload.attachment_duration_ms = opts.attachment.durationMs ?? null;
+    }
+    const { data, error } = await supabase.from("messages").insert(insertPayload).select().single();
     setSending(false);
     if (error) {
       setMessages((p) => p.filter((m) => m.id !== optimistic.id));
       toast.error(error.message);
       return;
     }
-    setMessages((p) => p.map((m) => m.id === optimistic.id ? (data as Msg) : m));
+    setMessages((p) => p.map((m) => m.id === optimistic.id ? (data as unknown as Msg) : m));
     inputRef.current?.focus();
   };
+
+  const send = (body: string) => sendMessage({ body });
 
   const sendPleaseCallMe = async () => {
     if (!phoneInput.trim()) { toast.error("Enter your phone number"); return; }
     await send(`📞 Please call me on ${phoneInput.trim()}`);
     setAskPhone(false);
     setPhoneInput("");
+  };
+
+  // ---- Image upload ----
+  const onPickImage = async (file: File | null | undefined) => {
+    if (!file || !user) return;
+    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be under 8MB"); return; }
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `${listingId}/${user.id}/${crypto.randomUUID()}.${ext}`;
+    try {
+      await uploadFile("chat-media", path, file);
+      await sendMessage({ body: text, attachment: { path, type: "image" } });
+    } catch (e: any) {
+      toast.error(e.message ?? "Upload failed");
+    }
+  };
+
+  // ---- Voice recording ----
+  const startRecording = async () => {
+    if (recording || !user) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      recorderRef.current = rec;
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onstop = async () => {
+        const durationMs = Date.now() - recordStartRef.current;
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+        stream.getTracks().forEach((t) => t.stop());
+        if (recordTimerRef.current) { clearInterval(recordTimerRef.current); recordTimerRef.current = null; }
+        setRecording(false);
+        setRecordSeconds(0);
+        if (blob.size < 1000) { toast.error("Recording too short"); return; }
+        const ext = (rec.mimeType || "audio/webm").includes("mp4") ? "m4a" : "webm";
+        const path = `${listingId}/${user.id}/${crypto.randomUUID()}.${ext}`;
+        try {
+          const file = new File([blob], `voice.${ext}`, { type: blob.type });
+          await uploadFile("chat-media", path, file);
+          await sendMessage({ attachment: { path, type: "audio", durationMs } });
+        } catch (e: any) {
+          toast.error(e.message ?? "Upload failed");
+        }
+      };
+      recordStartRef.current = Date.now();
+      setRecording(true);
+      setRecordSeconds(0);
+      recordTimerRef.current = setInterval(() => {
+        const s = Math.floor((Date.now() - recordStartRef.current) / 1000);
+        setRecordSeconds(s);
+        if (s >= 120) stopRecording(); // hard cap 2 min
+      }, 250);
+      rec.start();
+    } catch (e: any) {
+      toast.error(e.message ?? "Microphone permission denied");
+    }
+  };
+
+  const stopRecording = () => {
+    const rec = recorderRef.current;
+    if (rec && rec.state !== "inactive") rec.stop();
+  };
+
+  const cancelRecording = () => {
+    const rec = recorderRef.current;
+    if (!rec) return;
+    rec.ondataavailable = null;
+    rec.onstop = null;
+    if (rec.state !== "inactive") rec.stop();
+    rec.stream?.getTracks?.().forEach((t) => t.stop());
+    if (recordTimerRef.current) { clearInterval(recordTimerRef.current); recordTimerRef.current = null; }
+    chunksRef.current = [];
+    setRecording(false);
+    setRecordSeconds(0);
+  };
+
+  const onEmojiClick = (e: EmojiClickData) => {
+    setText((t) => t + e.emoji);
+    inputRef.current?.focus();
   };
 
   const headerName = other?.full_name || "Seller";
@@ -161,7 +314,6 @@ function ChatPage() {
   return (
     <div className="flex h-[100dvh] flex-col bg-background">
       <Navbar />
-      {/* Chat header */}
       <div className="border-b bg-card">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           <button onClick={() => navigate({ to: "/messages" })} className="rounded p-1 hover:bg-muted" aria-label="Back">
@@ -200,8 +352,6 @@ function ChatPage() {
           </div>
         )}
       </div>
-      
-
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto bg-surface">
@@ -213,11 +363,17 @@ function ChatPage() {
 
           {messages.map((m) => {
             const mine = m.sender_id === user.id;
+            const hasAttach = !!m.attachment_url;
             return (
               <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm ${mine ? "bg-primary text-primary-foreground" : "bg-card text-foreground"}`}>
-                  <p className="whitespace-pre-wrap">{m.content}</p>
-                  <p className={`mt-1 text-[10px] ${mine ? "opacity-80" : "text-muted-foreground"}`}>
+                <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm ${mine ? "bg-primary text-primary-foreground" : "bg-card text-foreground"}`}>
+                  {hasAttach && (
+                    <div className={m.content ? "mb-2" : ""}>
+                      <AttachmentView msg={m} />
+                    </div>
+                  )}
+                  {m.content && <p className="whitespace-pre-wrap px-1">{m.content}</p>}
+                  <p className={`mt-1 px-1 text-[10px] ${mine ? "opacity-80" : "text-muted-foreground"}`}>
                     {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
@@ -227,7 +383,7 @@ function ChatPage() {
         </div>
       </div>
 
-      {/* Quick replies */}
+      {/* Composer */}
       <div className="border-t bg-card">
         <div className="mx-auto max-w-3xl space-y-2 px-4 py-2">
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -257,21 +413,80 @@ function ChatPage() {
             </div>
           )}
 
-          <form
-            onSubmit={(e) => { e.preventDefault(); send(text); }}
-            className="flex items-center gap-2"
-          >
-            <Input
-              ref={inputRef}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Write your message here"
-              disabled={sending || isSelfChat}
-            />
-            <Button type="submit" disabled={!text.trim() || sending || isSelfChat} size="icon">
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+          {emojiOpen && (
+            <div className="relative">
+              <div className="absolute bottom-full left-0 z-50 mb-2">
+                <EmojiPicker
+                  onEmojiClick={onEmojiClick}
+                  theme={themeResolved === "dark" ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                  height={350}
+                  width={320}
+                  lazyLoadEmojis
+                />
+              </div>
+            </div>
+          )}
+
+          {recording ? (
+            <div className="flex items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-2">
+              <span className="relative flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-destructive" />
+              </span>
+              <span className="flex-1 text-sm font-medium text-destructive">Recording… {formatDuration(recordSeconds * 1000)}</span>
+              <Button variant="ghost" size="sm" onClick={cancelRecording}>
+                <Trash2 className="mr-1 h-4 w-4" />Cancel
+              </Button>
+              <Button size="sm" onClick={stopRecording} disabled={recordSeconds < 1}>
+                <Square className="mr-1 h-4 w-4" />Send
+              </Button>
+            </div>
+          ) : (
+            <form
+              onSubmit={(e) => { e.preventDefault(); send(text); }}
+              className="flex items-center gap-1"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { onPickImage(e.target.files?.[0]); e.target.value = ""; }}
+              />
+              <button type="button" aria-label="Emoji" onClick={() => setEmojiOpen((v) => !v)}
+                className={`rounded-full p-2 hover:bg-muted ${emojiOpen ? "bg-muted text-primary" : "text-muted-foreground"}`}>
+                {emojiOpen ? <X className="h-5 w-5" /> : <Smile className="h-5 w-5" />}
+              </button>
+              <button type="button" aria-label="Attach image" onClick={() => fileInputRef.current?.click()}
+                className="rounded-full p-2 text-muted-foreground hover:bg-muted">
+                <Paperclip className="h-5 w-5" />
+              </button>
+              <Input
+                ref={inputRef}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Write your message here"
+                disabled={sending || isSelfChat}
+                onFocus={() => setEmojiOpen(false)}
+              />
+              {text.trim() ? (
+                <Button type="submit" disabled={!text.trim() || sending || isSelfChat} size="icon">
+                  <Send className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button type="button" size="icon" onClick={startRecording} disabled={isSelfChat} aria-label="Record voice note">
+                  <Mic className="h-4 w-4" />
+                </Button>
+              )}
+            </form>
+          )}
+
+          {/* Mobile-friendly attach-photo shortcut row, visible when nothing typed */}
+          {!recording && !text.trim() && (
+            <p className="text-center text-[10px] text-muted-foreground">
+              <ImageIcon className="mr-1 inline h-3 w-3" /> Tap the clip to send a photo · Tap mic to record a voice note
+            </p>
+          )}
         </div>
       </div>
     </div>

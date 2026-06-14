@@ -15,6 +15,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
 import { toast } from "sonner";
+import { notifyAdminWhatsapp } from "@/lib/admin-notify.functions";
 import { Loader2, Upload, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/submit-listing")({
@@ -138,6 +139,11 @@ function SubmitListing() {
       }
       await supabase.from("listing_photos").insert(photoRows);
       await supabase.from("listings").update({ cover_photo_url: photoRows[0].url }).eq("id", listing.id);
+
+      // Fire-and-forget admin WhatsApp alert (no-op if Twilio not configured)
+      notifyAdminWhatsapp({
+        data: { message: `📋 New listing pending review on Autofie\n\n"${title}"\nby ${contactName || user.email}\nGH₵${Number(price).toLocaleString("en-GH")}\n\nReview: ${window.location.origin}/admin/listings` },
+      }).catch(() => {});
 
       toast.success("Listing submitted. An admin will review it shortly.");
       navigate({ to: "/my-listings" });
