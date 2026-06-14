@@ -19,8 +19,12 @@ import { Route as AuthenticatedMySavedRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMyListingsRouteImport } from './routes/_authenticated/my-listings'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedCompleteDealerProfileRouteImport } from './routes/_authenticated/complete-dealer-profile'
+import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedMyListingsClosedRouteImport } from './routes/_authenticated/my-listings.closed'
+import { Route as AuthenticatedEditListingIdRouteImport } from './routes/_authenticated/edit-listing.$id'
 import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin/listings'
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
+import { Route as AuthenticatedMessagesListingIdOtherIdRouteImport } from './routes/_authenticated/messages.$listingId.$otherId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -73,6 +77,23 @@ const AuthenticatedCompleteDealerProfileRoute =
     path: '/complete-dealer-profile',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMyListingsClosedRoute =
+  AuthenticatedMyListingsClosedRouteImport.update({
+    id: '/closed',
+    path: '/closed',
+    getParentRoute: () => AuthenticatedMyListingsRoute,
+  } as any)
+const AuthenticatedEditListingIdRoute =
+  AuthenticatedEditListingIdRouteImport.update({
+    id: '/edit-listing/$id',
+    path: '/edit-listing/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminListingsRoute =
   AuthenticatedAdminListingsRouteImport.update({
     id: '/admin/listings',
@@ -85,53 +106,72 @@ const AuthenticatedAdminDealersRoute =
     path: '/admin/dealers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMessagesListingIdOtherIdRoute =
+  AuthenticatedMessagesListingIdOtherIdRouteImport.update({
+    id: '/$listingId/$otherId',
+    path: '/$listingId/$otherId',
+    getParentRoute: () => AuthenticatedMessagesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/account': typeof AuthenticatedAccountRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
-  '/messages': typeof AuthenticatedMessagesRoute
-  '/my-listings': typeof AuthenticatedMyListingsRoute
+  '/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/my-listings': typeof AuthenticatedMyListingsRouteWithChildren
   '/my-saved': typeof AuthenticatedMySavedRoute
   '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/my-listings/closed': typeof AuthenticatedMyListingsClosedRoute
+  '/messages/$listingId/$otherId': typeof AuthenticatedMessagesListingIdOtherIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/account': typeof AuthenticatedAccountRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
-  '/messages': typeof AuthenticatedMessagesRoute
-  '/my-listings': typeof AuthenticatedMyListingsRoute
+  '/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/my-listings': typeof AuthenticatedMyListingsRouteWithChildren
   '/my-saved': typeof AuthenticatedMySavedRoute
   '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/my-listings/closed': typeof AuthenticatedMyListingsClosedRoute
+  '/messages/$listingId/$otherId': typeof AuthenticatedMessagesListingIdOtherIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
-  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
-  '/_authenticated/my-listings': typeof AuthenticatedMyListingsRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/_authenticated/my-listings': typeof AuthenticatedMyListingsRouteWithChildren
   '/_authenticated/my-saved': typeof AuthenticatedMySavedRoute
   '/_authenticated/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
   '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/_authenticated/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/_authenticated/my-listings/closed': typeof AuthenticatedMyListingsClosedRoute
+  '/_authenticated/messages/$listingId/$otherId': typeof AuthenticatedMessagesListingIdOtherIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/account'
     | '/complete-dealer-profile'
     | '/messages'
     | '/my-listings'
@@ -141,10 +181,14 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/admin/dealers'
     | '/admin/listings'
+    | '/edit-listing/$id'
+    | '/my-listings/closed'
+    | '/messages/$listingId/$otherId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/account'
     | '/complete-dealer-profile'
     | '/messages'
     | '/my-listings'
@@ -154,11 +198,15 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/admin/dealers'
     | '/admin/listings'
+    | '/edit-listing/$id'
+    | '/my-listings/closed'
+    | '/messages/$listingId/$otherId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/account'
     | '/_authenticated/complete-dealer-profile'
     | '/_authenticated/messages'
     | '/_authenticated/my-listings'
@@ -168,6 +216,9 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/_authenticated/admin/dealers'
     | '/_authenticated/admin/listings'
+    | '/_authenticated/edit-listing/$id'
+    | '/_authenticated/my-listings/closed'
+    | '/_authenticated/messages/$listingId/$otherId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -250,6 +301,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompleteDealerProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-listings/closed': {
+      id: '/_authenticated/my-listings/closed'
+      path: '/closed'
+      fullPath: '/my-listings/closed'
+      preLoaderRoute: typeof AuthenticatedMyListingsClosedRouteImport
+      parentRoute: typeof AuthenticatedMyListingsRoute
+    }
+    '/_authenticated/edit-listing/$id': {
+      id: '/_authenticated/edit-listing/$id'
+      path: '/edit-listing/$id'
+      fullPath: '/edit-listing/$id'
+      preLoaderRoute: typeof AuthenticatedEditListingIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/listings': {
       id: '/_authenticated/admin/listings'
       path: '/admin/listings'
@@ -264,28 +336,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDealersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/messages/$listingId/$otherId': {
+      id: '/_authenticated/messages/$listingId/$otherId'
+      path: '/$listingId/$otherId'
+      fullPath: '/messages/$listingId/$otherId'
+      preLoaderRoute: typeof AuthenticatedMessagesListingIdOtherIdRouteImport
+      parentRoute: typeof AuthenticatedMessagesRoute
+    }
   }
 }
 
+interface AuthenticatedMessagesRouteChildren {
+  AuthenticatedMessagesListingIdOtherIdRoute: typeof AuthenticatedMessagesListingIdOtherIdRoute
+}
+
+const AuthenticatedMessagesRouteChildren: AuthenticatedMessagesRouteChildren = {
+  AuthenticatedMessagesListingIdOtherIdRoute:
+    AuthenticatedMessagesListingIdOtherIdRoute,
+}
+
+const AuthenticatedMessagesRouteWithChildren =
+  AuthenticatedMessagesRoute._addFileChildren(
+    AuthenticatedMessagesRouteChildren,
+  )
+
+interface AuthenticatedMyListingsRouteChildren {
+  AuthenticatedMyListingsClosedRoute: typeof AuthenticatedMyListingsClosedRoute
+}
+
+const AuthenticatedMyListingsRouteChildren: AuthenticatedMyListingsRouteChildren =
+  {
+    AuthenticatedMyListingsClosedRoute: AuthenticatedMyListingsClosedRoute,
+  }
+
+const AuthenticatedMyListingsRouteWithChildren =
+  AuthenticatedMyListingsRoute._addFileChildren(
+    AuthenticatedMyListingsRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedCompleteDealerProfileRoute: typeof AuthenticatedCompleteDealerProfileRoute
-  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
-  AuthenticatedMyListingsRoute: typeof AuthenticatedMyListingsRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
+  AuthenticatedMyListingsRoute: typeof AuthenticatedMyListingsRouteWithChildren
   AuthenticatedMySavedRoute: typeof AuthenticatedMySavedRoute
   AuthenticatedSubmitListingRoute: typeof AuthenticatedSubmitListingRoute
   AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
   AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
+  AuthenticatedEditListingIdRoute: typeof AuthenticatedEditListingIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedCompleteDealerProfileRoute:
     AuthenticatedCompleteDealerProfileRoute,
-  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
-  AuthenticatedMyListingsRoute: AuthenticatedMyListingsRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
+  AuthenticatedMyListingsRoute: AuthenticatedMyListingsRouteWithChildren,
   AuthenticatedMySavedRoute: AuthenticatedMySavedRoute,
   AuthenticatedSubmitListingRoute: AuthenticatedSubmitListingRoute,
   AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
   AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
+  AuthenticatedEditListingIdRoute: AuthenticatedEditListingIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -301,3 +412,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

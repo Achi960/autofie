@@ -4,14 +4,26 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type AppRole = "buyer" | "dealer_pending" | "dealer_verified" | "admin";
 
+export interface ProfileRow {
+  id: string;
+  full_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  created_at: string;
+}
+
 interface AuthContextValue {
   user: User | null;
+  profile: ProfileRow | null;
   roles: AppRole[];
   loading: boolean;
   isAdmin: boolean;
   isVerifiedDealer: boolean;
   isPendingDealer: boolean;
   refreshRoles: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -19,12 +31,18 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadRoles = async (uid: string) => {
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
     setRoles((data ?? []).map((r) => r.role as AppRole));
+  };
+
+  const loadProfile = async (uid: string) => {
+    const { data } = await supabase.from("profiles").select("*").eq("id", uid).maybeSingle();
+    setProfile((data as any) ?? null);
   };
 
   useEffect(() => {
@@ -34,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       const u = data.session?.user ?? null;
       setUser(u);
-      if (u) loadRoles(u.id).finally(() => setLoading(false));
+      if (u) Promise.all([loadRoles(u.id), loadProfile(u.id)]).finally(() => setLoading(false));
       else setLoading(false);
     });
 
@@ -43,32 +61,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
-        // defer to avoid recursive supabase call inside the callback
-        setTimeout(() => loadRoles(u.id), 0);
+        setTimeout(() => { loadRoles(u.id); loadProfile(u.id); }, 0);
       } else {
-        setRoles([]);
+        setRoles([]); setProfile(null);
       }
     });
 
-    return () => {
-      mounted = false;
-      sub.subscription.unsubscribe();
-    };
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
 
   const value: AuthContextValue = {
     user,
+    profile,
     roles,
     loading,
     isAdmin: roles.includes("admin"),
     isVerifiedDealer: roles.includes("dealer_verified"),
     isPendingDealer: roles.includes("dealer_pending"),
-    refreshRoles: async () => {
-      if (user) await loadRoles(user.id);
-    },
-    signOut: async () => {
-      await supabase.auth.signOut();
-    },
+    refreshRoles: async () => { if (user) await loadRoles(user.id); },
+    refreshProfile: async () => { if (user) await loadProfile(user.id); },
+    signOut: async () => { await supabase.auth.signOut(); },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
