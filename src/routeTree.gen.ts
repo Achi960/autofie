@@ -17,6 +17,7 @@ import { Route as ReviewIdRouteImport } from './routes/review.$id'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as BrowseCategoryRouteImport } from './routes/browse.$category'
 import { Route as AuthenticatedSubmitListingRouteImport } from './routes/_authenticated/submit-listing'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMySavedRouteImport } from './routes/_authenticated/my-saved'
 import { Route as AuthenticatedMyListingsRouteImport } from './routes/_authenticated/my-listings'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
@@ -67,6 +68,12 @@ const AuthenticatedSubmitListingRoute =
   AuthenticatedSubmitListingRouteImport.update({
     id: '/submit-listing',
     path: '/submit-listing',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMySavedRoute = AuthenticatedMySavedRouteImport.update({
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof AuthenticatedMessagesRoute
   '/my-listings': typeof AuthenticatedMyListingsRoute
   '/my-saved': typeof AuthenticatedMySavedRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
@@ -161,6 +169,7 @@ export interface FileRoutesByTo {
   '/messages': typeof AuthenticatedMessagesRoute
   '/my-listings': typeof AuthenticatedMyListingsRoute
   '/my-saved': typeof AuthenticatedMySavedRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
@@ -183,6 +192,7 @@ export interface FileRoutesById {
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/my-listings': typeof AuthenticatedMyListingsRoute
   '/_authenticated/my-saved': typeof AuthenticatedMySavedRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/submit-listing': typeof AuthenticatedSubmitListingRoute
   '/browse/$category': typeof BrowseCategoryRoute
   '/listing/$id': typeof ListingIdRoute
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/my-listings'
     | '/my-saved'
+    | '/notifications'
     | '/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/my-listings'
     | '/my-saved'
+    | '/notifications'
     | '/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
     | '/_authenticated/messages'
     | '/_authenticated/my-listings'
     | '/_authenticated/my-saved'
+    | '/_authenticated/notifications'
     | '/_authenticated/submit-listing'
     | '/browse/$category'
     | '/listing/$id'
@@ -325,6 +338,13 @@ declare module '@tanstack/react-router' {
       path: '/submit-listing'
       fullPath: '/submit-listing'
       preLoaderRoute: typeof AuthenticatedSubmitListingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/my-saved': {
@@ -413,6 +433,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedMyListingsRoute: typeof AuthenticatedMyListingsRoute
   AuthenticatedMySavedRoute: typeof AuthenticatedMySavedRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedSubmitListingRoute: typeof AuthenticatedSubmitListingRoute
   AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
   AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
@@ -429,6 +450,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedMyListingsRoute: AuthenticatedMyListingsRoute,
   AuthenticatedMySavedRoute: AuthenticatedMySavedRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedSubmitListingRoute: AuthenticatedSubmitListingRoute,
   AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
   AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
@@ -454,3 +476,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
