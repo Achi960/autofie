@@ -33,37 +33,40 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-surface: var(--surface);
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.18 0.02 260);
+  /* Autofie light grey page background #f4f4f4 */
+  --background: oklch(0.965 0 0);
+  /* Autofie dark navy #1a1a2e */
+  --foreground: oklch(0.19 0.04 275);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 260);
+  --card-foreground: oklch(0.19 0.04 275);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 260);
-  /* Autofie orange #F97316 */
-  --primary: oklch(0.706 0.196 41.5);
-  --primary-foreground: oklch(1 0 0);
-  --brand: oklch(0.706 0.196 41.5);
-  --brand-foreground: oklch(1 0 0);
-  --secondary: oklch(0.97 0.005 260);
-  --secondary-foreground: oklch(0.18 0.02 260);
-  --muted: oklch(0.97 0.005 260);
-  --muted-foreground: oklch(0.5 0.02 260);
-  --accent: oklch(0.96 0.02 50);
-  --accent-foreground: oklch(0.3 0.1 41);
+  --popover-foreground: oklch(0.19 0.04 275);
+  /* Autofie gold #f5c518 — primary CTA / accents */
+  --primary: oklch(0.832 0.165 88);
+  --primary-foreground: oklch(0.19 0.04 275);
+  --brand: oklch(0.832 0.165 88);
+  --brand-foreground: oklch(0.19 0.04 275);
+  /* Navy secondary surface */
+  --secondary: oklch(0.19 0.04 275);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.95 0.005 275);
+  --muted-foreground: oklch(0.45 0.02 275);
+  --accent: oklch(0.95 0.06 88);
+  --accent-foreground: oklch(0.19 0.04 275);
   --destructive: oklch(0.6 0.22 27);
   --destructive-foreground: oklch(1 0 0);
-  /* Autofie green #16A34A */
   --success: oklch(0.62 0.17 145);
   --success-foreground: oklch(1 0 0);
-  --border: oklch(0.92 0.01 260);
-  --input: oklch(0.92 0.01 260);
-  --ring: oklch(0.706 0.196 41.5);
-  --surface: oklch(0.985 0.003 260);
+  --border: oklch(0.9 0.01 275);
+  --input: oklch(0.9 0.01 275);
+  --ring: oklch(0.832 0.165 88);
+  /* White card surface */
+  --surface: oklch(1 0 0);
 }
 
 @layer base {
