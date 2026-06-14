@@ -62,9 +62,7 @@ function BrowsePage() {
       let q = supabase
         .from("listings")
         .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url, user_id,
-                 listing_stats(views),
-                 profiles!listings_user_id_fkey(full_name),
-                 dealer_profiles!dealer_profiles_user_id_fkey(status)`, { count: "exact" })
+                 listing_stats(views)`, { count: "exact" })
         .eq("status", "approved")
         .eq("category", category as any);
 
@@ -83,7 +81,21 @@ function BrowsePage() {
       const { data, count } = await q;
       if (!alive) return;
       setTotal(count ?? 0);
-      const mapped = (data ?? []).map((row: any) => ({
+
+      const rows = data ?? [];
+      const userIds = Array.from(new Set(rows.map((r: any) => r.user_id).filter(Boolean)));
+      const [{ data: profs }, { data: deals }] = await Promise.all([
+        userIds.length
+          ? supabase.from("profiles").select("id, full_name").in("id", userIds)
+          : Promise.resolve({ data: [] as any[] }),
+        userIds.length
+          ? supabase.from("dealer_profiles").select("user_id, status").in("user_id", userIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const dealMap = new Map((deals ?? []).map((d: any) => [d.user_id, d]));
+
+      const mapped = rows.map((row: any) => ({
         id: row.id,
         title: row.title,
         price: Number(row.price),
@@ -93,8 +105,8 @@ function BrowsePage() {
         mileage: row.mileage,
         cover_photo_url: row.cover_photo_url,
         views: row.listing_stats?.views ?? 0,
-        dealer_name: row.profiles?.full_name ?? null,
-        dealer_verified: row.dealer_profiles?.status === "approved",
+        dealer_name: profMap.get(row.user_id)?.full_name ?? null,
+        dealer_verified: dealMap.get(row.user_id)?.status === "approved",
       }));
       setListings(shuffleByMinute(mapped, page));
       setLoading(false);
