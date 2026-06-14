@@ -13,9 +13,9 @@ import { shuffleByMinute } from "@/lib/shuffle";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Autofie — Buy and sell cars in Ghana" },
+      { title: "AutoFie — Buy and sell cars in Ghana" },
       { name: "description", content: "Browse thousands of cars, trucks, motorcycles and vehicle parts from verified dealers across Ghana. Post your ad free." },
-      { property: "og:title", content: "Autofie — Buy and sell cars in Ghana" },
+      { property: "og:title", content: "AutoFie — Buy and sell cars in Ghana" },
       { property: "og:description", content: "Browse thousands of cars, trucks, motorcycles and vehicle parts from verified dealers across Ghana." },
     ],
   }),
@@ -188,7 +188,7 @@ function HomePage() {
       {/* How it works */}
       <section className="bg-surface py-14">
         <div className="mx-auto max-w-5xl px-4">
-          <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">How Autofie works</h2>
+          <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">How AutoFie works</h2>
           <p className="mt-2 text-center text-sm text-muted-foreground">Simple, safe, and built for Ghana</p>
           <div className="mt-10 grid gap-6 sm:grid-cols-3">
             {[
@@ -223,10 +223,10 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Why Autofie */}
+      {/* Why AutoFie */}
       <section className="mx-auto max-w-6xl px-4 py-14">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Why Ghanaians choose Autofie</h2>
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Why Ghanaians choose AutoFie</h2>
           <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">Built locally, with the safeguards buyers and sellers actually need.</p>
         </div>
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -252,7 +252,7 @@ function HomePage() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Trusted by Ghanaians</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Real stories from buyers and dealers on Autofie.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Real stories from buyers and dealers on AutoFie.</p>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-3">
             {[
@@ -275,13 +275,13 @@ function HomePage() {
 
       {/* Dealer CTA */}
       <section className="mx-auto max-w-7xl px-4 py-12">
-        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-secondary to-secondary/90 p-8 text-center text-secondary-foreground sm:p-14">
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-secondary to-secondary/90 p-8 text-center text-white sm:p-14">
           <div className="mx-auto max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
               <BadgeCheck className="h-3.5 w-3.5" /> For dealers
             </span>
-            <h2 className="mt-4 text-2xl font-bold sm:text-3xl">Sell faster on Autofie</h2>
-            <p className="mx-auto mt-3 max-w-lg opacity-90">Join hundreds of verified dealers across Ghana. Post unlimited ads. Reach serious buyers.</p>
+            <h2 className="mt-4 text-2xl font-bold text-white sm:text-3xl">Sell faster on AutoFie</h2>
+            <p className="mx-auto mt-3 max-w-lg text-white/90">Join hundreds of verified dealers across Ghana. Post unlimited ads. Reach serious buyers.</p>
             <Button
               size="lg"
               className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -293,14 +293,14 @@ function HomePage() {
             >
               {isVerifiedDealer ? "Post a listing" : isPendingDealer ? "Application under review" : "Become a dealer"}
             </Button>
-            <p className="mt-3 text-xs opacity-75">Free to join · Verified with Ghana Card · No commission on sales</p>
+            <p className="mt-3 text-xs text-white/75">Free to join · Verified with Ghana Card · No commission on sales</p>
           </div>
         </div>
       </section>
 
       <footer className="border-t bg-surface py-6">
         <div className="mx-auto max-w-7xl px-4 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Autofie. Built for Ghana.
+          © {new Date().getFullYear()} AutoFie. Built for Ghana.
         </div>
       </footer>
     </div>

@@ -15,8 +15,8 @@ export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }).partial(),
   head: () => ({
     meta: [
-      { title: "Sign in — Autofie" },
-      { name: "description", content: "Sign in to Autofie with your phone number." },
+      { title: "Sign in — AutoFie" },
+      { name: "description", content: "Sign in to AutoFie with your phone number." },
     ],
   }),
   component: AuthPage,
@@ -75,7 +75,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-md rounded-2xl border bg-card p-8 shadow-sm">
-        <Link to="/" className="mb-6 block text-2xl font-extrabold text-primary">Autofie</Link>
+        <Link to="/" className="mb-6 block text-2xl font-extrabold text-primary">AutoFie</Link>
         <h1 className="text-xl font-bold">{step === "phone" ? "Sign in" : "Verify code"}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {step === "phone" ? "We'll text you a 6-digit code." : `Sent to ${phoneE164}`}

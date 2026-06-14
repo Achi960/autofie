@@ -27,10 +27,10 @@ export const Route = createFileRoute("/browse/$category")({
     const cat = CATEGORIES.find((c) => c.slug === params.category)?.label ?? "Listings";
     return {
       meta: [
-        { title: `${cat} for sale in Ghana — Autofie` },
-        { name: "description", content: `Browse ${cat.toLowerCase()} from verified dealers across Ghana on Autofie.` },
-        { property: "og:title", content: `${cat} for sale in Ghana — Autofie` },
-        { property: "og:description", content: `Browse ${cat.toLowerCase()} from verified dealers across Ghana on Autofie.` },
+        { title: `${cat} for sale in Ghana — AutoFie` },
+        { name: "description", content: `Browse ${cat.toLowerCase()} from verified dealers across Ghana on AutoFie.` },
+        { property: "og:title", content: `${cat} for sale in Ghana — AutoFie` },
+        { property: "og:description", content: `Browse ${cat.toLowerCase()} from verified dealers across Ghana on AutoFie.` },
       ],
     };
   },

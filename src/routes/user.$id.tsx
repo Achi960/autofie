@@ -178,7 +178,7 @@ function UserProfilePage() {
                 {memberSince && (
                   <Badge variant="outline" className="gap-1">
                     <Clock className="h-3 w-3" />
-                    {yearsActive >= 1 ? `${yearsActive} year${yearsActive === 1 ? "" : "s"} on Autofie` : `Joined ${memberSince.toLocaleDateString(undefined, { month: "short", year: "numeric" })}`}
+                    {yearsActive >= 1 ? `${yearsActive} year${yearsActive === 1 ? "" : "s"} on AutoFie` : `Joined ${memberSince.toLocaleDateString(undefined, { month: "short", year: "numeric" })}`}
                   </Badge>
                 )}
               </div>

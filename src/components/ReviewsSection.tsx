@@ -135,7 +135,7 @@ export function ReviewsSection({ dealerId, dealerName, summaryOnly, autoOpen, on
     toast.success(editingId ? "Review updated" : "Review posted");
     if (!editingId) {
       notifyAdminWhatsapp({
-        data: { message: `⭐ New review (${rating}★) for ${dealerName} on Autofie\n\n"${comment.slice(0, 200)}"\n\nView: ${window.location.origin}/user/${dealerId}` },
+        data: { message: `⭐ New review (${rating}★) for ${dealerName} on AutoFie\n\n"${comment.slice(0, 200)}"\n\nView: ${window.location.origin}/user/${dealerId}` },
       }).catch(() => {});
     }
     setFormOpen(false);
@@ -172,7 +172,7 @@ export function ReviewsSection({ dealerId, dealerName, summaryOnly, autoOpen, on
   const share = async () => {
     const url = `${window.location.origin}/review/${dealerId}`;
     try {
-      if (navigator.share) await navigator.share({ title: `Review ${dealerName} on Autofie`, url });
+      if (navigator.share) await navigator.share({ title: `Review ${dealerName} on AutoFie`, url });
       else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
     } catch { /* user cancelled */ }
   };

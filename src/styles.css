@@ -38,15 +38,15 @@
 
 :root {
   --radius: 0.625rem;
-  /* Autofie light grey page background #f4f4f4 */
+  /* AutoFie light grey page background #f4f4f4 */
   --background: oklch(0.965 0 0);
-  /* Autofie dark navy #1a1a2e */
+  /* AutoFie dark navy #1a1a2e */
   --foreground: oklch(0.19 0.04 275);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.19 0.04 275);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.19 0.04 275);
-  /* Autofie gold #f5c518 — primary CTA / accents */
+  /* AutoFie gold #f5c518 — primary CTA / accents */
   --primary: oklch(0.832 0.165 88);
   --primary-foreground: oklch(0.19 0.04 275);
   --brand: oklch(0.832 0.165 88);

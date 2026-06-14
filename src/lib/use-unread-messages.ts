@@ -37,7 +37,7 @@ export function useUnreadMessages() {
           playMessageBeep();
           if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted" && document.visibilityState !== "visible") {
             const body = m.content ?? (m.attachment_type === "image" ? "📷 Photo" : m.attachment_type === "audio" ? "🎙 Voice note" : "New message");
-            try { new Notification("New message on Autofie", { body, icon: "/favicon.ico" }); } catch { /* ignore */ }
+            try { new Notification("New message on AutoFie", { body, icon: "/favicon.ico" }); } catch { /* ignore */ }
           }
         },
       )

@@ -142,7 +142,7 @@ function SubmitListing() {
 
       // Fire-and-forget admin WhatsApp alert (no-op if Twilio not configured)
       notifyAdminWhatsapp({
-        data: { message: `📋 New listing pending review on Autofie\n\n"${title}"\nby ${contactName || user.email}\nGH₵${Number(price).toLocaleString("en-GH")}\n\nReview: ${window.location.origin}/admin/listings` },
+        data: { message: `📋 New listing pending review on AutoFie\n\n"${title}"\nby ${contactName || user.email}\nGH₵${Number(price).toLocaleString("en-GH")}\n\nReview: ${window.location.origin}/admin/listings` },
       }).catch(() => {});
 
       toast.success("Listing submitted. An admin will review it shortly.");

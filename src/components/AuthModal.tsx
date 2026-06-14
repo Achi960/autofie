@@ -196,7 +196,7 @@ export function AuthModal({ open, onOpenChange, onSuccess, initialStep = "choose
                   {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">Never disclose your Autofie password to anyone.</p>
+              <p className="text-xs text-muted-foreground">Never disclose your AutoFie password to anyone.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
