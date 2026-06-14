@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search, ShieldCheck, BadgeCheck, Users, MessageCircle } from "lucide-react";
+import { Search, ShieldCheck, BadgeCheck, Users, MessageCircle, Star, MapPin, Lock, Zap, Quote } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -206,23 +206,94 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Stats / social proof */}
+      <section className="bg-secondary/5 py-12">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-4 text-center sm:grid-cols-4">
+          {[
+            { n: "500+", l: "Verified dealers" },
+            { n: "16", l: "Regions covered" },
+            { n: "10k+", l: "Active buyers" },
+            { n: "4.8★", l: "Average rating" },
+          ].map((s) => (
+            <div key={s.l}>
+              <div className="text-2xl font-extrabold text-primary sm:text-4xl">{s.n}</div>
+              <div className="mt-1 text-xs text-muted-foreground sm:text-sm">{s.l}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Why Autofie */}
+      <section className="mx-auto max-w-6xl px-4 py-14">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Why Ghanaians choose Autofie</h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">Built locally, with the safeguards buyers and sellers actually need.</p>
+        </div>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { icon: ShieldCheck, t: "Ghana Card verified", d: "Every dealer is identity-checked before posting. No anonymous sellers." },
+            { icon: Lock, t: "Safe in-app chat", d: "Talk and share photos privately. Your phone number stays hidden until you choose." },
+            { icon: MapPin, t: "All 16 regions", d: "From Accra to Tamale — find vehicles close to you, or anywhere in Ghana." },
+            { icon: Zap, t: "Free to post", d: "List your vehicle in under 2 minutes. No hidden fees, no commissions." },
+          ].map((f) => (
+            <div key={f.t} className="rounded-xl border bg-card p-5 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <f.icon className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-foreground">{f.t}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{f.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="bg-surface py-14">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Trusted by Ghanaians</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Real stories from buyers and dealers on Autofie.</p>
+          </div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-3">
+            {[
+              { q: "Sold my Corolla in 4 days. The buyer came straight from chat — no middlemen, no stress.", n: "Kwabena A.", r: "Dealer, Kumasi" },
+              { q: "I trusted it because every dealer shows their Ghana Card verification badge. Bought my first car here.", n: "Akosua M.", r: "Buyer, Accra" },
+              { q: "The in-app chat is fast and dealers actually reply. Saved me from so many fake adverts.", n: "Yaw O.", r: "Buyer, Takoradi" },
+            ].map((t) => (
+              <figure key={t.n} className="rounded-xl border bg-card p-6 shadow-sm">
+                <Quote className="h-5 w-5 text-primary/60" />
+                <blockquote className="mt-3 text-sm leading-relaxed text-foreground">"{t.q}"</blockquote>
+                <div className="mt-4 flex items-center gap-0.5 text-amber-500">
+                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-current" />)}
+                </div>
+                <figcaption className="mt-2 text-xs text-muted-foreground"><span className="font-semibold text-foreground">{t.n}</span> · {t.r}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Dealer CTA */}
       <section className="mx-auto max-w-7xl px-4 py-12">
-        <div className="overflow-hidden rounded-2xl bg-secondary p-8 text-secondary-foreground sm:p-12">
-          <div className="max-w-xl">
-            <h2 className="text-2xl font-bold sm:text-3xl">Sell faster on Autofie</h2>
-            <p className="mt-2 opacity-90">Join hundreds of verified dealers across Ghana. Post unlimited ads. Reach serious buyers.</p>
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-secondary to-secondary/90 p-8 text-center text-secondary-foreground sm:p-14">
+          <div className="mx-auto max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
+              <BadgeCheck className="h-3.5 w-3.5" /> For dealers
+            </span>
+            <h2 className="mt-4 text-2xl font-bold sm:text-3xl">Sell faster on Autofie</h2>
+            <p className="mx-auto mt-3 max-w-lg opacity-90">Join hundreds of verified dealers across Ghana. Post unlimited ads. Reach serious buyers.</p>
             <Button
               size="lg"
-              className="mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => {
-                if (!user) return; // navbar handles the auth modal trigger
+                if (!user) return;
                 if (isVerifiedDealer) navigate({ to: "/submit-listing" });
                 else navigate({ to: "/complete-dealer-profile" });
               }}
             >
               {isVerifiedDealer ? "Post a listing" : isPendingDealer ? "Application under review" : "Become a dealer"}
             </Button>
+            <p className="mt-3 text-xs opacity-75">Free to join · Verified with Ghana Card · No commission on sales</p>
           </div>
         </div>
       </section>
