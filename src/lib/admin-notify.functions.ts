@@ -1,14 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const ADMIN_WHATSAPP = "+233245209130";
 const GATEWAY = "https://connector-gateway.lovable.dev/twilio";
 
 /**
  * Sends a WhatsApp message to the admin via the Twilio connector gateway.
- * Gracefully no-ops if the Twilio connector is not linked yet.
+ * Requires the caller to be signed in; gracefully no-ops if Twilio isn't linked.
  */
 export const notifyAdminWhatsapp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: { message: string }) => {
+    if (!data?.message || typeof data.message !== "string") throw new Error("message required");
+    if (data.message.length > 1500) throw new Error("message too long");
+    return data;
+  })
     if (!data?.message || typeof data.message !== "string") throw new Error("message required");
     if (data.message.length > 1500) throw new Error("message too long");
     return data;
