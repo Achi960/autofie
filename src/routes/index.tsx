@@ -95,16 +95,16 @@ function HomePage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-secondary to-primary/40 py-14 text-secondary-foreground sm:py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 py-14 text-white sm:py-20">
         <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
         <div className="relative mx-auto max-w-3xl px-4 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
             <ShieldCheck className="h-3.5 w-3.5" /> Identity-verified dealers only
           </span>
-          <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+          <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
             Ghana's trusted marketplace for vehicles
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm opacity-90 sm:text-base">
+          <p className="mx-auto mt-3 max-w-xl text-sm text-white/90 sm:text-base">
             Cars, motorbikes, trucks, parts and services — from dealers verified with Ghana Card. No scams, no fake listings.
           </p>
           <form onSubmit={onSearch} className="mx-auto mt-7 flex max-w-xl items-center gap-2 rounded-full bg-white p-1.5 shadow-xl ring-1 ring-black/5">
