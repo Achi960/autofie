@@ -166,7 +166,12 @@ function SubmitListing() {
             <SimpleSelect label="Transmission" value={transmission} onChange={setTransmission} options={TRANSMISSIONS as unknown as string[]} />
             <SimpleSelect label="Fuel" value={fuel} onChange={setFuel} options={FUELS as unknown as string[]} />
             <SimpleSelect label="Body type" value={bodyType} onChange={setBodyType} options={BODY_TYPES as unknown as string[]} />
-            <SimpleSelect label="Registration" value={registration} onChange={setRegistration} options={REGISTRATION_STATUS as unknown as string[]} />
+            <SimpleSelect label="Registration" value={registration} onChange={(v) => { setRegistration(v); if (v !== "Registered") setRegistrationYear(""); }} options={REGISTRATION_STATUS as unknown as string[]} />
+            {registration === "Registered" && (
+              <Field label="Year of registration">
+                <Input type="number" inputMode="numeric" value={registrationYear} onChange={(e) => setRegistrationYear(e.target.value)} min={1980} max={CURRENT_YEAR + 1} placeholder={String(CURRENT_YEAR)} />
+              </Field>
+            )}
             <Field label="Engine"><Input value={engine} onChange={(e) => setEngine(e.target.value)} placeholder="1.8L" maxLength={20} /></Field>
           </div>
 
@@ -193,7 +198,10 @@ function SubmitListing() {
             </label>
           </div>
 
-          <Field label="Contact phone (optional)"><Input inputMode="tel" value={contact} onChange={(e) => setContact(e.target.value)} placeholder="Defaults to your account number" maxLength={20} /></Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Contact name (visible to buyers)"><Input value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="e.g. Kwame Mensah" maxLength={60} /></Field>
+            <Field label="Contact phone (visible to buyers)"><Input inputMode="tel" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="e.g. 024 123 4567" maxLength={20} /></Field>
+          </div>
 
           <Field label="Description">
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} maxLength={3000} placeholder="Condition details, service history, features…" />
