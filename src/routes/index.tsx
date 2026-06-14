@@ -1,29 +1,210 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ListingCard, type ListingCardData } from "@/components/ListingCard";
+import { CATEGORIES } from "@/lib/ghana";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Autofie — Buy and sell cars in Ghana" },
+      { name: "description", content: "Browse thousands of cars, trucks, motorcycles and vehicle parts from verified dealers across Ghana. Post your ad free." },
+      { property: "og:title", content: "Autofie — Buy and sell cars in Ghana" },
+      { property: "og:description", content: "Browse thousands of cars, trucks, motorcycles and vehicle parts from verified dealers across Ghana." },
     ],
   }),
-  component: Index,
+  component: HomePage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function HomePage() {
+  const navigate = useNavigate();
+  const { user, isVerifiedDealer, isPendingDealer } = useAuth();
+  const [query, setQuery] = useState("");
+  const [listings, setListings] = useState<ListingCardData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      const { data } = await supabase
+        .from("listings")
+        .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url,
+                 user_id,
+                 listing_stats(views),
+                 profiles!listings_user_id_fkey(full_name),
+                 dealer_profiles!dealer_profiles_user_id_fkey(status)`)
+        .eq("status", "approved")
+        .order("created_at", { ascending: false })
+        .limit(12);
+      if (!alive || !data) { setLoading(false); return; }
+      const mapped: ListingCardData[] = data.map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        price: Number(row.price),
+        region: row.region,
+        condition: row.condition,
+        transmission: row.transmission,
+        mileage: row.mileage,
+        cover_photo_url: row.cover_photo_url,
+        views: row.listing_stats?.views ?? 0,
+        dealer_name: row.profiles?.full_name ?? null,
+        dealer_verified: row.dealer_profiles?.status === "approved",
+      }));
+      setListings(mapped);
+      setLoading(false);
+    };
+    load();
+    return () => { alive = false; };
+  }, []);
+
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate({ to: "/browse/$category", params: { category: "car" }, search: query ? { q: query } : undefined });
+  };
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background">
+      <Navbar />
+
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-primary to-primary/90 py-10 text-primary-foreground sm:py-16">
+        <div className="mx-auto max-w-3xl px-4 text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
+            Find your next ride in Ghana
+          </h1>
+          <p className="mt-3 text-sm opacity-90 sm:text-base">
+            Verified dealers. Real cedis. Across all 16 regions.
+          </p>
+          <form onSubmit={onSearch} className="mx-auto mt-6 flex max-w-xl items-center gap-2 rounded-full bg-white p-1.5 shadow-lg">
+            <Search className="ml-3 h-5 w-5 shrink-0 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search Toyota, Honda, Hyundai…"
+              className="border-0 bg-transparent text-foreground shadow-none focus-visible:ring-0"
+            />
+            <Button type="submit" size="sm" className="rounded-full">Search</Button>
+          </form>
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
+        <h2 className="mb-4 text-lg font-bold text-foreground">Browse by category</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+          {CATEGORIES.map((c) => (
+            <Link
+              key={c.slug}
+              to="/browse/$category"
+              params={{ category: c.slug }}
+              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-4 text-center transition hover:border-primary hover:shadow-sm"
+            >
+              <CategoryIcon slug={c.slug} />
+              <span className="text-xs font-medium text-foreground">{c.label}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Recent listings */}
+      <section className="mx-auto max-w-7xl px-4 py-8">
+        <div className="mb-4 flex items-end justify-between">
+          <h2 className="text-lg font-bold text-foreground">Recent listings</h2>
+          <Link to="/browse/$category" params={{ category: "car" }} className="text-sm font-medium text-primary hover:underline">View all →</Link>
+        </div>
+        {loading ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
+            ))}
+          </div>
+        ) : listings.length === 0 ? (
+          <p className="rounded-xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
+            No listings yet. Be the first to post one!
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
+          </div>
+        )}
+      </section>
+
+      {/* How it works */}
+      <section className="bg-surface py-12">
+        <div className="mx-auto max-w-5xl px-4">
+          <h2 className="text-center text-2xl font-bold text-foreground">How Autofie works</h2>
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            {[
+              { n: 1, t: "Browse freely", d: "Search thousands of vehicles. No account needed." },
+              { n: 2, t: "Chat with dealers", d: "Contact verified dealers directly with one tap." },
+              { n: 3, t: "Buy with confidence", d: "Every dealer is verified with Ghana Card." },
+            ].map((s) => (
+              <div key={s.n} className="rounded-xl bg-card p-6 text-center shadow-sm">
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">{s.n}</div>
+                <h3 className="font-semibold text-foreground">{s.t}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Dealer CTA */}
+      <section className="mx-auto max-w-7xl px-4 py-12">
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-orange-500 p-8 text-primary-foreground sm:p-12">
+          <div className="max-w-xl">
+            <h2 className="text-2xl font-bold sm:text-3xl">Sell faster on Autofie</h2>
+            <p className="mt-2 opacity-90">Join hundreds of verified dealers across Ghana. Post unlimited ads. Reach serious buyers.</p>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="mt-5 bg-white text-primary hover:bg-white/90"
+              onClick={() => {
+                if (!user) return; // navbar handles the auth modal trigger
+                if (isVerifiedDealer) navigate({ to: "/submit-listing" });
+                else navigate({ to: "/complete-dealer-profile" });
+              }}
+            >
+              {isVerifiedDealer ? "Post a listing" : isPendingDealer ? "Application under review" : "Become a dealer"}
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t bg-surface py-6">
+        <div className="mx-auto max-w-7xl px-4 text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Autofie. Built for Ghana.
+        </div>
+      </footer>
     </div>
   );
+}
+
+function CategoryIcon({ slug }: { slug: string }) {
+  const common = "h-7 w-7 text-primary";
+  switch (slug) {
+    case "car":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 17h14M3 13l2-5a3 3 0 0 1 3-2h8a3 3 0 0 1 3 2l2 5v4a1 1 0 0 1-1 1h-1a2 2 0 1 1-4 0H8a2 2 0 1 1-4 0H3v-4Z" /></svg>;
+    case "motorcycle":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="5" cy="17" r="3" /><circle cx="19" cy="17" r="3" /><path d="m14 7 2 3 3 4M10 7h4l-3 7H8" /></svg>;
+    case "bus":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="4" width="16" height="13" rx="2" /><path d="M4 11h16M8 17v2M16 17v2M8 7h8" /></svg>;
+    case "truck":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h11v11H3zM14 9h4l3 4v4h-7" /><circle cx="7" cy="18" r="2" /><circle cx="17" cy="18" r="2" /></svg>;
+    case "heavy_equipment":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 19h11l3-3V9l-5-5-3 5v6H3z" /><circle cx="7" cy="20" r="1.5" /><circle cx="14" cy="20" r="1.5" /></svg>;
+    case "parts":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3" /><path d="M12 3v4M12 17v4M3 12h4M17 12h4" /></svg>;
+    case "accessories":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 7h16l-1 12H5L4 7zM9 7V5a3 3 0 1 1 6 0v2" /></svg>;
+    case "services":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m14 6 4 4-10 10H4v-4L14 6zM13 7l4 4" /></svg>;
+    default:
+      return null;
+  }
 }

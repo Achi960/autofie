@@ -1,0 +1,114 @@
+import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Heart, MapPin, Gauge, Settings, BadgeCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { formatGHS, formatMileage, initialsOf } from "@/lib/format";
+import { signedUrl } from "@/lib/storage";
+import { cn } from "@/lib/utils";
+
+export interface ListingCardData {
+  id: string;
+  title: string;
+  price: number;
+  region: string | null;
+  condition: string | null;
+  transmission: string | null;
+  mileage: number | null;
+  cover_photo_url: string | null;
+  views?: number;
+  dealer_name?: string | null;
+  dealer_verified?: boolean;
+}
+
+export function ListingCard({
+  listing,
+  isSaved = false,
+  onToggleSave,
+}: {
+  listing: ListingCardData;
+  isSaved?: boolean;
+  onToggleSave?: () => void;
+}) {
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    signedUrl("listing-photos", listing.cover_photo_url).then((u) => {
+      if (alive) setPhoto(u);
+    });
+    return () => { alive = false; };
+  }, [listing.cover_photo_url]);
+
+  const popular = (listing.views ?? 0) > 50;
+
+  return (
+    <article className="group overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md">
+      <Link
+        to="/listing/$id"
+        params={{ id: listing.id }}
+        className="block relative aspect-[4/3] overflow-hidden bg-muted"
+      >
+        {photo ? (
+          <img src={photo} alt={listing.title} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
+        ) : (
+          <div className="flex h-full items-center justify-center text-xs text-muted-foreground">No photo</div>
+        )}
+        {popular && (
+          <Badge className="absolute left-2 top-2 bg-primary text-primary-foreground">Popular</Badge>
+        )}
+        {onToggleSave && (
+          <button
+            type="button"
+            aria-label={isSaved ? "Remove from saved" : "Save listing"}
+            onClick={(e) => { e.preventDefault(); onToggleSave(); }}
+            className="absolute right-2 top-2 rounded-full bg-white/95 p-2 shadow-sm transition hover:scale-105"
+          >
+            <Heart className={cn("h-4 w-4", isSaved ? "fill-primary text-primary" : "text-foreground")} />
+          </button>
+        )}
+      </Link>
+
+      <div className="p-3">
+        <p className="text-lg font-bold text-primary">{formatGHS(listing.price)}</p>
+        <h3 className="line-clamp-1 text-sm font-semibold text-foreground">
+          <Link to="/listing/$id" params={{ id: listing.id }}>{listing.title}</Link>
+        </h3>
+
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {listing.region && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+              <MapPin className="h-3 w-3" />{listing.region}
+            </span>
+          )}
+          {listing.condition && (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{listing.condition}</span>
+          )}
+          {listing.transmission && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+              <Settings className="h-3 w-3" />{listing.transmission}
+            </span>
+          )}
+          {listing.mileage != null && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+              <Gauge className="h-3 w-3" />{formatMileage(listing.mileage)}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-3 flex items-center justify-between border-t pt-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="bg-primary/10 text-primary text-[10px]">{initialsOf(listing.dealer_name)}</AvatarFallback>
+            </Avatar>
+            <span className="truncate text-xs text-muted-foreground">{listing.dealer_name ?? "Dealer"}</span>
+            {listing.dealer_verified && (
+              <BadgeCheck className="h-4 w-4 shrink-0 text-success" aria-label="Verified dealer" />
+            )}
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
