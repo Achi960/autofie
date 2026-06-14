@@ -26,6 +26,7 @@ function HomePage() {
   const navigate = useNavigate();
   const { user, isVerifiedDealer, isPendingDealer } = useAuth();
   const [query, setQuery] = useState("");
+  const [allListings, setAllListings] = useState<ListingCardData[]>([]);
   const [listings, setListings] = useState<ListingCardData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +42,7 @@ function HomePage() {
                  dealer_profiles!dealer_profiles_user_id_fkey(status)`)
         .eq("status", "approved")
         .order("created_at", { ascending: false })
-        .limit(12);
+        .limit(48);
       if (!alive || !data) { setLoading(false); return; }
       const mapped: ListingCardData[] = data.map((row: any) => ({
         id: row.id,
@@ -56,12 +57,22 @@ function HomePage() {
         dealer_name: row.profiles?.full_name ?? null,
         dealer_verified: row.dealer_profiles?.status === "approved",
       }));
-      setListings(mapped);
+      setAllListings(mapped);
+      setListings(shuffleByMinute(mapped).slice(0, 12));
       setLoading(false);
     };
     load();
     return () => { alive = false; };
   }, []);
+
+  // Re-shuffle every minute so the front page mixes naturally.
+  useEffect(() => {
+    if (!allListings.length) return;
+    const id = setInterval(() => {
+      setListings(shuffleByMinute(allListings).slice(0, 12));
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [allListings]);
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
