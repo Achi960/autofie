@@ -67,10 +67,8 @@ function BrowsePage() {
       if (search.q) q = q.ilike("title", `%${search.q}%`);
       if (search.make) q = q.eq("make", search.make);
       if (search.region) q = q.eq("region", search.region);
+      if (search.district) q = q.eq("district", search.district);
       if (search.condition) q = q.eq("condition", search.condition);
-      if (search.transmission) q = q.eq("transmission", search.transmission);
-      if (search.fuel) q = q.eq("fuel", search.fuel);
-      if (search.body) q = q.eq("body_type", search.body);
       if (search.min_price) q = q.gte("price", search.min_price);
       if (search.max_price) q = q.lte("price", search.max_price);
 
