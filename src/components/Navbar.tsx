@@ -107,6 +107,11 @@ export function Navbar() {
                         <LayoutGrid className="mr-2 h-4 w-4" /> My listings
                       </DropdownMenuItem>
                     )}
+                    {(isVerifiedDealer || isPendingDealer) && (
+                      <DropdownMenuItem onClick={() => navigate({ to: "/complete-dealer-profile" })}>
+                        Edit verification
+                      </DropdownMenuItem>
+                    )}
                     {!isVerifiedDealer && !isPendingDealer && (
                       <DropdownMenuItem onClick={() => navigate({ to: "/complete-dealer-profile" })}>
                         Become a dealer
