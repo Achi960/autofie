@@ -168,11 +168,20 @@ function SubmitListing() {
             </Field>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Year"><Input type="number" inputMode="numeric" value={year} onChange={(e) => setYear(e.target.value)} min={1980} max={CURRENT_YEAR + 1} /></Field>
-            <Field label="Mileage (km)"><Input type="number" inputMode="numeric" value={mileage} onChange={(e) => setMileage(e.target.value)} min={0} /></Field>
-            <Field label="Colour"><Input value={colour} onChange={(e) => setColour(e.target.value)} maxLength={30} /></Field>
+            <Field label="Mileage (km)">
+              <Input
+                inputMode="numeric"
+                value={mileage ? Number(mileage).toLocaleString("en-GH") : ""}
+                onChange={(e) => setMileage(e.target.value.replace(/[^\d]/g, ""))}
+              />
+            </Field>
           </div>
+
+          <Field label="Colour">
+            <ColourPicker value={colour} onChange={setColour} />
+          </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <SimpleSelect label="Condition" value={condition} onChange={setCondition} options={CONDITIONS as unknown as string[]} />
