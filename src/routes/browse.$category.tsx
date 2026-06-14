@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, ALL_BRANDS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, ALL_REGIONS } from "@/lib/ghana";
+import { shuffleByMinute } from "@/lib/shuffle";
 
 const searchSchema = z.object({
   q: z.string().optional(),
