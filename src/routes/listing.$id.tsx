@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Phone, MessageCircle, Heart, MapPin, Gauge, Calendar, Fuel, Settings, Palette, BadgeCheck } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/listing/$id")({
 function ListingDetail() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [listing, setListing] = useState<any | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [coverIdx, setCoverIdx] = useState(0);
@@ -97,8 +98,9 @@ function ListingDetail() {
   };
   const onChatClick = () => {
     if (!user) { toast.error("Sign in to chat"); return; }
+    if (user.id === listing.user_id) { toast.error("You can't message yourself"); return; }
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "chat_clicks" });
-    toast.info("Messaging coming in phase 2");
+    navigate({ to: "/chat/$listingId/$otherId", params: { listingId: listing.id, otherId: listing.user_id } });
   };
 
   return (

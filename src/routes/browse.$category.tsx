@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, ALL_BRANDS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, ALL_REGIONS } from "@/lib/ghana";
+import { shuffleByMinute } from "@/lib/shuffle";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -82,7 +83,7 @@ function BrowsePage() {
       const { data, count } = await q;
       if (!alive) return;
       setTotal(count ?? 0);
-      setListings((data ?? []).map((row: any) => ({
+      const mapped = (data ?? []).map((row: any) => ({
         id: row.id,
         title: row.title,
         price: Number(row.price),
@@ -94,11 +95,15 @@ function BrowsePage() {
         views: row.listing_stats?.views ?? 0,
         dealer_name: row.profiles?.full_name ?? null,
         dealer_verified: row.dealer_profiles?.status === "approved",
-      })));
+      }));
+      setListings(shuffleByMinute(mapped, page));
       setLoading(false);
     };
     load();
-    return () => { alive = false; };
+    const id = setInterval(() => {
+      setListings((prev) => shuffleByMinute(prev, search.page ?? 1));
+    }, 60_000);
+    return () => { alive = false; clearInterval(id); };
   }, [category, search.q, search.make, search.region, search.condition, search.transmission, search.fuel, search.body, search.min_price, search.max_price, search.page]);
 
   const setFilter = (key: string, value: string | undefined) => {
