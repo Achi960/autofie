@@ -185,14 +185,15 @@ function ListingDetail() {
                     <Button className="w-full"><Phone className="mr-2 h-4 w-4" />Call dealer</Button>
                   </a>
                 )}
-                {phone && (
-                  <a href={`https://wa.me/${phone.replace(/[^\d]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in your ${listing.title} on Autofie.`)}`}
+                {listing.profiles?.whatsapp_enabled && listing.profiles?.whatsapp_number && (
+                  <a href={`https://wa.me/${listing.profiles.whatsapp_number.replace(/[^\d]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in your ${listing.title} on Autofie.`)}`}
                      target="_blank" rel="noopener noreferrer" onClick={onCallClick}>
                     <Button variant="outline" className="w-full border-success text-success hover:bg-success/10 hover:text-success">
                       <MessageCircle className="mr-2 h-4 w-4" />WhatsApp
                     </Button>
                   </a>
                 )}
+
                 <Button variant="outline" className="w-full" onClick={onChatClick}>
                   <MessageCircle className="mr-2 h-4 w-4" />Chat on Autofie
                 </Button>
