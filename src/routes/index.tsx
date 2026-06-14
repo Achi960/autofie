@@ -72,13 +72,13 @@ function HomePage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-primary to-primary/90 py-10 text-primary-foreground sm:py-16">
+      <section className="bg-secondary py-10 text-secondary-foreground sm:py-16">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
-            Find your next ride in Ghana
+            Buy and Sell Cars in Ghana — Verified Dealers Only
           </h1>
           <p className="mt-3 text-sm opacity-90 sm:text-base">
-            Verified dealers. Real cedis. Across all 16 regions.
+            Every dealer on Autofie is identity-verified. No fake listings. No scams.
           </p>
           <form onSubmit={onSearch} className="mx-auto mt-6 flex max-w-xl items-center gap-2 rounded-full bg-white p-1.5 shadow-lg">
             <Search className="ml-3 h-5 w-5 shrink-0 text-muted-foreground" />
