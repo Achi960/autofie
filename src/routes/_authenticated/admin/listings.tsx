@@ -35,11 +35,18 @@ function AdminListings() {
 
   const load = async () => {
     const { data, error } = await supabase.from("listings")
-      .select("*, profiles(full_name, phone)")
+      .select("*")
       .eq("status", "pending")
       .order("created_at", { ascending: true });
-    if (error) { console.error("admin listings load error", error); toast.error(error.message); }
-    setRows(data ?? []);
+    if (error) { console.error("admin listings load error", error); toast.error(error.message); setRows([]); return; }
+    const list = data ?? [];
+    const ids = Array.from(new Set(list.map((r: any) => r.user_id).filter(Boolean)));
+    let profMap: Record<string, { full_name: string | null; phone: string | null }> = {};
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, phone").in("id", ids);
+      profMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, { full_name: p.full_name, phone: p.phone }]));
+    }
+    setRows(list.map((r: any) => ({ ...r, profiles: profMap[r.user_id] ?? null })));
   };
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
