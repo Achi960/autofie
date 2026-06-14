@@ -167,22 +167,41 @@ function ChatPage() {
           <button onClick={() => navigate({ to: "/messages" })} className="rounded p-1 hover:bg-muted" aria-label="Back">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <Avatar className="h-10 w-10"><AvatarFallback className="bg-primary/10 text-primary">{initialsOf(headerName)}</AvatarFallback></Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-foreground">{headerName}</p>
-            {listing && (
-              <Link to="/listing/$id" params={{ id: listing.id }} className="truncate text-xs text-muted-foreground hover:underline">
-                {listing.title}
-              </Link>
-            )}
-          </div>
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-md p-1 -m-1 text-left hover:bg-muted/40"
+            aria-label="View profile"
+          >
+            <div className="relative">
+              <Avatar className="h-10 w-10">
+                {otherAvatar && <AvatarImage src={otherAvatar} alt={headerName} />}
+                <AvatarFallback className="bg-primary/10 text-primary">{initialsOf(headerName)}</AvatarFallback>
+              </Avatar>
+              <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card ${isOnline(other?.last_seen_at) ? "bg-success" : "bg-muted-foreground"}`} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold text-foreground">{headerName}</p>
+              <p className={`truncate text-xs ${isOnline(other?.last_seen_at) ? "text-success" : "text-muted-foreground"}`}>
+                {lastSeenLabel(other?.last_seen_at)}
+              </p>
+            </div>
+          </button>
           {other?.phone && (
             <a href={`tel:${other.phone}`} className="rounded-full bg-success/10 p-2 text-success" aria-label="Call">
               <Phone className="h-5 w-5" />
             </a>
           )}
         </div>
+        {listing && (
+          <div className="mx-auto max-w-3xl px-4 pb-2">
+            <Link to="/listing/$id" params={{ id: listing.id }} className="truncate text-xs text-muted-foreground hover:underline">
+              About: {listing.title}
+            </Link>
+          </div>
+        )}
       </div>
+      <ProfileDialog userId={otherId} open={profileOpen} onOpenChange={setProfileOpen} />
+
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto bg-surface">
