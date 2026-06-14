@@ -163,8 +163,10 @@ function AccountSettings() {
             )}
           </div>
 
+          <Button onClick={save} disabled={saving} size="lg" className="w-full">
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save changes
           </Button>
+
         </div>
       </div>
     </div>
