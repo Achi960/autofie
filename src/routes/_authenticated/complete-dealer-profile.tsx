@@ -90,7 +90,7 @@ function DealerProfileForm() {
 
       // Demote the role back to dealer_pending so they cannot post until re-approved
       if (isVerifiedDealer) {
-        await supabase.from("user_roles").delete().eq("user_id", user.id).eq("role", "dealer");
+        await supabase.from("user_roles").delete().eq("user_id", user.id).eq("role", "dealer_verified");
       }
       await supabase.from("user_roles").upsert({ user_id: user.id, role: "dealer_pending" }, { onConflict: "user_id,role" });
       await refreshRoles();
