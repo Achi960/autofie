@@ -66,9 +66,10 @@ export function CategoryPicker({ value, onChange }: Props) {
               className="flex w-full items-center justify-between border-b px-4 py-3 text-left hover:bg-muted/50"
             >
               <span className="flex items-center gap-3">
-                <span className="text-2xl leading-none">{c.emoji}</span>
+                <img src={c.image} alt="" width={36} height={36} loading="lazy" className="h-9 w-9 rounded object-cover" />
                 <span className="text-sm font-medium">{c.label}</span>
               </span>
+
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>
           ))}
