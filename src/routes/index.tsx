@@ -125,13 +125,14 @@ function HomePage() {
               key={c.slug}
               to="/browse/$category"
               params={{ category: c.slug }}
-              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-4 text-center transition hover:border-primary hover:shadow-sm"
+              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center transition hover:border-primary hover:shadow-sm"
             >
-              <span className="text-3xl leading-none">{c.emoji}</span>
+              <img src={c.image} alt={c.label} width={72} height={72} loading="lazy" className="h-16 w-16 rounded-lg object-cover" />
               <span className="text-xs font-medium text-foreground">{c.label}</span>
             </Link>
           ))}
         </div>
+
       </section>
 
       {/* Recent listings */}

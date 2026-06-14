@@ -4,11 +4,15 @@ import { ArrowLeft, Phone, Send } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { signedUrl } from "@/lib/storage";
 import { useAuth } from "@/lib/auth-context";
 import { initialsOf } from "@/lib/format";
+import { isOnline, lastSeenLabel, playMessageBeep } from "@/lib/presence";
+import { ProfileDialog } from "@/components/ProfileDialog";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/chat/$listingId/$otherId")({
   component: ChatPage,
@@ -38,10 +42,13 @@ function ChatPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [other, setOther] = useState<{ full_name: string | null; phone: string | null } | null>(null);
+  const [other, setOther] = useState<{ full_name: string | null; phone: string | null; avatar_url: string | null; last_seen_at: string | null } | null>(null);
+  const [otherAvatar, setOtherAvatar] = useState<string | null>(null);
   const [listing, setListing] = useState<{ id: string; title: string; price: number; cover_photo_url: string | null } | null>(null);
   const [askPhone, setAskPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [, forceTick] = useState(0); // re-render every 30s to refresh "last seen" label
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -63,12 +70,16 @@ function ChatPage() {
         .eq("listing_id", listingId).eq("sender_id", otherId).eq("receiver_id", user.id).eq("read", false);
 
       const [{ data: prof }, { data: lst }] = await Promise.all([
-        supabase.from("profiles").select("full_name, phone").eq("id", otherId).maybeSingle(),
+        supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at").eq("id", otherId).maybeSingle(),
         supabase.from("listings").select("id, title, price, cover_photo_url").eq("id", listingId).maybeSingle(),
       ]);
       if (!alive) return;
-      setOther(prof ?? { full_name: null, phone: null });
+      setOther((prof as any) ?? { full_name: null, phone: null, avatar_url: null, last_seen_at: null });
       setListing(lst ?? null);
+      if ((prof as any)?.avatar_url) {
+        const url = await signedUrl("avatars", (prof as any).avatar_url);
+        if (alive) setOtherAvatar(url);
+      }
     };
     load();
 
@@ -80,12 +91,23 @@ function ChatPage() {
         if (!involves) return;
         setMessages((prev) => prev.some((x) => x.id === m.id) ? prev : [...prev, m]);
         if (m.receiver_id === user.id) {
+          playMessageBeep();
           supabase.from("messages").update({ read: true }).eq("id", m.id);
         }
       })
       .subscribe();
-    return () => { alive = false; supabase.removeChannel(channel); };
+
+    // Refresh the other user's last_seen every 30s while the chat is open
+    const presenceInterval = setInterval(async () => {
+      const { data } = await supabase.from("profiles").select("last_seen_at").eq("id", otherId).maybeSingle();
+      if (!alive) return;
+      setOther((prev) => prev ? { ...prev, last_seen_at: (data as any)?.last_seen_at ?? prev.last_seen_at } : prev);
+      forceTick((n) => n + 1);
+    }, 30_000);
+
+    return () => { alive = false; supabase.removeChannel(channel); clearInterval(presenceInterval); };
   }, [user, listingId, otherId]);
+
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -145,22 +167,41 @@ function ChatPage() {
           <button onClick={() => navigate({ to: "/messages" })} className="rounded p-1 hover:bg-muted" aria-label="Back">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <Avatar className="h-10 w-10"><AvatarFallback className="bg-primary/10 text-primary">{initialsOf(headerName)}</AvatarFallback></Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-foreground">{headerName}</p>
-            {listing && (
-              <Link to="/listing/$id" params={{ id: listing.id }} className="truncate text-xs text-muted-foreground hover:underline">
-                {listing.title}
-              </Link>
-            )}
-          </div>
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-md p-1 -m-1 text-left hover:bg-muted/40"
+            aria-label="View profile"
+          >
+            <div className="relative">
+              <Avatar className="h-10 w-10">
+                {otherAvatar && <AvatarImage src={otherAvatar} alt={headerName} />}
+                <AvatarFallback className="bg-primary/10 text-primary">{initialsOf(headerName)}</AvatarFallback>
+              </Avatar>
+              <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card ${isOnline(other?.last_seen_at) ? "bg-success" : "bg-muted-foreground"}`} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold text-foreground">{headerName}</p>
+              <p className={`truncate text-xs ${isOnline(other?.last_seen_at) ? "text-success" : "text-muted-foreground"}`}>
+                {lastSeenLabel(other?.last_seen_at)}
+              </p>
+            </div>
+          </button>
           {other?.phone && (
             <a href={`tel:${other.phone}`} className="rounded-full bg-success/10 p-2 text-success" aria-label="Call">
               <Phone className="h-5 w-5" />
             </a>
           )}
         </div>
+        {listing && (
+          <div className="mx-auto max-w-3xl px-4 pb-2">
+            <Link to="/listing/$id" params={{ id: listing.id }} className="truncate text-xs text-muted-foreground hover:underline">
+              About: {listing.title}
+            </Link>
+          </div>
+        )}
       </div>
+      <ProfileDialog userId={otherId} open={profileOpen} onOpenChange={setProfileOpen} />
+
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto bg-surface">

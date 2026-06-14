@@ -10,7 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, uploadFile } from "@/lib/storage";
 import { initialsOf } from "@/lib/format";
 import { toast } from "sonner";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, MessageCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+
 
 export const Route = createFileRoute("/_authenticated/account-settings")({
   component: AccountSettings,
@@ -26,20 +28,27 @@ function AccountSettings() {
   const [phone, setPhone] = useState("");
   const [avatarPath, setAvatarPath] = useState<string | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("profiles").select("first_name, last_name, phone, avatar_url, full_name").eq("id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles")
+        .select("first_name, last_name, phone, avatar_url, full_name, whatsapp_enabled, whatsapp_number")
+        .eq("id", user.id).maybeSingle();
       setFirstName(data?.first_name ?? "");
       setLastName(data?.last_name ?? "");
       setPhone(data?.phone ?? "");
       setAvatarPath(data?.avatar_url ?? null);
+      setWhatsappEnabled(!!(data as any)?.whatsapp_enabled);
+      setWhatsappNumber((data as any)?.whatsapp_number ?? "");
       if (data?.avatar_url) setAvatarSrc(await signedUrl("avatars", data.avatar_url));
       setLoading(false);
     })();
   }, [user?.id]);
+
 
   const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,6 +76,7 @@ function AccountSettings() {
   const save = async () => {
     if (!user) return;
     if (!firstName.trim() || !lastName.trim()) { toast.error("First and last name required"); return; }
+    if (whatsappEnabled && !whatsappNumber.trim()) { toast.error("Enter your WhatsApp number to enable WhatsApp"); return; }
     setSaving(true);
     const full = `${firstName.trim()} ${lastName.trim()}`.trim();
     const { error } = await supabase.from("profiles").update({
@@ -74,11 +84,14 @@ function AccountSettings() {
       last_name: lastName.trim(),
       full_name: full,
       phone: phone.trim() || null,
-    }).eq("id", user.id);
+      whatsapp_enabled: whatsappEnabled,
+      whatsapp_number: whatsappEnabled ? whatsappNumber.trim() : null,
+    } as any).eq("id", user.id);
     setSaving(false);
     if (error) toast.error(error.message);
     else toast.success("Profile saved");
   };
+
 
   if (loading) return (
     <div className="min-h-screen bg-background"><Navbar />
@@ -131,9 +144,29 @@ function AccountSettings() {
             <p className="text-xs text-muted-foreground">Contact support to change your email.</p>
           </div>
 
+          <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-success/15 p-2 text-success"><MessageCircle className="h-5 w-5" /></div>
+                <div>
+                  <p className="font-medium text-foreground">WhatsApp button</p>
+                  <p className="text-xs text-muted-foreground">Show a WhatsApp button on your listings so buyers can message you on WhatsApp.</p>
+                </div>
+              </div>
+              <Switch checked={whatsappEnabled} onCheckedChange={setWhatsappEnabled} />
+            </div>
+            {whatsappEnabled && (
+              <div className="space-y-1.5"><Label>WhatsApp number</Label>
+                <Input inputMode="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} maxLength={20} placeholder="e.g. +233 24 123 4567" />
+                <p className="text-xs text-muted-foreground">Include country code. Buyers will be sent here directly from your listing.</p>
+              </div>
+            )}
+          </div>
+
           <Button onClick={save} disabled={saving} size="lg" className="w-full">
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save changes
           </Button>
+
         </div>
       </div>
     </div>
