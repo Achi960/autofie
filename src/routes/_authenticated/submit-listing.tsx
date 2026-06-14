@@ -38,11 +38,13 @@ function SubmitListing() {
   const [colour, setColour] = useState("");
   const [engine, setEngine] = useState("");
   const [registration, setRegistration] = useState("");
+  const [registrationYear, setRegistrationYear] = useState<string>("");
   const [region, setRegion] = useState("");
   const [district, setDistrict] = useState("");
   const [price, setPrice] = useState<string>("");
   const [negotiable, setNegotiable] = useState(false);
-  const [contact, setContact] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
