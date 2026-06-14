@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
+import { ReviewsSection } from "@/components/ReviewsSection";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/storage";
 import { initialsOf } from "@/lib/format";
@@ -239,6 +240,13 @@ function UserProfilePage() {
           </div>
         )}
       </div>
+
+      {/* Reviews */}
+      <div className="mx-auto max-w-5xl px-4 pb-10">
+        <ReviewsSection dealerId={id} dealerName={name} />
+      </div>
+
+
 
       <Dialog open={!!listOpen} onOpenChange={(v) => !v && setListOpen(null)}>
         <DialogContent className="max-w-sm">
