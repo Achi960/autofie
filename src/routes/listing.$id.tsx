@@ -201,8 +201,9 @@ function ListingDetail() {
                 </Button>
                 <Button variant="ghost" className="w-full" onClick={toggleSave}>
                   <Heart className={`mr-2 h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
-                  {saved ? "Saved" : "Save"}
+                  {saved ? "Saved to favorites" : "Add to favorites"}
                 </Button>
+                <FollowButton dealerId={listing.user_id} />
               </div>
             </div>
           </aside>
