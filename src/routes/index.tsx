@@ -275,13 +275,13 @@ function HomePage() {
 
       {/* Dealer CTA */}
       <section className="mx-auto max-w-7xl px-4 py-12">
-        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-secondary to-secondary/90 p-8 text-center text-secondary-foreground sm:p-14">
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-secondary to-secondary/90 p-8 text-center text-white sm:p-14">
           <div className="mx-auto max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
               <BadgeCheck className="h-3.5 w-3.5" /> For dealers
             </span>
-            <h2 className="mt-4 text-2xl font-bold sm:text-3xl">Sell faster on AutoFie</h2>
-            <p className="mx-auto mt-3 max-w-lg opacity-90">Join hundreds of verified dealers across Ghana. Post unlimited ads. Reach serious buyers.</p>
+            <h2 className="mt-4 text-2xl font-bold text-white sm:text-3xl">Sell faster on AutoFie</h2>
+            <p className="mx-auto mt-3 max-w-lg text-white/90">Join hundreds of verified dealers across Ghana. Post unlimited ads. Reach serious buyers.</p>
             <Button
               size="lg"
               className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -293,7 +293,7 @@ function HomePage() {
             >
               {isVerifiedDealer ? "Post a listing" : isPendingDealer ? "Application under review" : "Become a dealer"}
             </Button>
-            <p className="mt-3 text-xs opacity-75">Free to join · Verified with Ghana Card · No commission on sales</p>
+            <p className="mt-3 text-xs text-white/75">Free to join · Verified with Ghana Card · No commission on sales</p>
           </div>
         </div>
       </section>
