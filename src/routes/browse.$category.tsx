@@ -133,11 +133,23 @@ function BrowsePage() {
         {/* Filters */}
         <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl border bg-card p-3 sm:grid-cols-4 lg:grid-cols-6">
           <FilterSelect label="Make" value={search.make} options={ALL_BRANDS} onChange={(v) => setFilter("make", v)} />
-          <FilterSelect label="Region" value={search.region} options={ALL_REGIONS} onChange={(v) => setFilter("region", v)} />
+          <FilterSelect
+            label="Region"
+            value={search.region}
+            options={ALL_REGIONS}
+            onChange={(v) => {
+              // also clear district when region changes
+              navigate({ search: (s: Record<string, unknown>) => ({ ...s, region: v || undefined, district: undefined, page: 1 }) });
+            }}
+          />
+          <FilterSelect
+            label="District"
+            value={search.district}
+            options={search.region ? REGIONS[search.region] ?? [] : []}
+            onChange={(v) => setFilter("district", v)}
+            disabled={!search.region}
+          />
           <FilterSelect label="Condition" value={search.condition} options={CONDITIONS as unknown as string[]} onChange={(v) => setFilter("condition", v)} />
-          <FilterSelect label="Transmission" value={search.transmission} options={TRANSMISSIONS as unknown as string[]} onChange={(v) => setFilter("transmission", v)} />
-          <FilterSelect label="Fuel" value={search.fuel} options={FUELS as unknown as string[]} onChange={(v) => setFilter("fuel", v)} />
-          <FilterSelect label="Body type" value={search.body} options={BODY_TYPES as unknown as string[]} onChange={(v) => setFilter("body", v)} />
           <div className="col-span-2 flex items-center gap-2 sm:col-span-2 lg:col-span-2">
             <Input
               type="number"
