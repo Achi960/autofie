@@ -28,20 +28,27 @@ function AccountSettings() {
   const [phone, setPhone] = useState("");
   const [avatarPath, setAvatarPath] = useState<string | null>(null);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("profiles").select("first_name, last_name, phone, avatar_url, full_name").eq("id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles")
+        .select("first_name, last_name, phone, avatar_url, full_name, whatsapp_enabled, whatsapp_number")
+        .eq("id", user.id).maybeSingle();
       setFirstName(data?.first_name ?? "");
       setLastName(data?.last_name ?? "");
       setPhone(data?.phone ?? "");
       setAvatarPath(data?.avatar_url ?? null);
+      setWhatsappEnabled(!!(data as any)?.whatsapp_enabled);
+      setWhatsappNumber((data as any)?.whatsapp_number ?? "");
       if (data?.avatar_url) setAvatarSrc(await signedUrl("avatars", data.avatar_url));
       setLoading(false);
     })();
   }, [user?.id]);
+
 
   const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
