@@ -95,7 +95,7 @@ function HomePage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 py-14 text-white sm:py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-secondary to-secondary/90 py-14 text-white sm:py-20">
         <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
         <div className="relative mx-auto max-w-3xl px-4 text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
