@@ -56,6 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Presence heartbeat — keeps profiles.last_seen_at fresh while a user is active
+  useEffect(() => {
+    if (!user) return;
+    const ping = () => { supabase.rpc("touch_last_seen"); };
+    ping();
+    const id = setInterval(ping, 45_000);
+    const onFocus = () => ping();
+    window.addEventListener("focus", onFocus);
+    return () => { clearInterval(id); window.removeEventListener("focus", onFocus); };
+  }, [user?.id]);
+
+
   const value: AuthContextValue = {
     user,
     roles,
