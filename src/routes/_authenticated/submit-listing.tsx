@@ -50,6 +50,20 @@ function SubmitListing() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
+  // Auto-populate name + phone from the signed-in user's profile
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle()
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        if (!contactName && data.full_name) setContactName(data.full_name);
+        if (!contactPhone && data.phone) setContactPhone(data.phone);
+      });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   if (!isVerifiedDealer) {
     return (
       <div className="min-h-screen bg-background"><Navbar />
