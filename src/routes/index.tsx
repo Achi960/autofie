@@ -160,9 +160,12 @@ function HomePage() {
       </section>
 
       {/* Recent listings */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-lg font-bold text-foreground">Recent listings</h2>
+      <section className="mx-auto max-w-7xl px-4 py-10">
+        <div className="mb-5 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-foreground sm:text-2xl">Fresh listings</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Updated every minute — see something new each visit</p>
+          </div>
           <Link to="/browse/$category" params={{ category: "car" }} className="text-sm font-medium text-primary hover:underline">View all →</Link>
         </div>
         {loading ? (
@@ -183,19 +186,20 @@ function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="bg-surface py-12">
+      <section className="bg-surface py-14">
         <div className="mx-auto max-w-5xl px-4">
-          <h2 className="text-center text-2xl font-bold text-foreground">How Autofie works</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">How Autofie works</h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">Simple, safe, and built for Ghana</p>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
             {[
-              { n: 1, t: "Browse freely", d: "Search thousands of vehicles. No account needed." },
-              { n: 2, t: "Chat with dealers", d: "Contact verified dealers directly with one tap." },
-              { n: 3, t: "Buy with confidence", d: "Every dealer is verified with Ghana Card." },
+              { n: 1, t: "Browse freely", d: "Search thousands of vehicles across all 16 regions. No account needed." },
+              { n: 2, t: "Chat with dealers", d: "Reach verified dealers directly with one tap. See when they're online." },
+              { n: 3, t: "Buy with confidence", d: "Every dealer is verified with Ghana Card before posting." },
             ].map((s) => (
-              <div key={s.n} className="rounded-xl bg-card p-6 text-center shadow-sm">
-                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">{s.n}</div>
+              <div key={s.n} className="rounded-xl border bg-card p-6 text-center shadow-sm transition hover:shadow-md">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-sm">{s.n}</div>
                 <h3 className="font-semibold text-foreground">{s.t}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">{s.d}</p>
               </div>
             ))}
           </div>
