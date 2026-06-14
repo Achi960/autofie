@@ -50,7 +50,7 @@ function Stars({ value, onChange, size = 18 }: { value: number; onChange?: (n: n
           >
             <Star
               style={{ width: size, height: size }}
-              className={filled ? "fill-warning text-warning" : "text-muted-foreground/40"}
+              className={filled ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}
             />
           </Cmp>
         );
