@@ -9,6 +9,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { initialsOf } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/storage";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Navbar() {
   const { user, isAdmin, isVerifiedDealer, isPendingDealer, signOut } = useAuth();
@@ -58,6 +59,7 @@ export function Navbar() {
                 <button aria-label="Notifications" className="rounded-full p-2 hover:bg-white/15" onClick={() => navigate({ to: "/messages" })}>
                   <Bell className="h-5 w-5" />
                 </button>
+                <ThemeToggle />
                 {(isVerifiedDealer || isPendingDealer) && (
                   <Link to="/my-listings" aria-label="My listings" className="hidden sm:inline-flex rounded-full p-2 hover:bg-white/15">
                     <LayoutGrid className="h-5 w-5" />
@@ -126,6 +128,7 @@ export function Navbar() {
               </>
             ) : (
               <>
+                <ThemeToggle />
                 <Button variant="ghost" size="sm" onClick={() => openAuth("signin")} className="text-primary-foreground hover:bg-white/15 hover:text-primary-foreground">
                   <UserIcon className="h-4 w-4 sm:hidden" />
                   <span className="hidden sm:inline">Sign in</span>
