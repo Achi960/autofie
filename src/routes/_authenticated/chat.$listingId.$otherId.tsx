@@ -10,7 +10,7 @@ import { signedUrl } from "@/lib/storage";
 import { useAuth } from "@/lib/auth-context";
 import { initialsOf } from "@/lib/format";
 import { isOnline, lastSeenLabel, playMessageBeep } from "@/lib/presence";
-import { ProfileDialog } from "@/components/ProfileDialog";
+
 import { toast } from "sonner";
 
 
@@ -47,7 +47,7 @@ function ChatPage() {
   const [listing, setListing] = useState<{ id: string; title: string; price: number; cover_photo_url: string | null } | null>(null);
   const [askPhone, setAskPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
-  const [profileOpen, setProfileOpen] = useState(false);
+  
   const [, forceTick] = useState(0); // re-render every 30s to refresh "last seen" label
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -168,7 +168,7 @@ function ChatPage() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <button
-            onClick={() => setProfileOpen(true)}
+            onClick={() => navigate({ to: "/user/$id", params: { id: otherId } })}
             className="flex min-w-0 flex-1 items-center gap-3 rounded-md p-1 -m-1 text-left hover:bg-muted/40"
             aria-label="View profile"
           >
@@ -200,7 +200,7 @@ function ChatPage() {
           </div>
         )}
       </div>
-      <ProfileDialog userId={otherId} open={profileOpen} onOpenChange={setProfileOpen} />
+      
 
 
       {/* Messages */}
