@@ -298,8 +298,11 @@ export type Database = {
           full_name: string | null
           id: string
           last_name: string | null
+          last_seen_at: string | null
           phone: string | null
           updated_at: string
+          whatsapp_enabled: boolean
+          whatsapp_number: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -308,8 +311,11 @@ export type Database = {
           full_name?: string | null
           id: string
           last_name?: string | null
+          last_seen_at?: string | null
           phone?: string | null
           updated_at?: string
+          whatsapp_enabled?: boolean
+          whatsapp_number?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -318,8 +324,11 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_name?: string | null
+          last_seen_at?: string | null
           phone?: string | null
           updated_at?: string
+          whatsapp_enabled?: boolean
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
@@ -400,6 +409,7 @@ export type Database = {
           unread_count: number
         }[]
       }
+      touch_last_seen: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "buyer" | "dealer_pending" | "dealer_verified" | "admin"
