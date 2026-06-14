@@ -213,7 +213,18 @@ function SubmitListing() {
           </div>
 
           <div className="grid items-end gap-4 sm:grid-cols-2">
-            <Field label="Price (GH₵)"><Input type="number" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} min={0} /></Field>
+            <Field label="Price (GH₵)">
+              <div className="flex items-center gap-2 rounded-md border bg-background px-3">
+                <span className="text-sm font-medium text-muted-foreground">GH₵</span>
+                <Input
+                  inputMode="numeric"
+                  value={price ? Number(price).toLocaleString("en-GH") : ""}
+                  onChange={(e) => setPrice(e.target.value.replace(/[^\d]/g, ""))}
+                  placeholder="50,000"
+                  className="border-0 px-0 shadow-none focus-visible:ring-0"
+                />
+              </div>
+            </Field>
             <label className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
               <Switch checked={negotiable} onCheckedChange={setNegotiable} />
               <span className="text-sm">Price is negotiable</span>
