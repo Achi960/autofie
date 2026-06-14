@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, ShieldCheck, BadgeCheck, Users, MessageCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,15 +95,19 @@ function HomePage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-secondary py-10 text-secondary-foreground sm:py-16">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
-            Buy and Sell Cars in Ghana — Verified Dealers Only
+      <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-secondary to-primary/40 py-14 text-secondary-foreground sm:py-20">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+        <div className="relative mx-auto max-w-3xl px-4 text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
+            <ShieldCheck className="h-3.5 w-3.5" /> Identity-verified dealers only
+          </span>
+          <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+            Ghana's trusted marketplace for vehicles
           </h1>
-          <p className="mt-3 text-sm opacity-90 sm:text-base">
-            Every dealer on Autofie is identity-verified. No fake listings. No scams.
+          <p className="mx-auto mt-3 max-w-xl text-sm opacity-90 sm:text-base">
+            Cars, motorbikes, trucks, parts and services — from dealers verified with Ghana Card. No scams, no fake listings.
           </p>
-          <form onSubmit={onSearch} className="mx-auto mt-6 flex max-w-xl items-center gap-2 rounded-full bg-white p-1.5 shadow-lg">
+          <form onSubmit={onSearch} className="mx-auto mt-7 flex max-w-xl items-center gap-2 rounded-full bg-white p-1.5 shadow-xl ring-1 ring-black/5">
             <Search className="ml-3 h-5 w-5 shrink-0 text-muted-foreground" />
             <Input
               value={query}
@@ -111,34 +115,57 @@ function HomePage() {
               placeholder="Search Toyota, Honda, Hyundai…"
               className="border-0 bg-transparent text-foreground shadow-none focus-visible:ring-0"
             />
-            <Button type="submit" size="sm" className="rounded-full">Search</Button>
+            <Button type="submit" size="sm" className="rounded-full px-5">Search</Button>
           </form>
+
+          {/* Trust strip */}
+          <div className="mt-8 grid grid-cols-3 gap-3 text-center text-[11px] sm:text-xs">
+            {[
+              { icon: BadgeCheck, label: "Verified dealers" },
+              { icon: Users, label: "Trusted by buyers" },
+              { icon: MessageCircle, label: "Chat in-app" },
+            ].map((b) => (
+              <div key={b.label} className="flex flex-col items-center gap-1 rounded-lg bg-white/10 px-2 py-3 backdrop-blur">
+                <b.icon className="h-4 w-4" />
+                <span className="font-medium">{b.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Categories */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
-        <h2 className="mb-4 text-lg font-bold text-foreground">Browse by category</h2>
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
+        <div className="mb-5 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-foreground sm:text-2xl">Browse by category</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Find exactly what you're looking for</p>
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
           {CATEGORIES.map((c) => (
             <Link
               key={c.slug}
               to="/browse/$category"
               params={{ category: c.slug }}
-              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center transition hover:border-primary hover:shadow-sm"
+              className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
             >
-              <img src={c.image} alt={c.label} width={72} height={72} loading="lazy" className="h-16 w-16 rounded-lg object-cover" />
+              <div className="overflow-hidden rounded-lg">
+                <img src={c.image} alt={c.label} width={72} height={72} loading="lazy" className="h-16 w-16 object-cover transition-transform duration-300 group-hover:scale-110" />
+              </div>
               <span className="text-xs font-medium text-foreground">{c.label}</span>
             </Link>
           ))}
         </div>
-
       </section>
 
       {/* Recent listings */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-lg font-bold text-foreground">Recent listings</h2>
+      <section className="mx-auto max-w-7xl px-4 py-10">
+        <div className="mb-5 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-foreground sm:text-2xl">Fresh listings</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Updated every minute — see something new each visit</p>
+          </div>
           <Link to="/browse/$category" params={{ category: "car" }} className="text-sm font-medium text-primary hover:underline">View all →</Link>
         </div>
         {loading ? (
@@ -159,19 +186,20 @@ function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="bg-surface py-12">
+      <section className="bg-surface py-14">
         <div className="mx-auto max-w-5xl px-4">
-          <h2 className="text-center text-2xl font-bold text-foreground">How Autofie works</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          <h2 className="text-center text-2xl font-bold text-foreground sm:text-3xl">How Autofie works</h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">Simple, safe, and built for Ghana</p>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
             {[
-              { n: 1, t: "Browse freely", d: "Search thousands of vehicles. No account needed." },
-              { n: 2, t: "Chat with dealers", d: "Contact verified dealers directly with one tap." },
-              { n: 3, t: "Buy with confidence", d: "Every dealer is verified with Ghana Card." },
+              { n: 1, t: "Browse freely", d: "Search thousands of vehicles across all 16 regions. No account needed." },
+              { n: 2, t: "Chat with dealers", d: "Reach verified dealers directly with one tap. See when they're online." },
+              { n: 3, t: "Buy with confidence", d: "Every dealer is verified with Ghana Card before posting." },
             ].map((s) => (
-              <div key={s.n} className="rounded-xl bg-card p-6 text-center shadow-sm">
-                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">{s.n}</div>
+              <div key={s.n} className="rounded-xl border bg-card p-6 text-center shadow-sm transition hover:shadow-md">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-sm">{s.n}</div>
                 <h3 className="font-semibold text-foreground">{s.t}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">{s.d}</p>
               </div>
             ))}
           </div>

@@ -7,17 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORIES, ALL_BRANDS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, ALL_REGIONS } from "@/lib/ghana";
+import { CATEGORIES, ALL_BRANDS, CONDITIONS, ALL_REGIONS, REGIONS } from "@/lib/ghana";
 import { shuffleByMinute } from "@/lib/shuffle";
 
 const searchSchema = z.object({
   q: z.string().optional(),
   make: z.string().optional(),
   region: z.string().optional(),
+  district: z.string().optional(),
   condition: z.string().optional(),
-  transmission: z.string().optional(),
-  fuel: z.string().optional(),
-  body: z.string().optional(),
   min_price: z.coerce.number().optional(),
   max_price: z.coerce.number().optional(),
   page: z.coerce.number().int().min(1).default(1),
@@ -69,10 +67,8 @@ function BrowsePage() {
       if (search.q) q = q.ilike("title", `%${search.q}%`);
       if (search.make) q = q.eq("make", search.make);
       if (search.region) q = q.eq("region", search.region);
+      if (search.district) q = q.eq("district", search.district);
       if (search.condition) q = q.eq("condition", search.condition);
-      if (search.transmission) q = q.eq("transmission", search.transmission);
-      if (search.fuel) q = q.eq("fuel", search.fuel);
-      if (search.body) q = q.eq("body_type", search.body);
       if (search.min_price) q = q.gte("price", search.min_price);
       if (search.max_price) q = q.lte("price", search.max_price);
 
@@ -116,7 +112,7 @@ function BrowsePage() {
       setListings((prev) => shuffleByMinute(prev, search.page ?? 1));
     }, 60_000);
     return () => { alive = false; clearInterval(id); };
-  }, [category, search.q, search.make, search.region, search.condition, search.transmission, search.fuel, search.body, search.min_price, search.max_price, search.page]);
+  }, [category, search.q, search.make, search.region, search.district, search.condition, search.min_price, search.max_price, search.page]);
 
   const setFilter = (key: string, value: string | undefined) => {
     navigate({ search: (s: Record<string, unknown>) => ({ ...s, [key]: value || undefined, page: 1 }) });
@@ -137,11 +133,23 @@ function BrowsePage() {
         {/* Filters */}
         <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl border bg-card p-3 sm:grid-cols-4 lg:grid-cols-6">
           <FilterSelect label="Make" value={search.make} options={ALL_BRANDS} onChange={(v) => setFilter("make", v)} />
-          <FilterSelect label="Region" value={search.region} options={ALL_REGIONS} onChange={(v) => setFilter("region", v)} />
+          <FilterSelect
+            label="Region"
+            value={search.region}
+            options={ALL_REGIONS}
+            onChange={(v) => {
+              // also clear district when region changes
+              navigate({ search: (s: Record<string, unknown>) => ({ ...s, region: v || undefined, district: undefined, page: 1 }) });
+            }}
+          />
+          <FilterSelect
+            label="District"
+            value={search.district}
+            options={search.region ? REGIONS[search.region] ?? [] : []}
+            onChange={(v) => setFilter("district", v)}
+            disabled={!search.region}
+          />
           <FilterSelect label="Condition" value={search.condition} options={CONDITIONS as unknown as string[]} onChange={(v) => setFilter("condition", v)} />
-          <FilterSelect label="Transmission" value={search.transmission} options={TRANSMISSIONS as unknown as string[]} onChange={(v) => setFilter("transmission", v)} />
-          <FilterSelect label="Fuel" value={search.fuel} options={FUELS as unknown as string[]} onChange={(v) => setFilter("fuel", v)} />
-          <FilterSelect label="Body type" value={search.body} options={BODY_TYPES as unknown as string[]} onChange={(v) => setFilter("body", v)} />
           <div className="col-span-2 flex items-center gap-2 sm:col-span-2 lg:col-span-2">
             <Input
               type="number"
@@ -194,9 +202,9 @@ function BrowsePage() {
   );
 }
 
-function FilterSelect({ label, value, options, onChange }: { label: string; value?: string; options: string[]; onChange: (v: string | undefined) => void }) {
+function FilterSelect({ label, value, options, onChange, disabled }: { label: string; value?: string; options: string[]; onChange: (v: string | undefined) => void; disabled?: boolean }) {
   return (
-    <Select value={value ?? "__all"} onValueChange={(v) => onChange(v === "__all" ? undefined : v)}>
+    <Select value={value ?? "__all"} onValueChange={(v) => onChange(v === "__all" ? undefined : v)} disabled={disabled}>
       <SelectTrigger><SelectValue placeholder={label} /></SelectTrigger>
       <SelectContent>
         <SelectItem value="__all">Any {label.toLowerCase()}</SelectItem>

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { ColourPicker } from "@/components/ColourPicker";
 import { CAR_BRANDS, ALL_BRANDS, REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, type CategorySlug } from "@/lib/ghana";
+import { fieldsFor } from "@/lib/category-fields";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
@@ -49,6 +50,8 @@ function SubmitListing() {
   const [contactPhone, setContactPhone] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const cfg = useMemo(() => fieldsFor(category), [category]);
 
   // Auto-populate name + phone from the signed-in user's profile
   useEffect(() => {
@@ -103,13 +106,18 @@ function SubmitListing() {
         user_id: user.id,
         category: category as any,
         title, description: description || null,
-        make: make || null, model: model || null,
-        year: year ? Number(year) : null,
-        condition: condition || null, transmission: transmission || null, fuel: fuel || null,
-        mileage: mileage ? Number(mileage) : null,
-        body_type: bodyType || null, colour: colour || null, engine: engine || null,
-        registration_status: registration || null,
-        registration_year: registration === "Registered" && registrationYear ? Number(registrationYear) : null,
+        make: cfg.make !== "off" && make ? make : null,
+        model: cfg.make !== "off" && model ? model : null,
+        year: cfg.year && year ? Number(year) : null,
+        condition: cfg.condition && condition ? condition : null,
+        transmission: cfg.transmission && transmission ? transmission : null,
+        fuel: cfg.fuel && fuel ? fuel : null,
+        mileage: cfg.mileage && mileage ? Number(mileage) : null,
+        body_type: cfg.bodyType && bodyType ? bodyType : null,
+        colour: cfg.colour && colour ? colour : null,
+        engine: cfg.engine && engine ? engine : null,
+        registration_status: cfg.registration && registration ? registration : null,
+        registration_year: cfg.registration && registration === "Registered" && registrationYear ? Number(registrationYear) : null,
         region, district,
         price: Number(price), negotiable,
         contact: contactPhone || null,
@@ -118,7 +126,6 @@ function SubmitListing() {
       }).select().single();
       if (insErr) throw insErr;
 
-      // upload photos
       const photoRows: { listing_id: string; url: string; is_cover: boolean; sort_order: number }[] = [];
       for (let i = 0; i < photos.length; i++) {
         const f = photos[i];
@@ -151,51 +158,82 @@ function SubmitListing() {
             <CategoryPicker value={category} onChange={(v) => setCategory(v)} />
           </Field>
 
-          <Field label="Title"><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="2018 Toyota Corolla XLE Foreign Used" maxLength={120} /></Field>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Make">
-              <Select value={make} onValueChange={(v) => { setMake(v); setModel(""); }}>
-                <SelectTrigger><SelectValue placeholder="Select make" /></SelectTrigger>
-                <SelectContent className="max-h-72">{ALL_BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
-              </Select>
-            </Field>
-            <Field label="Model">
-              <Select value={model} onValueChange={setModel} disabled={!make}>
-                <SelectTrigger><SelectValue placeholder="Select model" /></SelectTrigger>
-                <SelectContent>{models.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
-              </Select>
-            </Field>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Year"><Input type="number" inputMode="numeric" value={year} onChange={(e) => setYear(e.target.value)} min={1980} max={CURRENT_YEAR + 1} /></Field>
-            <Field label="Mileage (km)">
-              <Input
-                inputMode="numeric"
-                value={mileage ? Number(mileage).toLocaleString("en-GH") : ""}
-                onChange={(e) => setMileage(e.target.value.replace(/[^\d]/g, ""))}
-              />
-            </Field>
-          </div>
-
-          <Field label="Colour">
-            <ColourPicker value={colour} onChange={setColour} />
+          <Field label="Title">
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={cfg.titlePlaceholder} maxLength={120} />
           </Field>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <SimpleSelect label="Condition" value={condition} onChange={setCondition} options={CONDITIONS as unknown as string[]} />
-            <SimpleSelect label="Transmission" value={transmission} onChange={setTransmission} options={TRANSMISSIONS as unknown as string[]} />
-            <SimpleSelect label="Fuel" value={fuel} onChange={setFuel} options={FUELS as unknown as string[]} />
-            <SimpleSelect label="Body type" value={bodyType} onChange={setBodyType} options={BODY_TYPES as unknown as string[]} />
-            <SimpleSelect label="Registration" value={registration} onChange={(v) => { setRegistration(v); if (v !== "Registered") setRegistrationYear(""); }} options={REGISTRATION_STATUS as unknown as string[]} />
-            {registration === "Registered" && (
-              <Field label="Year of registration">
-                <Input type="number" inputMode="numeric" value={registrationYear} onChange={(e) => setRegistrationYear(e.target.value)} min={1980} max={CURRENT_YEAR + 1} placeholder={String(CURRENT_YEAR)} />
+          {/* Make / model */}
+          {cfg.make === "list" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={cfg.makeLabel}>
+                <Select value={make} onValueChange={(v) => { setMake(v); setModel(""); }}>
+                  <SelectTrigger><SelectValue placeholder={`Select ${cfg.makeLabel.toLowerCase()}`} /></SelectTrigger>
+                  <SelectContent className="max-h-72">{ALL_BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
+                </Select>
               </Field>
-            )}
-            <Field label="Engine"><Input value={engine} onChange={(e) => setEngine(e.target.value)} placeholder="1.8L" maxLength={20} /></Field>
-          </div>
+              <Field label={cfg.modelLabel}>
+                <Select value={model} onValueChange={setModel} disabled={!make}>
+                  <SelectTrigger><SelectValue placeholder={`Select ${cfg.modelLabel.toLowerCase()}`} /></SelectTrigger>
+                  <SelectContent>{models.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                </Select>
+              </Field>
+            </div>
+          )}
+          {cfg.make === "text" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={cfg.makeLabel}>
+                <Input value={make} onChange={(e) => setMake(e.target.value)} maxLength={40} placeholder={cfg.makeLabel} />
+              </Field>
+              <Field label={cfg.modelLabel}>
+                <Input value={model} onChange={(e) => setModel(e.target.value)} maxLength={40} placeholder={cfg.modelLabel} />
+              </Field>
+            </div>
+          )}
+
+          {(cfg.year || cfg.mileage) && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {cfg.year && (
+                <Field label="Year"><Input type="number" inputMode="numeric" value={year} onChange={(e) => setYear(e.target.value)} min={1980} max={CURRENT_YEAR + 1} /></Field>
+              )}
+              {cfg.mileage && (
+                <Field label="Mileage (km)">
+                  <Input
+                    inputMode="numeric"
+                    value={mileage ? Number(mileage).toLocaleString("en-GH") : ""}
+                    onChange={(e) => setMileage(e.target.value.replace(/[^\d]/g, ""))}
+                  />
+                </Field>
+              )}
+            </div>
+          )}
+
+          {cfg.colour && (
+            <Field label="Colour">
+              <ColourPicker value={colour} onChange={setColour} />
+            </Field>
+          )}
+
+          {(cfg.condition || cfg.transmission || cfg.fuel || cfg.bodyType || cfg.registration || cfg.engine) && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {cfg.condition && <SimpleSelect label="Condition" value={condition} onChange={setCondition} options={CONDITIONS as unknown as string[]} />}
+              {cfg.transmission && <SimpleSelect label="Transmission" value={transmission} onChange={setTransmission} options={TRANSMISSIONS as unknown as string[]} />}
+              {cfg.fuel && <SimpleSelect label="Fuel" value={fuel} onChange={setFuel} options={FUELS as unknown as string[]} />}
+              {cfg.bodyType && <SimpleSelect label="Body type" value={bodyType} onChange={setBodyType} options={BODY_TYPES as unknown as string[]} />}
+              {cfg.registration && (
+                <SimpleSelect label="Registration" value={registration} onChange={(v) => { setRegistration(v); if (v !== "Registered") setRegistrationYear(""); }} options={REGISTRATION_STATUS as unknown as string[]} />
+              )}
+              {cfg.registration && registration === "Registered" && (
+                <Field label="Year of registration">
+                  <Input type="number" inputMode="numeric" value={registrationYear} onChange={(e) => setRegistrationYear(e.target.value)} min={1980} max={CURRENT_YEAR + 1} placeholder={String(CURRENT_YEAR)} />
+                </Field>
+              )}
+              {cfg.engine && (
+                <Field label={cfg.engineLabel}>
+                  <Input value={engine} onChange={(e) => setEngine(e.target.value)} placeholder={cfg.engineLabel === "Operating hours" ? "e.g. 4,500" : "e.g. 1.8L"} maxLength={20} />
+                </Field>
+              )}
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Region">
@@ -237,7 +275,7 @@ function SubmitListing() {
           </div>
 
           <Field label="Description">
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} maxLength={3000} placeholder="Condition details, service history, features…" />
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} maxLength={3000} placeholder={category === "services" ? "Describe the service, coverage area, pricing…" : "Condition details, service history, features…"} />
           </Field>
 
           <div className="space-y-2">
