@@ -93,9 +93,11 @@ function SubmitListing() {
         mileage: mileage ? Number(mileage) : null,
         body_type: bodyType || null, colour: colour || null, engine: engine || null,
         registration_status: registration || null,
+        registration_year: registration === "Registered" && registrationYear ? Number(registrationYear) : null,
         region, district,
         price: Number(price), negotiable,
-        contact: contact || null,
+        contact: contactPhone || null,
+        contact_name: contactName || null,
         status: "pending" as const,
       }).select().single();
       if (insErr) throw insErr;
