@@ -7,17 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORIES, ALL_BRANDS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, ALL_REGIONS } from "@/lib/ghana";
+import { CATEGORIES, ALL_BRANDS, CONDITIONS, ALL_REGIONS, REGIONS } from "@/lib/ghana";
 import { shuffleByMinute } from "@/lib/shuffle";
 
 const searchSchema = z.object({
   q: z.string().optional(),
   make: z.string().optional(),
   region: z.string().optional(),
+  district: z.string().optional(),
   condition: z.string().optional(),
-  transmission: z.string().optional(),
-  fuel: z.string().optional(),
-  body: z.string().optional(),
   min_price: z.coerce.number().optional(),
   max_price: z.coerce.number().optional(),
   page: z.coerce.number().int().min(1).default(1),
