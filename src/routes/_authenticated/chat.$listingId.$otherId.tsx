@@ -42,10 +42,13 @@ function ChatPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [other, setOther] = useState<{ full_name: string | null; phone: string | null } | null>(null);
+  const [other, setOther] = useState<{ full_name: string | null; phone: string | null; avatar_url: string | null; last_seen_at: string | null } | null>(null);
+  const [otherAvatar, setOtherAvatar] = useState<string | null>(null);
   const [listing, setListing] = useState<{ id: string; title: string; price: number; cover_photo_url: string | null } | null>(null);
   const [askPhone, setAskPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [, forceTick] = useState(0); // re-render every 30s to refresh "last seen" label
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -67,12 +70,16 @@ function ChatPage() {
         .eq("listing_id", listingId).eq("sender_id", otherId).eq("receiver_id", user.id).eq("read", false);
 
       const [{ data: prof }, { data: lst }] = await Promise.all([
-        supabase.from("profiles").select("full_name, phone").eq("id", otherId).maybeSingle(),
+        supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at").eq("id", otherId).maybeSingle(),
         supabase.from("listings").select("id, title, price, cover_photo_url").eq("id", listingId).maybeSingle(),
       ]);
       if (!alive) return;
-      setOther(prof ?? { full_name: null, phone: null });
+      setOther((prof as any) ?? { full_name: null, phone: null, avatar_url: null, last_seen_at: null });
       setListing(lst ?? null);
+      if ((prof as any)?.avatar_url) {
+        const url = await signedUrl("avatars", (prof as any).avatar_url);
+        if (alive) setOtherAvatar(url);
+      }
     };
     load();
 
@@ -84,12 +91,23 @@ function ChatPage() {
         if (!involves) return;
         setMessages((prev) => prev.some((x) => x.id === m.id) ? prev : [...prev, m]);
         if (m.receiver_id === user.id) {
+          playMessageBeep();
           supabase.from("messages").update({ read: true }).eq("id", m.id);
         }
       })
       .subscribe();
-    return () => { alive = false; supabase.removeChannel(channel); };
+
+    // Refresh the other user's last_seen every 30s while the chat is open
+    const presenceInterval = setInterval(async () => {
+      const { data } = await supabase.from("profiles").select("last_seen_at").eq("id", otherId).maybeSingle();
+      if (!alive) return;
+      setOther((prev) => prev ? { ...prev, last_seen_at: (data as any)?.last_seen_at ?? prev.last_seen_at } : prev);
+      forceTick((n) => n + 1);
+    }, 30_000);
+
+    return () => { alive = false; supabase.removeChannel(channel); clearInterval(presenceInterval); };
   }, [user, listingId, otherId]);
+
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
