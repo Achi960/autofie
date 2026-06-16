@@ -34,13 +34,14 @@ function ListingDetail() {
       // Safe (anon-visible) columns. Avoid `*` because anon lacks SELECT on `contact`/`contact_name`.
       const safeCols = "id, user_id, category, title, description, make, model, year, condition, transmission, fuel, mileage, body_type, colour, engine, vin, registration_status, registration_year, region, district, price, negotiable, status, cover_photo_url, rejection_reason, closed_reason, created_at, updated_at";
       const cols = user ? `${safeCols}, contact, contact_name` : safeCols;
-      const { data, error } = await supabase
-        .from("listings")
+      const { data: rawData, error } = await (supabase
+        .from("listings") as any)
         .select(`${cols}, listing_photos(url, is_cover, sort_order)`)
         .eq("id", id)
         .maybeSingle();
       if (!alive) return;
-      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      if (error || !rawData) { setNotFound(true); setLoading(false); return; }
+      const data: any = rawData;
 
       // Fetch profile + dealer info separately (no direct FK between listings <-> profiles).
       // Anon can only see safe profile columns (full_name); phone/whatsapp are restricted.
