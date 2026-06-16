@@ -52,7 +52,7 @@ function HomePage() {
     const load = async () => {
       const { data } = await supabase
         .from("listings")
-        .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url, user_id,
+        .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url, user_id, category, make, year,
                  listing_stats(views)`)
         .eq("status", "approved")
         .order("created_at", { ascending: false })
@@ -84,6 +84,9 @@ function HomePage() {
         views: row.listing_stats?.views ?? 0,
         dealer_name: profMap.get(row.user_id)?.full_name ?? null,
         dealer_verified: dealMap.get(row.user_id)?.status === "approved",
+        category: row.category,
+        make: row.make,
+        year: row.year,
       }));
       setAllListings(mapped);
       setListings(shuffleByMinute(mapped).slice(0, 12));

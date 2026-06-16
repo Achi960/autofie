@@ -103,7 +103,7 @@ function UserProfilePage() {
       const [{ data: p }, { data: d }, { data: lst }, { data: fcount }, { data: gcount }] = await Promise.all([
         supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at, created_at").eq("id", id).maybeSingle(),
         supabase.from("dealer_profiles").select("business_name, region, district, status").eq("user_id", id).maybeSingle(),
-        supabase.from("listings").select("id, title, price, region, condition, transmission, mileage, cover_photo_url").eq("user_id", id).eq("status", "approved").order("created_at", { ascending: false }),
+        supabase.from("listings").select("id, title, price, region, condition, transmission, mileage, cover_photo_url, category, make, year").eq("user_id", id).eq("status", "approved").order("created_at", { ascending: false }),
         supabase.rpc("follower_count", { _user_id: id }),
         supabase.rpc("following_count", { _user_id: id }),
       ]);

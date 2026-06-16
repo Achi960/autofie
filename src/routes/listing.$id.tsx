@@ -12,16 +12,18 @@ import { signedUrl, signedUrls } from "@/lib/storage";
 import { formatGHS, formatMileage, initialsOf } from "@/lib/format";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
+import { fieldsFor } from "@/lib/category-fields";
+import type { CategorySlug } from "@/lib/ghana";
 
 export const Route = createFileRoute("/listing/$id")({
   loader: async ({ params }) => {
     const { data } = await (supabase.from("listings") as any)
-      .select("id, title, description, make, model, year, price, region, district, condition, transmission, fuel, mileage, body_type")
+      .select("id, category, title, description, make, model, year, price, region, district, condition, transmission, fuel, mileage, body_type")
       .eq("id", params.id)
       .eq("status", "approved")
       .maybeSingle();
     return { meta: data as null | {
-      id: string; title: string; description: string | null; make: string | null; model: string | null;
+      id: string; category: string | null; title: string; description: string | null; make: string | null; model: string | null;
       year: number | null; price: number | null; region: string | null; district: string | null;
       condition: string | null; transmission: string | null; fuel: string | null; mileage: number | null;
       body_type: string | null;
@@ -229,21 +231,26 @@ function ListingDetail() {
               <h1 className="text-2xl font-bold text-foreground">{listing.title}</h1>
               <p className="mt-2 text-3xl font-extrabold text-primary">{formatGHS(listing.price)}{listing.negotiable && <span className="ml-2 text-sm font-medium text-muted-foreground">negotiable</span>}</p>
 
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <Spec icon={<Calendar className="h-4 w-4" />} label="Year" value={listing.year} />
-                <Spec icon={<Gauge className="h-4 w-4" />} label="Mileage" value={formatMileage(listing.mileage)} />
-                <Spec icon={<Settings className="h-4 w-4" />} label="Transmission" value={listing.transmission} />
-                <Spec icon={<Fuel className="h-4 w-4" />} label="Fuel" value={listing.fuel} />
-                <Spec icon={<Palette className="h-4 w-4" />} label="Colour" value={listing.colour} />
-                <Spec icon={<MapPin className="h-4 w-4" />} label="Location" value={[listing.district, listing.region].filter(Boolean).join(", ")} />
-                <Spec label="Make" value={listing.make} />
-                <Spec label="Model" value={listing.model} />
-                <Spec label="Body" value={listing.body_type} />
-                <Spec label="Condition" value={listing.condition} />
-                <Spec label="Engine" value={listing.engine} />
-                <Spec label="Registration" value={listing.registration_status} />
-                <Spec label="Year of registration" value={listing.registration_year} />
-              </div>
+              {(() => {
+                const cfg = fieldsFor((listing.category ?? "") as CategorySlug | "");
+                return (
+                  <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {cfg.year && <Spec icon={<Calendar className="h-4 w-4" />} label="Year" value={listing.year} />}
+                    {cfg.mileage && <Spec icon={<Gauge className="h-4 w-4" />} label="Mileage" value={formatMileage(listing.mileage)} />}
+                    {cfg.transmission && <Spec icon={<Settings className="h-4 w-4" />} label="Transmission" value={listing.transmission} />}
+                    {cfg.fuel && <Spec icon={<Fuel className="h-4 w-4" />} label="Fuel" value={listing.fuel} />}
+                    {cfg.colour && <Spec icon={<Palette className="h-4 w-4" />} label="Colour" value={listing.colour} />}
+                    <Spec icon={<MapPin className="h-4 w-4" />} label="Location" value={[listing.district, listing.region].filter(Boolean).join(", ")} />
+                    {cfg.make !== "off" && <Spec label={cfg.makeLabel || "Make"} value={listing.make} />}
+                    {cfg.make !== "off" && <Spec label={cfg.modelLabel || "Model"} value={listing.model} />}
+                    {cfg.bodyType && <Spec label="Body" value={listing.body_type} />}
+                    {cfg.condition && <Spec label="Condition" value={listing.condition} />}
+                    {cfg.engine && <Spec label={cfg.engineLabel || "Engine"} value={listing.engine} />}
+                    {cfg.registration && <Spec label="Registration" value={listing.registration_status} />}
+                    {cfg.registration && <Spec label="Year of registration" value={listing.registration_year} />}
+                  </div>
+                );
+              })()}
 
               {listing.description && (
                 <>
