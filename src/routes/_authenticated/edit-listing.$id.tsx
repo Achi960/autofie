@@ -198,10 +198,12 @@ function EditListing() {
             <Label>Photos ({totalPhotos}/10) — tap a photo to set it as cover</Label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {existingPhotos.map((p) => (
-                <div key={p.id} className="group relative aspect-square overflow-hidden rounded-md border">
-                  {p.src ? <img src={p.src} alt="" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-muted" />}
+                <div key={p.id} className={`group relative aspect-square overflow-hidden rounded-md border ${p.is_cover ? "ring-2 ring-primary" : ""}`}>
+                  <button type="button" disabled={photosBusy || p.is_cover} onClick={() => setCover(p.id)} className="h-full w-full" aria-label="Set as cover photo">
+                    {p.src ? <img src={p.src} alt="Listing preview" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-muted" />}
+                  </button>
                   {p.is_cover && (
-                    <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">Cover</span>
+                    <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground"><Star className="mr-0.5 inline h-3 w-3" />Cover</span>
                   )}
                   <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     {!p.is_cover && (
@@ -214,11 +216,26 @@ function EditListing() {
                 </div>
               ))}
               {newPhotos.map((file, i) => (
-                <div key={`new-${i}`} className="relative aspect-square overflow-hidden rounded-md border border-dashed">
-                  <img src={URL.createObjectURL(file)} alt="" className="h-full w-full object-cover" />
-                  <span className="absolute left-1 top-1 rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-accent-foreground">New</span>
-                  <button type="button" onClick={() => setNewPhotos(newPhotos.filter((_, j) => j !== i))}
-                    className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"><X className="h-3 w-3" /></button>
+                <div
+                  key={`new-${file.name}-${i}`}
+                  className={`relative aspect-square overflow-hidden rounded-md border border-dashed ${newCoverIndex === i ? "ring-2 ring-primary" : ""}`}
+                  draggable
+                  onDragStart={() => setDragIndex(i)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); if (dragIndex !== null) moveNewPhoto(dragIndex, i); setDragIndex(null); }}
+                  onDragEnd={() => setDragIndex(null)}
+                >
+                  <button type="button" onClick={() => setNewCoverIndex(i)} className="h-full w-full" aria-label="Set new photo as cover">
+                    <img src={URL.createObjectURL(file)} alt="Listing preview" className="h-full w-full object-cover" />
+                  </button>
+                  <span className="absolute bottom-1 left-1 rounded bg-background/85 px-1 py-0.5 text-muted-foreground shadow-sm">
+                    <GripVertical className="h-3 w-3" />
+                  </span>
+                  <span className={`absolute left-1 top-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${newCoverIndex === i ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
+                    {newCoverIndex === i ? <><Star className="mr-0.5 inline h-3 w-3" />Cover</> : "New"}
+                  </span>
+                  <button type="button" onClick={() => removeNewPhoto(i)}
+                    className="absolute right-1 top-1 rounded-full bg-foreground/70 p-1 text-background"><X className="h-3 w-3" /></button>
                 </div>
               ))}
               {totalPhotos < 10 && (
