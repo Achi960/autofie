@@ -14,6 +14,60 @@ import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/listing/$id")({
+  loader: async ({ params }) => {
+    const { data } = await (supabase.from("listings") as any)
+      .select("id, title, description, make, model, year, price, region, district, condition, transmission, fuel, mileage, body_type")
+      .eq("id", params.id)
+      .eq("status", "approved")
+      .maybeSingle();
+    return { meta: data as null | {
+      id: string; title: string; description: string | null; make: string | null; model: string | null;
+      year: number | null; price: number | null; region: string | null; district: string | null;
+      condition: string | null; transmission: string | null; fuel: string | null; mileage: number | null;
+      body_type: string | null;
+    } };
+  },
+  head: ({ params, loaderData }) => {
+    const url = `https://autofie.com/listing/${params.id}`;
+    const m = loaderData?.meta;
+    const title = m
+      ? `${m.title} — GHS ${Number(m.price ?? 0).toLocaleString()} in ${m.region ?? "Ghana"} | AutoFie`
+      : "Vehicle listing — AutoFie";
+    const descRaw = m
+      ? (m.description?.trim() ||
+        `${m.year ?? ""} ${m.make ?? ""} ${m.model ?? ""}${m.condition ? `, ${m.condition}` : ""}${m.transmission ? `, ${m.transmission}` : ""}${m.mileage ? `, ${m.mileage.toLocaleString()} km` : ""}. For sale in ${m.district ?? m.region ?? "Ghana"} on AutoFie.`).trim()
+      : "View this vehicle on AutoFie, Ghana's verified marketplace.";
+    const description = descRaw.length > 160 ? descRaw.slice(0, 157) + "..." : descRaw;
+    const productJsonLd = m ? {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: m.title,
+      description,
+      ...(m.make ? { brand: { "@type": "Brand", name: m.make } } : {}),
+      ...(m.model ? { model: m.model } : {}),
+      offers: {
+        "@type": "Offer",
+        price: Number(m.price ?? 0),
+        priceCurrency: "GHS",
+        availability: "https://schema.org/InStock",
+        url,
+      },
+    } : null;
+    return {
+      meta: [
+        { title: title.slice(0, 70) },
+        { name: "description", content: description },
+        { property: "og:title", content: title.slice(0, 70) },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: productJsonLd
+        ? [{ type: "application/ld+json", children: JSON.stringify(productJsonLd) }]
+        : [],
+    };
+  },
   component: ListingDetail,
 });
 
@@ -164,8 +218,8 @@ function ListingDetail() {
             {photos.length > 1 && (
               <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
                 {photos.map((src, i) => (
-                  <button key={i} onClick={() => setCoverIdx(i)} className={`aspect-square overflow-hidden rounded-md border-2 ${i === coverIdx ? "border-primary" : "border-transparent"}`}>
-                    <img src={src} alt="" className="h-full w-full object-cover" />
+                  <button key={i} type="button" onClick={() => setCoverIdx(i)} aria-label={`View photo ${i + 1} of ${photos.length}`} aria-pressed={i === coverIdx} className={`aspect-square overflow-hidden rounded-md border-2 ${i === coverIdx ? "border-primary" : "border-transparent"}`}>
+                    <img src={src} alt={`${listing.title} — photo ${i + 1}`} className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>

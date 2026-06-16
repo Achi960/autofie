@@ -7,7 +7,12 @@ export const Route = createFileRoute("/privacy")({
     meta: [
       { title: "Privacy Policy — AutoFie" },
       { name: "description", content: "How AutoFie collects, uses and protects your personal information, including Ghana Card verification data, in line with the Ghana Data Protection Act." },
+      { property: "og:title", content: "Privacy Policy — AutoFie" },
+      { property: "og:description", content: "How AutoFie collects, uses and protects your personal information under Ghana's Data Protection Act." },
+      { property: "og:url", content: "https://autofie.com/privacy" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://autofie.com/privacy" }],
   }),
   component: PrivacyPage,
 });

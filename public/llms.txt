@@ -1,0 +1,18 @@
+# AutoFie
+
+> Ghana's verified vehicle marketplace. Every dealer is identity-verified — buy and sell cars, trucks, motorcycles and parts across all 16 regions without scams or fake listings.
+
+AutoFie is a Kumasi-built marketplace connecting verified vehicle dealers with serious buyers across Ghana. Listings cover cars, trucks, motorcycles, buses and vehicle parts, with in-app chat and dealer verification via Ghana Card.
+
+## Pages
+
+- [Home](/): Featured listings and search across categories.
+- [Browse cars](/browse/cars): Cars for sale from verified dealers in Ghana.
+- [Browse trucks](/browse/trucks): Trucks and pickups for sale in Ghana.
+- [Browse motorcycles](/browse/motorcycles): Motorcycles and scooters for sale in Ghana.
+- [Browse parts](/browse/parts): Vehicle parts and accessories.
+- [About](/about): Our mission, story and what makes AutoFie different.
+- [Contact](/contact): How to reach the AutoFie team in Kumasi.
+- [Safety tips](/safety-tips): Practical advice for buying and selling vehicles safely in Ghana.
+- [Terms](/terms): Rules for using AutoFie.
+- [Privacy](/privacy): How we handle your data under Ghana's Data Protection Act.

@@ -10,7 +10,10 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "AutoFie is a Ghana-built marketplace connecting verified vehicle dealers with serious buyers across all 16 regions. Learn our story, mission and values." },
       { property: "og:title", content: "About AutoFie" },
       { property: "og:description", content: "A Ghana-built, identity-verified vehicle marketplace headquartered in Kumasi." },
+      { property: "og:url", content: "https://autofie.com/about" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://autofie.com/about" }],
   }),
   component: AboutPage,
 });

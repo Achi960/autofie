@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SafetyTipsRouteImport } from './routes/safety-tips'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -41,6 +42,11 @@ import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authe
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SafetyTipsRoute = SafetyTipsRouteImport.update({
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/safety-tips': typeof SafetyTipsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/safety-tips': typeof SafetyTipsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/safety-tips': typeof SafetyTipsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/_authenticated/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
@@ -289,6 +298,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/privacy'
     | '/safety-tips'
+    | '/sitemap.xml'
     | '/terms'
     | '/account-settings'
     | '/complete-dealer-profile'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/privacy'
     | '/safety-tips'
+    | '/sitemap.xml'
     | '/terms'
     | '/account-settings'
     | '/complete-dealer-profile'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/privacy'
     | '/safety-tips'
+    | '/sitemap.xml'
     | '/terms'
     | '/_authenticated/account-settings'
     | '/_authenticated/complete-dealer-profile'
@@ -379,6 +391,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   PrivacyRoute: typeof PrivacyRoute
   SafetyTipsRoute: typeof SafetyTipsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   BrowseCategoryRoute: typeof BrowseCategoryRoute
   ListingIdRoute: typeof ListingIdRoute
@@ -393,6 +406,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/safety-tips': {
@@ -638,6 +658,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   PrivacyRoute: PrivacyRoute,
   SafetyTipsRoute: SafetyTipsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   BrowseCategoryRoute: BrowseCategoryRoute,
   ListingIdRoute: ListingIdRoute,

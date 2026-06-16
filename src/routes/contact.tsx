@@ -10,7 +10,10 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "Reach the AutoFie team in Kumasi, Ghana. Email autofieghana@gmail.com for support, partnerships, dealer verification or press." },
       { property: "og:title", content: "Contact AutoFie" },
       { property: "og:description", content: "Email autofieghana@gmail.com — we respond within one business day." },
+      { property: "og:url", content: "https://autofie.com/contact" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://autofie.com/contact" }],
   }),
   component: ContactPage,
 });
