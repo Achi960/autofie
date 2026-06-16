@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import { SiteFooter } from "@/components/SiteFooter";
 import { LegalPage, Section } from "@/components/LegalPage";
 import { Mail, MapPin, Clock, MessageCircle } from "lucide-react";
 
@@ -70,7 +69,7 @@ function ContactPage() {
           </p>
         </Section>
       </LegalPage>
-      <SiteFooter />
+
     </div>
   );
 }
