@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Phone, MessageCircle, Heart, MapPin, Gauge, Calendar, Fuel, Settings, Palette, BadgeCheck } from "lucide-react";
+import { Phone, MessageCircle, Heart, MapPin, Gauge, Calendar, Fuel, Settings, Palette, BadgeCheck, Share2, Eye } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,6 +25,8 @@ function ListingDetail() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+  const [showWa, setShowWa] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -101,6 +103,32 @@ function ListingDetail() {
   const onCallClick = () => {
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
   };
+  const onRevealPhone = () => {
+    if (!user) { toast.error("Sign in to view contact"); navigate({ to: "/auth" }); return; }
+    setShowPhone(true);
+    supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
+  };
+  const onRevealWa = () => {
+    if (!user) { toast.error("Sign in to view WhatsApp"); navigate({ to: "/auth" }); return; }
+    setShowWa(true);
+    supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
+  };
+  const onShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const shareData = { title: listing.title, text: `Check out this ${listing.title} on AutoFie`, url };
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share(shareData);
+        return;
+      }
+    } catch { /* user cancelled */ return; }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.error("Could not share link");
+    }
+  };
   const onChatClick = () => {
     if (!user) { toast.error("Sign in to chat"); return; }
     if (user.id === listing.user_id) { toast.error("You can't message yourself"); return; }
@@ -174,28 +202,56 @@ function ListingDetail() {
                   {listing.contact_name && dealerName !== contactDisplayName && (
                     <p className="text-xs text-muted-foreground">{dealerName}</p>
                   )}
-                  {phone && <p className="text-sm text-muted-foreground">{phone}</p>}
+                  {user && phone && <p className="text-sm text-muted-foreground">{phone}</p>}
                   {dealerVerified && <Badge variant="outline" className="mt-1 border-success/30 bg-success/10 text-success">Verified dealer</Badge>}
                 </div>
               </div>
 
               <div className="mt-4 space-y-2">
-                {phone && (
-                  <a href={`tel:${phone}`} onClick={onCallClick}>
-                    <Button className="w-full"><Phone className="mr-2 h-4 w-4" />Call dealer</Button>
-                  </a>
-                )}
-                {listing.profiles?.whatsapp_enabled && listing.profiles?.whatsapp_number && (
-                  <a href={`https://wa.me/${listing.profiles.whatsapp_number.replace(/[^\d]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in your ${listing.title} on AutoFie.`)}`}
-                     target="_blank" rel="noopener noreferrer" onClick={onCallClick}>
-                    <Button variant="outline" className="w-full border-success text-success hover:bg-success/10 hover:text-success">
-                      <MessageCircle className="mr-2 h-4 w-4" />WhatsApp
+                {/* Phone: hidden until revealed (sign-in required) */}
+                {user && phone ? (
+                  showPhone ? (
+                    <a href={`tel:${phone}`} onClick={onCallClick}>
+                      <Button className="w-full"><Phone className="mr-2 h-4 w-4" />{phone}</Button>
+                    </a>
+                  ) : (
+                    <Button className="w-full" onClick={onRevealPhone}>
+                      <Eye className="mr-2 h-4 w-4" />Show contact
                     </Button>
-                  </a>
+                  )
+                ) : (
+                  <Button className="w-full" onClick={onRevealPhone}>
+                    <Eye className="mr-2 h-4 w-4" />Show contact
+                  </Button>
+                )}
+
+                {/* WhatsApp: hidden until revealed */}
+                {user ? (
+                  listing.profiles?.whatsapp_enabled && listing.profiles?.whatsapp_number ? (
+                    showWa ? (
+                      <a href={`https://wa.me/${listing.profiles.whatsapp_number.replace(/[^\d]/g, "")}?text=${encodeURIComponent(`Hi, I'm interested in your ${listing.title} on AutoFie.`)}`}
+                         target="_blank" rel="noopener noreferrer" onClick={onCallClick}>
+                        <Button variant="outline" className="w-full border-success text-success hover:bg-success/10 hover:text-success">
+                          <MessageCircle className="mr-2 h-4 w-4" />WhatsApp
+                        </Button>
+                      </a>
+                    ) : (
+                      <Button variant="outline" className="w-full border-success text-success hover:bg-success/10 hover:text-success" onClick={onRevealWa}>
+                        <Eye className="mr-2 h-4 w-4" />Show WhatsApp number
+                      </Button>
+                    )
+                  ) : null
+                ) : (
+                  <Button variant="outline" className="w-full border-success text-success hover:bg-success/10 hover:text-success" onClick={onRevealWa}>
+                    <Eye className="mr-2 h-4 w-4" />Show WhatsApp number
+                  </Button>
                 )}
 
                 <Button variant="outline" className="w-full" onClick={onChatClick}>
                   <MessageCircle className="mr-2 h-4 w-4" />Chat on AutoFie
+                </Button>
+                <Button variant="outline" className="w-full" onClick={onShare}>
+                  <Share2 className="mr-2 h-4 w-4" />Share listing
                 </Button>
                 <Button variant="ghost" className="w-full" onClick={toggleSave}>
                   <Heart className={`mr-2 h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
