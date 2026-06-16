@@ -108,6 +108,9 @@ export function Navbar() {
                         <DropdownMenuItem onClick={() => navigate({ to: "/admin/listings" })}>
                           <ShieldCheck className="mr-2 h-4 w-4" /> Admin: Listings
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate({ to: "/admin/admins" })}>
+                          <ShieldCheck className="mr-2 h-4 w-4" /> Admin: Administrators
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                       </>
                     )}
