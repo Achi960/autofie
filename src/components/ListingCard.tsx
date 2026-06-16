@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MapPin, Gauge, Settings, BadgeCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Heart, MapPin, Gauge, Settings, BadgeCheck, Calendar, Tag } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatGHS, formatMileage, initialsOf } from "@/lib/format";
 import { signedUrl } from "@/lib/storage";
 import { cn } from "@/lib/utils";
+import { fieldsFor } from "@/lib/category-fields";
+import type { CategorySlug } from "@/lib/ghana";
 
 export interface ListingCardData {
   id: string;
@@ -20,6 +21,9 @@ export interface ListingCardData {
   views?: number;
   dealer_name?: string | null;
   dealer_verified?: boolean;
+  category?: CategorySlug | string | null;
+  make?: string | null;
+  year?: number | null;
 }
 
 export function ListingCard({
@@ -42,6 +46,7 @@ export function ListingCard({
   }, [listing.cover_photo_url]);
 
   const popular = (listing.views ?? 0) > 50;
+  const cfg = fieldsFor((listing.category ?? "") as CategorySlug | "");
 
   return (
     <article className="group overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md">
@@ -82,17 +87,27 @@ export function ListingCard({
               <MapPin className="h-3 w-3" />{listing.region}
             </span>
           )}
-          {listing.condition && (
+          {listing.condition && cfg.condition && (
             <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{listing.condition}</span>
           )}
-          {listing.transmission && (
+          {cfg.year && listing.year && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+              <Calendar className="h-3 w-3" />{listing.year}
+            </span>
+          )}
+          {cfg.transmission && listing.transmission && (
             <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
               <Settings className="h-3 w-3" />{listing.transmission}
             </span>
           )}
-          {listing.mileage != null && (
+          {cfg.mileage && listing.mileage != null && (
             <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
               <Gauge className="h-3 w-3" />{formatMileage(listing.mileage)}
+            </span>
+          )}
+          {!cfg.vehicle && listing.make && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+              <Tag className="h-3 w-3" />{listing.make}
             </span>
           )}
         </div>
