@@ -272,6 +272,8 @@ function ListingDetail() {
           </aside>
         </div>
       </div>
+      </div>
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} initialStep={authStep} />
     </div>
   );
 }
