@@ -71,6 +71,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "AutoFie.com — Ghana's Verified Car Marketplace" },
       { name: "description", content: "Every dealer on AutoFie is identity-verified. No fake listings. No scams. Buy and sell cars across Ghana." },
       { name: "theme-color", content: "#1a1a2e" },
+      { name: "google-site-verification", content: "ExgbRILSohuqxcwIDoASrvPIa61wsMmNoMudzNUGYjU" },
       { property: "og:title", content: "AutoFie.com — Ghana's Verified Car Marketplace" },
       { property: "og:description", content: "Every dealer on AutoFie is identity-verified. No fake listings. No scams. Buy and sell cars across Ghana." },
       { property: "og:type", content: "website" },
