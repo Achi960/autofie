@@ -184,18 +184,31 @@ function UserProfilePage() {
               </div>
             </div>
 
-            {!isSelf && (
-              <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              {!isSelf && (
                 <Button onClick={toggleFollow} disabled={busy} variant={isFollowing ? "outline" : "default"}>
                   {isFollowing ? <><UserCheck className="mr-1.5 h-4 w-4" />Following</> : <><UserPlus className="mr-1.5 h-4 w-4" />Follow</>}
                 </Button>
-                {profile.phone && (
-                  <Button asChild variant="outline" size="icon">
-                    <a href={`tel:${profile.phone}`} aria-label="Call"><Phone className="h-4 w-4" /></a>
-                  </Button>
-                )}
-              </div>
-            )}
+              )}
+              {!isSelf && user && profile.phone && (
+                <Button asChild variant="outline" size="icon">
+                  <a href={`tel:${profile.phone}`} aria-label="Call"><Phone className="h-4 w-4" /></a>
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const url = `${window.location.origin}/user/${id}`;
+                  const shareData = { title: `${name} on AutoFie`, text: `Check out ${name}'s shop on AutoFie`, url };
+                  try {
+                    if (navigator.share) await navigator.share(shareData);
+                    else { await navigator.clipboard.writeText(url); toast.success("Shop link copied"); }
+                  } catch { /* user cancelled */ }
+                }}
+              >
+                <Share2 className="mr-1.5 h-4 w-4" />Share shop
+              </Button>
+            </div>
           </div>
 
           {/* Stats row */}
