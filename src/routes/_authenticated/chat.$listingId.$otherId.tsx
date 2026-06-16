@@ -345,12 +345,20 @@ function ChatPage() {
               </p>
             </div>
           </button>
-          {other?.phone && (
+          {other?.phone && !otherBanned && (
             <a href={`tel:${other.phone}`} className="rounded-full bg-success/10 p-2 text-success" aria-label="Call">
               <Phone className="h-5 w-5" />
             </a>
           )}
+          <ReportButton reportedUserId={otherId} listingId={listingId} variant="ghost" size="sm" label="" className="px-2" />
         </div>
+        {otherBanned && (
+          <div className="mx-auto max-w-3xl px-4 pb-2">
+            <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <Ban className="h-4 w-4" /> This user has been blocked by AutoFie. You can no longer send messages.
+            </div>
+          </div>
+        )}
         {listing && (
           <div className="mx-auto max-w-3xl px-4 pb-2">
             <Link to="/listing/$id" params={{ id: listing.id }} className="truncate text-xs text-muted-foreground hover:underline">
@@ -366,6 +374,17 @@ function ChatPage() {
           <div className="mx-auto rounded-full border border-warning/40 bg-warning/10 px-4 py-1.5 text-center text-xs text-warning-foreground">
             📢 Avoid paying in advance — even for delivery
           </div>
+          {safetyAlert && (
+            <div className="mx-auto max-w-md rounded-lg border-2 border-destructive/50 bg-destructive/10 p-3 text-xs text-destructive">
+              <p className="flex items-center gap-1.5 font-semibold"><ShieldAlert className="h-4 w-4" /> Safety alert</p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                <li>Don't send money before seeing the car in person.</li>
+                <li>Meet in a public, open place during the day.</li>
+                <li>Inspect the car and documents before paying anything.</li>
+                <li>Keep chats here so we can help if anything goes wrong.</li>
+              </ul>
+            </div>
+          )}
           <p className="my-2 text-center text-xs text-muted-foreground">{groupedDate}</p>
 
           {messages.map((m) => {
