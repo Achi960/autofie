@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Phone, Send, Smile, Paperclip, Mic, Square, Trash2, X, Image as ImageIcon, ShieldAlert, Ban } from "lucide-react";
+import { ArrowLeft, Phone, Send, Smile, Keyboard, ShieldAlert, Ban } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
 import EmojiPicker, { type EmojiClickData, Theme as EmojiTheme } from "emoji-picker-react";
 import { Navbar } from "@/components/Navbar";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-import { signedUrl, uploadFile } from "@/lib/storage";
+import { signedUrl } from "@/lib/storage";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme";
 import { initialsOf } from "@/lib/format";
