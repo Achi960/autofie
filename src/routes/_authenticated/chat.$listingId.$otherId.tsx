@@ -41,53 +41,6 @@ const QUICK_REPLIES = [
   "Can I come for a test drive?",
 ];
 
-function formatDuration(ms: number | null) {
-  if (!ms || ms < 0) return "0:00";
-  const s = Math.round(ms / 1000);
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}:${r.toString().padStart(2, "0")}`;
-}
-
-function AttachmentView({ msg }: { msg: Msg }) {
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    if (msg.attachment_url) {
-      signedUrl("chat-media", msg.attachment_url).then((u) => { if (alive) setUrl(u); });
-    }
-    return () => { alive = false; };
-  }, [msg.attachment_url]);
-
-  if (!msg.attachment_url) return null;
-  if (msg.attachment_type === "image") {
-    return (
-      <a href={url ?? "#"} target="_blank" rel="noreferrer" className="block">
-        {url ? (
-          <img src={url} alt="attachment" className="max-h-72 w-auto max-w-full rounded-lg object-cover" />
-        ) : (
-          <div className="h-40 w-40 animate-pulse rounded-lg bg-muted" />
-        )}
-      </a>
-    );
-  }
-  if (msg.attachment_type === "audio") {
-    return (
-      <div className="flex flex-col gap-1">
-        {url ? (
-          <audio controls src={url} className="max-w-full" />
-        ) : (
-          <div className="h-10 w-56 animate-pulse rounded bg-muted" />
-        )}
-        {msg.attachment_duration_ms && (
-          <span className="text-[10px] opacity-70">🎙 {formatDuration(msg.attachment_duration_ms)}</span>
-        )}
-      </div>
-    );
-  }
-  return null;
-}
-
 function ChatPage() {
   const { listingId, otherId } = Route.useParams();
   const { user } = useAuth();
@@ -103,18 +56,9 @@ function ChatPage() {
   const [phoneInput, setPhoneInput] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
 
-  // Voice recording
-  const [recording, setRecording] = useState(false);
-  const [recordSeconds, setRecordSeconds] = useState(0);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<BlobPart[]>([]);
-  const recordStartRef = useRef<number>(0);
-  const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const [, forceTick] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
