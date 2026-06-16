@@ -199,8 +199,8 @@ function EditListing() {
             <Label>Photos ({totalPhotos}/10) — tap a photo to set it as cover</Label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {existingPhotos.map((p) => (
-                <div key={p.id} className={`group relative aspect-square overflow-hidden rounded-md border ${p.is_cover ? "ring-2 ring-primary" : ""}`}>
-                  <button type="button" disabled={photosBusy || p.is_cover} onClick={() => setCover(p.id)} className="h-full w-full" aria-label="Set as cover photo">
+                <div key={p.id} className={`group relative aspect-square overflow-hidden rounded-md border ${p.is_cover && newCoverIndex === null ? "ring-2 ring-primary" : ""}`}>
+                  <button type="button" disabled={photosBusy} onClick={() => setCover(p.id)} className="h-full w-full" aria-label="Set as cover photo">
                     {p.src ? <img src={p.src} alt="Listing preview" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-muted" />}
                   </button>
                   {p.is_cover && newCoverIndex === null && (
