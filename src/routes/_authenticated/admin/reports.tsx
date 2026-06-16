@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Ban, CheckCircle2, XCircle, ShieldOff } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/reports")({
-  component: AdminReports;
+  component: AdminReports,
 });
 
 type Report = {
