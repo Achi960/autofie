@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Phone, Send, Smile, Paperclip, Mic, Square, Trash2, X, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Phone, Send, Smile, Paperclip, Mic, Square, Trash2, X, Image as ImageIcon, ShieldAlert, Ban } from "lucide-react";
+import { ReportButton } from "@/components/ReportButton";
 import EmojiPicker, { type EmojiClickData, Theme as EmojiTheme } from "emoji-picker-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -95,7 +96,7 @@ function ChatPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [other, setOther] = useState<{ full_name: string | null; phone: string | null; avatar_url: string | null; last_seen_at: string | null } | null>(null);
+  const [other, setOther] = useState<{ full_name: string | null; phone: string | null; avatar_url: string | null; last_seen_at: string | null; is_banned: boolean } | null>(null);
   const [otherAvatar, setOtherAvatar] = useState<string | null>(null);
   const [listing, setListing] = useState<{ id: string; title: string; price: number; cover_photo_url: string | null } | null>(null);
   const [askPhone, setAskPhone] = useState(false);
@@ -131,11 +132,11 @@ function ChatPage() {
         .eq("listing_id", listingId).eq("sender_id", otherId).eq("receiver_id", user.id).eq("read", false);
 
       const [{ data: prof }, { data: lst }] = await Promise.all([
-        supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at").eq("id", otherId).maybeSingle(),
+        supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at, is_banned").eq("id", otherId).maybeSingle(),
         supabase.from("listings").select("id, title, price, cover_photo_url").eq("id", listingId).maybeSingle(),
       ]);
       if (!alive) return;
-      setOther((prof as any) ?? { full_name: null, phone: null, avatar_url: null, last_seen_at: null });
+      setOther((prof as any) ?? { full_name: null, phone: null, avatar_url: null, last_seen_at: null, is_banned: false });
       setListing(lst ?? null);
       if ((prof as any)?.avatar_url) {
         const url = await signedUrl("avatars", (prof as any).avatar_url);
@@ -174,12 +175,18 @@ function ChatPage() {
   }, [messages.length]);
 
   const isSelfChat = user?.id === otherId;
+  const otherBanned = !!other?.is_banned;
+
+  const SAFETY_TRIGGERS = /(whatsapp|telegram|wa\.me|momo|mobile money|mtn|vodafone cash|airteltigo|send (the )?money|deposit|advance|pay (first|now|me)|western union|bank transfer|account number|moneygram)/i;
+  const safetyAlert = SAFETY_TRIGGERS.test(text) || messages.slice(-3).some((m) => m.content && SAFETY_TRIGGERS.test(m.content));
+
 
   const sendMessage = async (opts: { body?: string; attachment?: { path: string; type: "image" | "audio"; durationMs?: number } }) => {
     if (!user || sending) return;
     const body = (opts.body ?? "").trim();
     if (!body && !opts.attachment) return;
     if (isSelfChat) { toast.error("You can't message yourself"); return; }
+    if (otherBanned) { toast.error("This user has been blocked"); return; }
     setSending(true);
     const optimistic: Msg = {
       id: `tmp-${Date.now()}`,
@@ -338,12 +345,20 @@ function ChatPage() {
               </p>
             </div>
           </button>
-          {other?.phone && (
+          {other?.phone && !otherBanned && (
             <a href={`tel:${other.phone}`} className="rounded-full bg-success/10 p-2 text-success" aria-label="Call">
               <Phone className="h-5 w-5" />
             </a>
           )}
+          <ReportButton reportedUserId={otherId} listingId={listingId} variant="ghost" size="sm" label="" className="px-2" />
         </div>
+        {otherBanned && (
+          <div className="mx-auto max-w-3xl px-4 pb-2">
+            <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <Ban className="h-4 w-4" /> This user has been blocked by AutoFie. You can no longer send messages.
+            </div>
+          </div>
+        )}
         {listing && (
           <div className="mx-auto max-w-3xl px-4 pb-2">
             <Link to="/listing/$id" params={{ id: listing.id }} className="truncate text-xs text-muted-foreground hover:underline">
@@ -359,6 +374,17 @@ function ChatPage() {
           <div className="mx-auto rounded-full border border-warning/40 bg-warning/10 px-4 py-1.5 text-center text-xs text-warning-foreground">
             📢 Avoid paying in advance — even for delivery
           </div>
+          {safetyAlert && (
+            <div className="mx-auto max-w-md rounded-lg border-2 border-destructive/50 bg-destructive/10 p-3 text-xs text-destructive">
+              <p className="flex items-center gap-1.5 font-semibold"><ShieldAlert className="h-4 w-4" /> Safety alert</p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                <li>Don't send money before seeing the car in person.</li>
+                <li>Meet in a public, open place during the day.</li>
+                <li>Inspect the car and documents before paying anything.</li>
+                <li>Keep chats here so we can help if anything goes wrong.</li>
+              </ul>
+            </div>
+          )}
           <p className="my-2 text-center text-xs text-muted-foreground">{groupedDate}</p>
 
           {messages.map((m) => {
@@ -466,15 +492,15 @@ function ChatPage() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Write your message here"
-                disabled={sending || isSelfChat}
+                disabled={sending || isSelfChat || otherBanned}
                 onFocus={() => setEmojiOpen(false)}
               />
               {text.trim() ? (
-                <Button type="submit" disabled={!text.trim() || sending || isSelfChat} size="icon">
+                <Button type="submit" disabled={!text.trim() || sending || isSelfChat || otherBanned} size="icon">
                   <Send className="h-4 w-4" />
                 </Button>
               ) : (
-                <Button type="button" size="icon" onClick={startRecording} disabled={isSelfChat} aria-label="Record voice note">
+                <Button type="button" size="icon" onClick={startRecording} disabled={isSelfChat || otherBanned} aria-label="Record voice note">
                   <Mic className="h-4 w-4" />
                 </Button>
               )}

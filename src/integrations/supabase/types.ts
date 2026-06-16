@@ -329,10 +329,13 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          banned_at: string | null
+          banned_reason: string | null
           created_at: string
           first_name: string | null
           full_name: string | null
           id: string
+          is_banned: boolean
           last_name: string | null
           last_seen_at: string | null
           phone: string | null
@@ -342,10 +345,13 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          banned_at?: string | null
+          banned_reason?: string | null
           created_at?: string
           first_name?: string | null
           full_name?: string | null
           id: string
+          is_banned?: boolean
           last_name?: string | null
           last_seen_at?: string | null
           phone?: string | null
@@ -355,10 +361,13 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          banned_at?: string | null
+          banned_reason?: string | null
           created_at?: string
           first_name?: string | null
           full_name?: string | null
           id?: string
+          is_banned?: boolean
           last_name?: string | null
           last_seen_at?: string | null
           phone?: string | null
@@ -367,6 +376,50 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          listing_id: string | null
+          reason: string
+          reported_user_id: string | null
+          reporter_id: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          listing_id?: string | null
+          reason: string
+          reported_user_id?: string | null
+          reporter_id: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          listing_id?: string | null
+          reason?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -513,6 +566,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_overview: { Args: never; Returns: Json }
       find_user_by_identifier: {
         Args: { _identifier: string }
         Returns: {

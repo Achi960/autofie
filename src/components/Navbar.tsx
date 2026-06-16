@@ -102,11 +102,17 @@ export function Navbar() {
                     <DropdownMenuSeparator />
                     {isAdmin && (
                       <>
+                        <DropdownMenuItem onClick={() => navigate({ to: "/admin/insights" })}>
+                          <ShieldCheck className="mr-2 h-4 w-4" /> Admin: Insights
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate({ to: "/admin/dealers" })}>
                           <ShieldCheck className="mr-2 h-4 w-4" /> Admin: Dealers
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate({ to: "/admin/listings" })}>
                           <ShieldCheck className="mr-2 h-4 w-4" /> Admin: Listings
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate({ to: "/admin/reports" })}>
+                          <ShieldCheck className="mr-2 h-4 w-4" /> Admin: Reports
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate({ to: "/admin/admins" })}>
                           <ShieldCheck className="mr-2 h-4 w-4" /> Admin: Administrators

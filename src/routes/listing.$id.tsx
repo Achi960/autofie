@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Phone, MessageCircle, Heart, MapPin, Gauge, Calendar, Fuel, Settings, Palette, BadgeCheck, Share2, Eye } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { ReportButton } from "@/components/ReportButton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -267,6 +268,7 @@ function ListingDetail() {
                   <Heart className={`mr-2 h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
                   {saved ? "Saved" : "Save"}
                 </Button>
+                <ReportButton reportedUserId={listing.user_id} listingId={listing.id} variant="ghost" className="w-full" label="Report this listing" />
               </div>
             </div>
           </aside>

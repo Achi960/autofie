@@ -29,8 +29,10 @@ import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCompleteDealerProfileRouteImport } from './routes/_authenticated/complete-dealer-profile'
 import { Route as AuthenticatedAccountSettingsRouteImport } from './routes/_authenticated/account-settings'
 import { Route as AuthenticatedEditListingIdRouteImport } from './routes/_authenticated/edit-listing.$id'
+import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin/notifications'
 import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin/listings'
+import { Route as AuthenticatedAdminInsightsRouteImport } from './routes/_authenticated/admin/insights'
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
 import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenticated/admin/admins'
 import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
@@ -140,6 +142,12 @@ const AuthenticatedEditListingIdRoute =
     path: '/edit-listing/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminReportsRoute =
+  AuthenticatedAdminReportsRouteImport.update({
+    id: '/admin/reports',
+    path: '/admin/reports',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminNotificationsRoute =
   AuthenticatedAdminNotificationsRouteImport.update({
     id: '/admin/notifications',
@@ -150,6 +158,12 @@ const AuthenticatedAdminListingsRoute =
   AuthenticatedAdminListingsRouteImport.update({
     id: '/admin/listings',
     path: '/admin/listings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminInsightsRoute =
+  AuthenticatedAdminInsightsRouteImport.update({
+    id: '/admin/insights',
+    path: '/admin/insights',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminDealersRoute =
@@ -198,8 +212,10 @@ export interface FileRoutesByFullPath {
   '/user/$id': typeof UserIdRoute
   '/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
+  '/admin/insights': typeof AuthenticatedAdminInsightsRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
   '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
@@ -225,8 +241,10 @@ export interface FileRoutesByTo {
   '/user/$id': typeof UserIdRoute
   '/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
+  '/admin/insights': typeof AuthenticatedAdminInsightsRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
   '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
@@ -254,8 +272,10 @@ export interface FileRoutesById {
   '/user/$id': typeof UserIdRoute
   '/_authenticated/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
+  '/_authenticated/admin/insights': typeof AuthenticatedAdminInsightsRoute
   '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
+  '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
   '/_authenticated/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/_authenticated/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
@@ -283,8 +303,10 @@ export interface FileRouteTypes {
     | '/user/$id'
     | '/admin/admins'
     | '/admin/dealers'
+    | '/admin/insights'
     | '/admin/listings'
     | '/admin/notifications'
+    | '/admin/reports'
     | '/edit-listing/$id'
     | '/admin/listing/$id'
     | '/chat/$listingId/$otherId'
@@ -310,8 +332,10 @@ export interface FileRouteTypes {
     | '/user/$id'
     | '/admin/admins'
     | '/admin/dealers'
+    | '/admin/insights'
     | '/admin/listings'
     | '/admin/notifications'
+    | '/admin/reports'
     | '/edit-listing/$id'
     | '/admin/listing/$id'
     | '/chat/$listingId/$otherId'
@@ -338,8 +362,10 @@ export interface FileRouteTypes {
     | '/user/$id'
     | '/_authenticated/admin/admins'
     | '/_authenticated/admin/dealers'
+    | '/_authenticated/admin/insights'
     | '/_authenticated/admin/listings'
     | '/_authenticated/admin/notifications'
+    | '/_authenticated/admin/reports'
     | '/_authenticated/edit-listing/$id'
     | '/_authenticated/admin/listing/$id'
     | '/_authenticated/chat/$listingId/$otherId'
@@ -502,6 +528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEditListingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/reports': {
+      id: '/_authenticated/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/notifications': {
       id: '/_authenticated/admin/notifications'
       path: '/admin/notifications'
@@ -514,6 +547,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/listings'
       fullPath: '/admin/listings'
       preLoaderRoute: typeof AuthenticatedAdminListingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/insights': {
+      id: '/_authenticated/admin/insights'
+      path: '/admin/insights'
+      fullPath: '/admin/insights'
+      preLoaderRoute: typeof AuthenticatedAdminInsightsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/dealers': {
@@ -557,8 +597,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSubmitListingRoute: typeof AuthenticatedSubmitListingRoute
   AuthenticatedAdminAdminsRoute: typeof AuthenticatedAdminAdminsRoute
   AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
+  AuthenticatedAdminInsightsRoute: typeof AuthenticatedAdminInsightsRoute
   AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
+  AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedEditListingIdRoute: typeof AuthenticatedEditListingIdRoute
   AuthenticatedAdminListingIdRoute: typeof AuthenticatedAdminListingIdRoute
   AuthenticatedChatListingIdOtherIdRoute: typeof AuthenticatedChatListingIdOtherIdRoute
@@ -575,8 +617,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSubmitListingRoute: AuthenticatedSubmitListingRoute,
   AuthenticatedAdminAdminsRoute: AuthenticatedAdminAdminsRoute,
   AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
+  AuthenticatedAdminInsightsRoute: AuthenticatedAdminInsightsRoute,
   AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
+  AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedEditListingIdRoute: AuthenticatedEditListingIdRoute,
   AuthenticatedAdminListingIdRoute: AuthenticatedAdminListingIdRoute,
   AuthenticatedChatListingIdOtherIdRoute:
