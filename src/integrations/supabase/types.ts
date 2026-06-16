@@ -576,6 +576,8 @@ export type Database = {
           user_id: string
         }[]
       }
+      follower_count: { Args: { _user_id: string }; Returns: number }
+      following_count: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -588,6 +590,10 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_following: {
+        Args: { _dealer: string; _follower: string }
+        Returns: boolean
+      }
       list_admins: {
         Args: never
         Returns: {
@@ -596,6 +602,22 @@ export type Database = {
           granted_at: string
           phone: string
           user_id: string
+        }[]
+      }
+      list_followers: {
+        Args: { _user_id: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          id: string
+        }[]
+      }
+      list_following: {
+        Args: { _user_id: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          id: string
         }[]
       }
       list_my_threads: {
