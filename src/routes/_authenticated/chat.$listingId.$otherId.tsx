@@ -175,12 +175,18 @@ function ChatPage() {
   }, [messages.length]);
 
   const isSelfChat = user?.id === otherId;
+  const otherBanned = !!other?.is_banned;
+
+  const SAFETY_TRIGGERS = /(whatsapp|telegram|wa\.me|momo|mobile money|mtn|vodafone cash|airteltigo|send (the )?money|deposit|advance|pay (first|now|me)|western union|bank transfer|account number|moneygram)/i;
+  const safetyAlert = SAFETY_TRIGGERS.test(text) || messages.slice(-3).some((m) => m.content && SAFETY_TRIGGERS.test(m.content));
+
 
   const sendMessage = async (opts: { body?: string; attachment?: { path: string; type: "image" | "audio"; durationMs?: number } }) => {
     if (!user || sending) return;
     const body = (opts.body ?? "").trim();
     if (!body && !opts.attachment) return;
     if (isSelfChat) { toast.error("You can't message yourself"); return; }
+    if (otherBanned) { toast.error("This user has been blocked"); return; }
     setSending(true);
     const optimistic: Msg = {
       id: `tmp-${Date.now()}`,
