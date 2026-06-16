@@ -492,15 +492,15 @@ function ChatPage() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Write your message here"
-                disabled={sending || isSelfChat}
+                disabled={sending || isSelfChat || otherBanned}
                 onFocus={() => setEmojiOpen(false)}
               />
               {text.trim() ? (
-                <Button type="submit" disabled={!text.trim() || sending || isSelfChat} size="icon">
+                <Button type="submit" disabled={!text.trim() || sending || isSelfChat || otherBanned} size="icon">
                   <Send className="h-4 w-4" />
                 </Button>
               ) : (
-                <Button type="button" size="icon" onClick={startRecording} disabled={isSelfChat} aria-label="Record voice note">
+                <Button type="button" size="icon" onClick={startRecording} disabled={isSelfChat || otherBanned} aria-label="Record voice note">
                   <Mic className="h-4 w-4" />
                 </Button>
               )}
