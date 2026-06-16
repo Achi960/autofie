@@ -101,13 +101,9 @@ function UserProfilePage() {
   const openList = async (kind: "followers" | "following") => {
     setListOpen(kind);
     setListUsers([]);
-    const col = kind === "followers" ? "follower_id" : "dealer_id";
-    const match = kind === "followers" ? "dealer_id" : "follower_id";
-    const { data } = await supabase.from("follows").select(col).eq(match, id);
-    const ids = ((data ?? []) as any[]).map((r) => r[col]).filter(Boolean);
-    if (ids.length === 0) { setListUsers([]); return; }
-    const { data: profs } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", ids);
-    setListUsers((profs as MiniUser[]) ?? []);
+    const fn = kind === "followers" ? "list_followers" : "list_following";
+    const { data } = await supabase.rpc(fn, { _user_id: id });
+    setListUsers((data as MiniUser[]) ?? []);
   };
 
   if (loading) {
