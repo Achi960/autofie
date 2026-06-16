@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
 import { toast } from "sonner";
 import { notifyAdminWhatsapp } from "@/lib/admin-notify.functions";
-import { Loader2, Upload, X } from "lucide-react";
+import { GripVertical, Loader2, Star, Upload, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/submit-listing")({
   component: SubmitListing,
@@ -50,6 +50,8 @@ function SubmitListing() {
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
+  const [coverIndex, setCoverIndex] = useState(0);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const cfg = useMemo(() => fieldsFor(category), [category]);
@@ -97,6 +99,32 @@ function SubmitListing() {
     setPhotos(next);
   };
 
+  const removePhoto = (index: number) => {
+    setPhotos((current) => current.filter((_, i) => i !== index));
+    setCoverIndex((current) => {
+      if (photos.length <= 1) return 0;
+      if (index === current) return 0;
+      if (index < current) return current - 1;
+      return Math.min(current, photos.length - 2);
+    });
+  };
+
+  const movePhoto = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= photos.length || to >= photos.length) return;
+    setPhotos((current) => {
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+    setCoverIndex((current) => {
+      if (current === from) return to;
+      if (from < current && to >= current) return current - 1;
+      if (from > current && to <= current) return current + 1;
+      return current;
+    });
+  };
+
   const submit = async () => {
     if (!user) return;
     if (!category) { toast.error("Pick a category"); return; }
@@ -135,10 +163,10 @@ function SubmitListing() {
         const ext = f.name.split(".").pop() || "jpg";
         const path = `${user.id}/${listing.id}/${i}-${Date.now()}.${ext}`;
         await uploadFile("listing-photos", path, f);
-        photoRows.push({ listing_id: listing.id, url: path, is_cover: i === 0, sort_order: i });
+        photoRows.push({ listing_id: listing.id, url: path, is_cover: i === coverIndex, sort_order: i });
       }
       await supabase.from("listing_photos").insert(photoRows);
-      await supabase.from("listings").update({ cover_photo_url: photoRows[0].url }).eq("id", listing.id);
+      await supabase.from("listings").update({ cover_photo_url: photoRows[coverIndex]?.url ?? photoRows[0].url }).eq("id", listing.id);
 
       // Fire-and-forget admin WhatsApp alert (no-op if Twilio not configured)
       notifyAdminWhatsapp({
