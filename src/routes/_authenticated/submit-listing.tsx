@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
 import { toast } from "sonner";
 import { notifyAdminWhatsapp } from "@/lib/admin-notify.functions";
-import { Loader2, Upload, X } from "lucide-react";
+import { GripVertical, Loader2, Star, Upload, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/submit-listing")({
   component: SubmitListing,
@@ -50,6 +50,8 @@ function SubmitListing() {
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
+  const [coverIndex, setCoverIndex] = useState(0);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const cfg = useMemo(() => fieldsFor(category), [category]);
@@ -97,6 +99,32 @@ function SubmitListing() {
     setPhotos(next);
   };
 
+  const removePhoto = (index: number) => {
+    setPhotos((current) => current.filter((_, i) => i !== index));
+    setCoverIndex((current) => {
+      if (photos.length <= 1) return 0;
+      if (index === current) return 0;
+      if (index < current) return current - 1;
+      return Math.min(current, photos.length - 2);
+    });
+  };
+
+  const movePhoto = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= photos.length || to >= photos.length) return;
+    setPhotos((current) => {
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+    setCoverIndex((current) => {
+      if (current === from) return to;
+      if (from < current && to >= current) return current - 1;
+      if (from > current && to <= current) return current + 1;
+      return current;
+    });
+  };
+
   const submit = async () => {
     if (!user) return;
     if (!category) { toast.error("Pick a category"); return; }
@@ -135,10 +163,10 @@ function SubmitListing() {
         const ext = f.name.split(".").pop() || "jpg";
         const path = `${user.id}/${listing.id}/${i}-${Date.now()}.${ext}`;
         await uploadFile("listing-photos", path, f);
-        photoRows.push({ listing_id: listing.id, url: path, is_cover: i === 0, sort_order: i });
+        photoRows.push({ listing_id: listing.id, url: path, is_cover: i === coverIndex, sort_order: i });
       }
       await supabase.from("listing_photos").insert(photoRows);
-      await supabase.from("listings").update({ cover_photo_url: photoRows[0].url }).eq("id", listing.id);
+      await supabase.from("listings").update({ cover_photo_url: photoRows[coverIndex]?.url ?? photoRows[0].url }).eq("id", listing.id);
 
       // Fire-and-forget admin WhatsApp alert (no-op if Twilio not configured)
       notifyAdminWhatsapp({
@@ -287,14 +315,27 @@ function SubmitListing() {
           </Field>
 
           <div className="space-y-2">
-            <Label>Photos ({photos.length}/10) — first photo is the cover</Label>
+            <Label>Photos ({photos.length}/10) — tap a photo to set it as cover</Label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {photos.map((f, i) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded-md border">
-                  <img src={URL.createObjectURL(f)} alt="" className="h-full w-full object-cover" />
-                  <button type="button" onClick={() => setPhotos(photos.filter((_, j) => j !== i))}
-                    className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"><X className="h-3 w-3" /></button>
-                  {i === 0 && <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">Cover</span>}
+                <div
+                  key={`${f.name}-${i}`}
+                  className={`group relative aspect-square overflow-hidden rounded-md border ${i === coverIndex ? "ring-2 ring-primary" : ""}`}
+                  draggable
+                  onDragStart={() => setDragIndex(i)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); if (dragIndex !== null) movePhoto(dragIndex, i); setDragIndex(null); }}
+                  onDragEnd={() => setDragIndex(null)}
+                >
+                  <button type="button" onClick={() => setCoverIndex(i)} className="h-full w-full" aria-label="Set as cover photo">
+                    <img src={URL.createObjectURL(f)} alt="Listing preview" className="h-full w-full object-cover" />
+                  </button>
+                  <span className="absolute bottom-1 left-1 rounded bg-background/85 px-1 py-0.5 text-muted-foreground shadow-sm">
+                    <GripVertical className="h-3 w-3" />
+                  </span>
+                  <button type="button" onClick={() => removePhoto(i)}
+                    className="absolute right-1 top-1 rounded-full bg-foreground/70 p-1 text-background"><X className="h-3 w-3" /></button>
+                  {i === coverIndex && <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground"><Star className="mr-0.5 inline h-3 w-3" />Cover</span>}
                 </div>
               ))}
               {photos.length < 10 && (

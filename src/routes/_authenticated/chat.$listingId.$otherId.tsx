@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Phone, Send, Smile, Paperclip, Mic, Square, Trash2, X, Image as ImageIcon, ShieldAlert, Ban } from "lucide-react";
+import { ArrowLeft, Phone, Send, Smile, Keyboard, ShieldAlert, Ban } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
 import EmojiPicker, { type EmojiClickData, Theme as EmojiTheme } from "emoji-picker-react";
 import { Navbar } from "@/components/Navbar";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-import { signedUrl, uploadFile } from "@/lib/storage";
+import { signedUrl } from "@/lib/storage";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme";
 import { initialsOf } from "@/lib/format";
@@ -41,53 +41,6 @@ const QUICK_REPLIES = [
   "Can I come for a test drive?",
 ];
 
-function formatDuration(ms: number | null) {
-  if (!ms || ms < 0) return "0:00";
-  const s = Math.round(ms / 1000);
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}:${r.toString().padStart(2, "0")}`;
-}
-
-function AttachmentView({ msg }: { msg: Msg }) {
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    if (msg.attachment_url) {
-      signedUrl("chat-media", msg.attachment_url).then((u) => { if (alive) setUrl(u); });
-    }
-    return () => { alive = false; };
-  }, [msg.attachment_url]);
-
-  if (!msg.attachment_url) return null;
-  if (msg.attachment_type === "image") {
-    return (
-      <a href={url ?? "#"} target="_blank" rel="noreferrer" className="block">
-        {url ? (
-          <img src={url} alt="attachment" className="max-h-72 w-auto max-w-full rounded-lg object-cover" />
-        ) : (
-          <div className="h-40 w-40 animate-pulse rounded-lg bg-muted" />
-        )}
-      </a>
-    );
-  }
-  if (msg.attachment_type === "audio") {
-    return (
-      <div className="flex flex-col gap-1">
-        {url ? (
-          <audio controls src={url} className="max-w-full" />
-        ) : (
-          <div className="h-10 w-56 animate-pulse rounded bg-muted" />
-        )}
-        {msg.attachment_duration_ms && (
-          <span className="text-[10px] opacity-70">🎙 {formatDuration(msg.attachment_duration_ms)}</span>
-        )}
-      </div>
-    );
-  }
-  return null;
-}
-
 function ChatPage() {
   const { listingId, otherId } = Route.useParams();
   const { user } = useAuth();
@@ -103,18 +56,9 @@ function ChatPage() {
   const [phoneInput, setPhoneInput] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
 
-  // Voice recording
-  const [recording, setRecording] = useState(false);
-  const [recordSeconds, setRecordSeconds] = useState(0);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<BlobPart[]>([]);
-  const recordStartRef = useRef<number>(0);
-  const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const [, forceTick] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -233,84 +177,16 @@ function ChatPage() {
     setPhoneInput("");
   };
 
-  // ---- Image upload ----
-  const onPickImage = async (file: File | null | undefined) => {
-    if (!file || !user) return;
-    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be under 8MB"); return; }
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const path = `${listingId}/${user.id}/${crypto.randomUUID()}.${ext}`;
-    try {
-      await uploadFile("chat-media", path, file);
-      await sendMessage({ body: text, attachment: { path, type: "image" } });
-    } catch (e: any) {
-      toast.error(e.message ?? "Upload failed");
-    }
-  };
-
-  // ---- Voice recording ----
-  const startRecording = async () => {
-    if (recording || !user) return;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
-      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-      recorderRef.current = rec;
-      chunksRef.current = [];
-      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      rec.onstop = async () => {
-        const durationMs = Date.now() - recordStartRef.current;
-        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
-        stream.getTracks().forEach((t) => t.stop());
-        if (recordTimerRef.current) { clearInterval(recordTimerRef.current); recordTimerRef.current = null; }
-        setRecording(false);
-        setRecordSeconds(0);
-        if (blob.size < 1000) { toast.error("Recording too short"); return; }
-        const ext = (rec.mimeType || "audio/webm").includes("mp4") ? "m4a" : "webm";
-        const path = `${listingId}/${user.id}/${crypto.randomUUID()}.${ext}`;
-        try {
-          const file = new File([blob], `voice.${ext}`, { type: blob.type });
-          await uploadFile("chat-media", path, file);
-          await sendMessage({ attachment: { path, type: "audio", durationMs } });
-        } catch (e: any) {
-          toast.error(e.message ?? "Upload failed");
-        }
-      };
-      recordStartRef.current = Date.now();
-      setRecording(true);
-      setRecordSeconds(0);
-      recordTimerRef.current = setInterval(() => {
-        const s = Math.floor((Date.now() - recordStartRef.current) / 1000);
-        setRecordSeconds(s);
-        if (s >= 120) stopRecording(); // hard cap 2 min
-      }, 250);
-      rec.start();
-    } catch (e: any) {
-      toast.error(e.message ?? "Microphone permission denied");
-    }
-  };
-
-  const stopRecording = () => {
-    const rec = recorderRef.current;
-    if (rec && rec.state !== "inactive") rec.stop();
-  };
-
-  const cancelRecording = () => {
-    const rec = recorderRef.current;
-    if (!rec) return;
-    rec.ondataavailable = null;
-    rec.onstop = null;
-    if (rec.state !== "inactive") rec.stop();
-    rec.stream?.getTracks?.().forEach((t) => t.stop());
-    if (recordTimerRef.current) { clearInterval(recordTimerRef.current); recordTimerRef.current = null; }
-    chunksRef.current = [];
-    setRecording(false);
-    setRecordSeconds(0);
-  };
-
   const onEmojiClick = (e: EmojiClickData) => {
     setText((t) => t + e.emoji);
-    inputRef.current?.focus();
+  };
+
+  const toggleEmojiKeyboard = () => {
+    setEmojiOpen((open) => {
+      if (open) requestAnimationFrame(() => inputRef.current?.focus());
+      else inputRef.current?.blur();
+      return !open;
+    });
   };
 
   const headerName = other?.full_name || "Seller";
@@ -389,16 +265,11 @@ function ChatPage() {
 
           {messages.map((m) => {
             const mine = m.sender_id === user.id;
-            const hasAttach = !!m.attachment_url;
+            if (!m.content) return null;
             return (
               <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm ${mine ? "bg-primary text-primary-foreground" : "bg-card text-foreground"}`}>
-                  {hasAttach && (
-                    <div className={m.content ? "mb-2" : ""}>
-                      <AttachmentView msg={m} />
-                    </div>
-                  )}
-                  {m.content && <p className="whitespace-pre-wrap px-1">{m.content}</p>}
+                  <p className="whitespace-pre-wrap px-1">{m.content}</p>
                   <p className={`mt-1 px-1 text-[10px] ${mine ? "opacity-80" : "text-muted-foreground"}`}>
                     {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </p>
@@ -440,79 +311,37 @@ function ChatPage() {
           )}
 
           {emojiOpen && (
-            <div className="relative">
-              <div className="absolute bottom-full left-0 z-50 mb-2">
-                <EmojiPicker
-                  onEmojiClick={onEmojiClick}
-                  theme={themeResolved === "dark" ? EmojiTheme.DARK : EmojiTheme.LIGHT}
-                  height={350}
-                  width={320}
-                  lazyLoadEmojis
-                />
-              </div>
+            <div className="overflow-hidden rounded-lg border bg-background">
+              <EmojiPicker
+                onEmojiClick={onEmojiClick}
+                theme={themeResolved === "dark" ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                height={320}
+                width="100%"
+                lazyLoadEmojis
+              />
             </div>
           )}
 
-          {recording ? (
-            <div className="flex items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-2">
-              <span className="relative flex h-3 w-3">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-destructive" />
-              </span>
-              <span className="flex-1 text-sm font-medium text-destructive">Recording… {formatDuration(recordSeconds * 1000)}</span>
-              <Button variant="ghost" size="sm" onClick={cancelRecording}>
-                <Trash2 className="mr-1 h-4 w-4" />Cancel
-              </Button>
-              <Button size="sm" onClick={stopRecording} disabled={recordSeconds < 1}>
-                <Square className="mr-1 h-4 w-4" />Send
-              </Button>
-            </div>
-          ) : (
-            <form
-              onSubmit={(e) => { e.preventDefault(); send(text); }}
-              className="flex items-center gap-1"
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => { onPickImage(e.target.files?.[0]); e.target.value = ""; }}
-              />
-              <button type="button" aria-label="Emoji" onClick={() => setEmojiOpen((v) => !v)}
-                className={`rounded-full p-2 hover:bg-muted ${emojiOpen ? "bg-muted text-primary" : "text-muted-foreground"}`}>
-                {emojiOpen ? <X className="h-5 w-5" /> : <Smile className="h-5 w-5" />}
-              </button>
-              <button type="button" aria-label="Attach image" onClick={() => fileInputRef.current?.click()}
-                className="rounded-full p-2 text-muted-foreground hover:bg-muted">
-                <Paperclip className="h-5 w-5" />
-              </button>
-              <Input
-                ref={inputRef}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Write your message here"
-                disabled={sending || isSelfChat || otherBanned}
-                onFocus={() => setEmojiOpen(false)}
-              />
-              {text.trim() ? (
-                <Button type="submit" disabled={!text.trim() || sending || isSelfChat || otherBanned} size="icon">
-                  <Send className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button type="button" size="icon" onClick={startRecording} disabled={isSelfChat || otherBanned} aria-label="Record voice note">
-                  <Mic className="h-4 w-4" />
-                </Button>
-              )}
-            </form>
-          )}
-
-          {/* Mobile-friendly attach-photo shortcut row, visible when nothing typed */}
-          {!recording && !text.trim() && (
-            <p className="text-center text-[10px] text-muted-foreground">
-              <ImageIcon className="mr-1 inline h-3 w-3" /> Tap the clip to send a photo · Tap mic to record a voice note
-            </p>
-          )}
+          <form
+            onSubmit={(e) => { e.preventDefault(); send(text); }}
+            className="flex items-center gap-1"
+          >
+            <button type="button" aria-label={emojiOpen ? "Show keyboard" : "Show emoji"} onClick={toggleEmojiKeyboard}
+              className={`rounded-full p-2 hover:bg-muted ${emojiOpen ? "bg-muted text-primary" : "text-muted-foreground"}`}>
+              {emojiOpen ? <Keyboard className="h-5 w-5" /> : <Smile className="h-5 w-5" />}
+            </button>
+            <Input
+              ref={inputRef}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Write your message here"
+              disabled={sending || isSelfChat || otherBanned}
+              onFocus={() => setEmojiOpen(false)}
+            />
+            <Button type="submit" disabled={!text.trim() || sending || isSelfChat || otherBanned} size="icon">
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
         </div>
       </div>
     </div>

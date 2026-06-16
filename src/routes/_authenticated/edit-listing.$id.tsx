@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, uploadFile } from "@/lib/storage";
 import { toast } from "sonner";
-import { Loader2, Upload, X, Star, Trash2 } from "lucide-react";
+import { GripVertical, Loader2, Upload, X, Star, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/edit-listing/$id")({
   component: EditListing,
@@ -33,6 +33,8 @@ function EditListing() {
   const [f, setF] = useState<any>(null);
   const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
   const [newPhotos, setNewPhotos] = useState<File[]>([]);
+  const [newCoverIndex, setNewCoverIndex] = useState<number | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [photosBusy, setPhotosBusy] = useState(false);
 
   useEffect(() => {
@@ -73,6 +75,32 @@ function EditListing() {
     setNewPhotos([...newPhotos, ...Array.from(files).slice(0, remaining)]);
   };
 
+  const removeNewPhoto = (index: number) => {
+    setNewPhotos((current) => current.filter((_, i) => i !== index));
+    setNewCoverIndex((current) => {
+      if (current === null) return null;
+      if (current === index) return null;
+      return index < current ? current - 1 : current;
+    });
+  };
+
+  const moveNewPhoto = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= newPhotos.length || to >= newPhotos.length) return;
+    setNewPhotos((current) => {
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+    setNewCoverIndex((current) => {
+      if (current === null) return null;
+      if (current === from) return to;
+      if (from < current && to >= current) return current - 1;
+      if (from > current && to <= current) return current + 1;
+      return current;
+    });
+  };
+
   const setCover = async (photoId: string) => {
     setPhotosBusy(true);
     try {
@@ -82,6 +110,7 @@ function EditListing() {
       await supabase.from("listing_photos").update({ is_cover: true }).eq("id", photoId);
       await supabase.from("listings").update({ cover_photo_url: target.url }).eq("id", id);
       setExistingPhotos(existingPhotos.map(p => ({ ...p, is_cover: p.id === photoId })));
+      setNewCoverIndex(null);
       toast.success("Cover updated");
     } catch (e: any) { toast.error(e.message ?? "Failed"); }
     finally { setPhotosBusy(false); }
@@ -122,11 +151,15 @@ function EditListing() {
           const ext = file.name.split(".").pop() || "jpg";
           const path = `${user.id}/${id}/${startOrder + i}-${Date.now()}.${ext}`;
           await uploadFile("listing-photos", path, file);
-          rows.push({ listing_id: id, url: path, is_cover: existingPhotos.length === 0 && i === 0, sort_order: startOrder + i });
+          rows.push({ listing_id: id, url: path, is_cover: newCoverIndex === i || (existingPhotos.length === 0 && newCoverIndex === null && i === 0), sort_order: startOrder + i });
+        }
+        if (newCoverIndex !== null || existingPhotos.length === 0) {
+          await supabase.from("listing_photos").update({ is_cover: false }).eq("listing_id", id);
         }
         await supabase.from("listing_photos").insert(rows);
-        if (existingPhotos.length === 0 && rows.length) {
-          await supabase.from("listings").update({ cover_photo_url: rows[0].url }).eq("id", id);
+        const coverRow = newCoverIndex !== null ? rows[newCoverIndex] : (existingPhotos.length === 0 ? rows[0] : null);
+        if (coverRow) {
+          await supabase.from("listings").update({ cover_photo_url: coverRow.url }).eq("id", id);
         }
       }
 
@@ -166,15 +199,17 @@ function EditListing() {
             <Label>Photos ({totalPhotos}/10) — tap a photo to set it as cover</Label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {existingPhotos.map((p) => (
-                <div key={p.id} className="group relative aspect-square overflow-hidden rounded-md border">
-                  {p.src ? <img src={p.src} alt="" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-muted" />}
-                  {p.is_cover && (
-                    <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">Cover</span>
+                <div key={p.id} className={`group relative aspect-square overflow-hidden rounded-md border ${p.is_cover && newCoverIndex === null ? "ring-2 ring-primary" : ""}`}>
+                  <button type="button" disabled={photosBusy} onClick={() => setCover(p.id)} className="h-full w-full" aria-label="Set as cover photo">
+                    {p.src ? <img src={p.src} alt="Listing preview" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-muted" />}
+                  </button>
+                  {p.is_cover && newCoverIndex === null && (
+                    <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground"><Star className="mr-0.5 inline h-3 w-3" />Cover</span>
                   )}
                   <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     {!p.is_cover && (
                       <button type="button" disabled={photosBusy} onClick={() => setCover(p.id)}
-                        className="rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white"><Star className="inline h-3 w-3" /> Cover</button>
+                        className="rounded bg-foreground/70 px-1.5 py-0.5 text-[10px] text-background"><Star className="inline h-3 w-3" /> Cover</button>
                     )}
                     <button type="button" disabled={photosBusy} onClick={() => deletePhoto(p.id)}
                       className="ml-auto rounded bg-destructive px-1.5 py-0.5 text-[10px] text-destructive-foreground"><Trash2 className="inline h-3 w-3" /></button>
@@ -182,11 +217,26 @@ function EditListing() {
                 </div>
               ))}
               {newPhotos.map((file, i) => (
-                <div key={`new-${i}`} className="relative aspect-square overflow-hidden rounded-md border border-dashed">
-                  <img src={URL.createObjectURL(file)} alt="" className="h-full w-full object-cover" />
-                  <span className="absolute left-1 top-1 rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-accent-foreground">New</span>
-                  <button type="button" onClick={() => setNewPhotos(newPhotos.filter((_, j) => j !== i))}
-                    className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"><X className="h-3 w-3" /></button>
+                <div
+                  key={`new-${file.name}-${i}`}
+                  className={`relative aspect-square overflow-hidden rounded-md border border-dashed ${newCoverIndex === i ? "ring-2 ring-primary" : ""}`}
+                  draggable
+                  onDragStart={() => setDragIndex(i)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); if (dragIndex !== null) moveNewPhoto(dragIndex, i); setDragIndex(null); }}
+                  onDragEnd={() => setDragIndex(null)}
+                >
+                  <button type="button" onClick={() => setNewCoverIndex(i)} className="h-full w-full" aria-label="Set new photo as cover">
+                    <img src={URL.createObjectURL(file)} alt="Listing preview" className="h-full w-full object-cover" />
+                  </button>
+                  <span className="absolute bottom-1 left-1 rounded bg-background/85 px-1 py-0.5 text-muted-foreground shadow-sm">
+                    <GripVertical className="h-3 w-3" />
+                  </span>
+                  <span className={`absolute left-1 top-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${newCoverIndex === i ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
+                    {newCoverIndex === i ? <><Star className="mr-0.5 inline h-3 w-3" />Cover</> : "New"}
+                  </span>
+                  <button type="button" onClick={() => removeNewPhoto(i)}
+                    className="absolute right-1 top-1 rounded-full bg-foreground/70 p-1 text-background"><X className="h-3 w-3" /></button>
                 </div>
               ))}
               {totalPhotos < 10 && (
