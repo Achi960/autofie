@@ -150,11 +150,15 @@ function EditListing() {
           const ext = file.name.split(".").pop() || "jpg";
           const path = `${user.id}/${id}/${startOrder + i}-${Date.now()}.${ext}`;
           await uploadFile("listing-photos", path, file);
-          rows.push({ listing_id: id, url: path, is_cover: existingPhotos.length === 0 && i === 0, sort_order: startOrder + i });
+          rows.push({ listing_id: id, url: path, is_cover: newCoverIndex === i || (existingPhotos.length === 0 && newCoverIndex === null && i === 0), sort_order: startOrder + i });
+        }
+        if (newCoverIndex !== null || existingPhotos.length === 0) {
+          await supabase.from("listing_photos").update({ is_cover: false }).eq("listing_id", id);
         }
         await supabase.from("listing_photos").insert(rows);
-        if (existingPhotos.length === 0 && rows.length) {
-          await supabase.from("listings").update({ cover_photo_url: rows[0].url }).eq("id", id);
+        const coverRow = newCoverIndex !== null ? rows[newCoverIndex] : (existingPhotos.length === 0 ? rows[0] : null);
+        if (coverRow) {
+          await supabase.from("listings").update({ cover_photo_url: coverRow.url }).eq("id", id);
         }
       }
 
