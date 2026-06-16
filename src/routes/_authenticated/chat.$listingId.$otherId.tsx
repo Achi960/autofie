@@ -132,11 +132,11 @@ function ChatPage() {
         .eq("listing_id", listingId).eq("sender_id", otherId).eq("receiver_id", user.id).eq("read", false);
 
       const [{ data: prof }, { data: lst }] = await Promise.all([
-        supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at").eq("id", otherId).maybeSingle(),
+        supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at, is_banned").eq("id", otherId).maybeSingle(),
         supabase.from("listings").select("id, title, price, cover_photo_url").eq("id", listingId).maybeSingle(),
       ]);
       if (!alive) return;
-      setOther((prof as any) ?? { full_name: null, phone: null, avatar_url: null, last_seen_at: null });
+      setOther((prof as any) ?? { full_name: null, phone: null, avatar_url: null, last_seen_at: null, is_banned: false });
       setListing(lst ?? null);
       if ((prof as any)?.avatar_url) {
         const url = await signedUrl("avatars", (prof as any).avatar_url);
