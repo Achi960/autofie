@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, uploadFile } from "@/lib/storage";
 import { toast } from "sonner";
-import { Loader2, Upload, X, Star, Trash2 } from "lucide-react";
+import { GripVertical, Loader2, Upload, X, Star, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/edit-listing/$id")({
   component: EditListing,
@@ -33,6 +33,8 @@ function EditListing() {
   const [f, setF] = useState<any>(null);
   const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
   const [newPhotos, setNewPhotos] = useState<File[]>([]);
+  const [newCoverIndex, setNewCoverIndex] = useState<number | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [photosBusy, setPhotosBusy] = useState(false);
 
   useEffect(() => {
@@ -71,6 +73,32 @@ function EditListing() {
     const remaining = 10 - totalPhotos;
     if (remaining <= 0) { toast.error("Max 10 photos"); return; }
     setNewPhotos([...newPhotos, ...Array.from(files).slice(0, remaining)]);
+  };
+
+  const removeNewPhoto = (index: number) => {
+    setNewPhotos((current) => current.filter((_, i) => i !== index));
+    setNewCoverIndex((current) => {
+      if (current === null) return null;
+      if (current === index) return null;
+      return index < current ? current - 1 : current;
+    });
+  };
+
+  const moveNewPhoto = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= newPhotos.length || to >= newPhotos.length) return;
+    setNewPhotos((current) => {
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+    setNewCoverIndex((current) => {
+      if (current === null) return null;
+      if (current === from) return to;
+      if (from < current && to >= current) return current - 1;
+      if (from > current && to <= current) return current + 1;
+      return current;
+    });
   };
 
   const setCover = async (photoId: string) => {
