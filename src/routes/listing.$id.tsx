@@ -25,6 +25,8 @@ function ListingDetail() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+  const [showWa, setShowWa] = useState(false);
 
   useEffect(() => {
     let alive = true;
