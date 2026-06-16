@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import { SiteFooter } from "@/components/SiteFooter";
 import { LegalPage, Section } from "@/components/LegalPage";
 import { ShieldCheck, MapPin, Users, Sparkles } from "lucide-react";
 
@@ -80,7 +79,7 @@ function AboutPage() {
           </p>
         </Section>
       </LegalPage>
-      <SiteFooter />
+
     </div>
   );
 }

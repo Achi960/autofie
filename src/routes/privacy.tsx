@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import { SiteFooter } from "@/components/SiteFooter";
 import { LegalPage, Section } from "@/components/LegalPage";
 
 export const Route = createFileRoute("/privacy")({
@@ -89,7 +88,7 @@ function PrivacyPage() {
           <p>For privacy questions or to exercise your rights, email <a className="text-primary hover:underline" href="mailto:autofieghana@gmail.com">autofieghana@gmail.com</a>.</p>
         </Section>
       </LegalPage>
-      <SiteFooter />
+
     </div>
   );
 }

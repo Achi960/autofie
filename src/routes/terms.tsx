@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import { SiteFooter } from "@/components/SiteFooter";
 import { LegalPage, Section } from "@/components/LegalPage";
 
 export const Route = createFileRoute("/terms")({
@@ -85,7 +84,7 @@ function TermsPage() {
           <p>Questions? Email <a className="text-primary hover:underline" href="mailto:autofieghana@gmail.com">autofieghana@gmail.com</a>.</p>
         </Section>
       </LegalPage>
-      <SiteFooter />
+
     </div>
   );
 }

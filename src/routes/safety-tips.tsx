@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import { SiteFooter } from "@/components/SiteFooter";
 import { LegalPage, Section } from "@/components/LegalPage";
 import { AlertTriangle, ShieldCheck, Eye, Banknote, Car, Users } from "lucide-react";
 
@@ -77,7 +76,7 @@ function SafetyPage() {
           </p>
         </Section>
       </LegalPage>
-      <SiteFooter />
+
     </div>
   );
 }
