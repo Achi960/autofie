@@ -103,6 +103,32 @@ function ListingDetail() {
   const onCallClick = () => {
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
   };
+  const onRevealPhone = () => {
+    if (!user) { toast.error("Sign in to view contact"); navigate({ to: "/auth" }); return; }
+    setShowPhone(true);
+    supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
+  };
+  const onRevealWa = () => {
+    if (!user) { toast.error("Sign in to view WhatsApp"); navigate({ to: "/auth" }); return; }
+    setShowWa(true);
+    supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
+  };
+  const onShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const shareData = { title: listing.title, text: `Check out this ${listing.title} on AutoFie`, url };
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share(shareData);
+        return;
+      }
+    } catch { /* user cancelled */ return; }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.error("Could not share link");
+    }
+  };
   const onChatClick = () => {
     if (!user) { toast.error("Sign in to chat"); return; }
     if (user.id === listing.user_id) { toast.error("You can't message yourself"); return; }
