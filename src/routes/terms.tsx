@@ -7,7 +7,12 @@ export const Route = createFileRoute("/terms")({
     meta: [
       { title: "Terms & Conditions — AutoFie" },
       { name: "description", content: "The rules for using AutoFie, Ghana's verified vehicle marketplace. Read our terms covering accounts, listings, conduct, payments and disputes." },
+      { property: "og:title", content: "Terms & Conditions — AutoFie" },
+      { property: "og:description", content: "The rules for using AutoFie — accounts, listings, conduct, payments and disputes." },
+      { property: "og:url", content: "https://autofie.com/terms" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://autofie.com/terms" }],
   }),
   component: TermsPage,
 });

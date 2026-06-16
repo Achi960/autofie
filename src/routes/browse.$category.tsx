@@ -25,13 +25,26 @@ export const Route = createFileRoute("/browse/$category")({
   validateSearch: searchSchema,
   head: ({ params }) => {
     const cat = CATEGORIES.find((c) => c.slug === params.category)?.label ?? "Listings";
+    const url = `https://autofie.com/browse/${params.category}`;
     return {
       meta: [
         { title: `${cat} for sale in Ghana — AutoFie` },
         { name: "description", content: `Browse ${cat.toLowerCase()} from verified dealers across Ghana on AutoFie.` },
         { property: "og:title", content: `${cat} for sale in Ghana — AutoFie` },
         { property: "og:description", content: `Browse ${cat.toLowerCase()} from verified dealers across Ghana on AutoFie.` },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "website" },
       ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [{
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: `${cat} for sale in Ghana`,
+          url,
+        }),
+      }],
     };
   },
   component: BrowsePage,

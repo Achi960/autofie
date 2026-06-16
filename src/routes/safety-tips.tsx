@@ -8,7 +8,12 @@ export const Route = createFileRoute("/safety-tips")({
     meta: [
       { title: "Safety Tips — Buy and sell vehicles safely in Ghana | AutoFie" },
       { name: "description", content: "Practical safety tips for buying and selling vehicles in Ghana on AutoFie — meet in public, verify documents, inspect in daylight, and avoid common scams." },
+      { property: "og:title", content: "Safety Tips — AutoFie" },
+      { property: "og:description", content: "Meet in public, verify documents, inspect in daylight, avoid common scams." },
+      { property: "og:url", content: "https://autofie.com/safety-tips" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://autofie.com/safety-tips" }],
   }),
   component: SafetyPage,
 });

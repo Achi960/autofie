@@ -17,7 +17,24 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Browse thousands of cars, trucks, motorcycles and vehicle parts from verified dealers across Ghana. Post your ad free." },
       { property: "og:title", content: "AutoFie — Buy and sell cars in Ghana" },
       { property: "og:description", content: "Browse thousands of cars, trucks, motorcycles and vehicle parts from verified dealers across Ghana." },
+      { property: "og:url", content: "https://autofie.com/" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://autofie.com/" }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "AutoFie",
+        url: "https://autofie.com/",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: "https://autofie.com/browse/cars?q={search_term_string}",
+          "query-input": "required name=search_term_string",
+        },
+      }),
+    }],
   }),
   component: HomePage,
 });
