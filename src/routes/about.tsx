@@ -8,12 +8,26 @@ export const Route = createFileRoute("/about")({
     meta: [
       { title: "About AutoFie — Ghana's Verified Vehicle Marketplace" },
       { name: "description", content: "AutoFie is a Ghana-built marketplace connecting verified vehicle dealers with serious buyers across all 16 regions. Learn our story, mission and values." },
-      { property: "og:title", content: "About AutoFie" },
+      { property: "og:title", content: "About AutoFie — Ghana's Verified Vehicle Marketplace" },
       { property: "og:description", content: "A Ghana-built, identity-verified vehicle marketplace headquartered in Kumasi." },
       { property: "og:url", content: "https://autofie.com/about" },
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: "https://autofie.com/about" }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "AutoFie",
+        url: "https://autofie.com/",
+        logo: "https://autofie.com/favicon.ico",
+        description: "Ghana's verified vehicle marketplace. Every dealer is identity-checked with Ghana Card.",
+        foundingLocation: { "@type": "Place", name: "Kumasi, Ashanti Region, Ghana" },
+        areaServed: { "@type": "Country", name: "Ghana" },
+        email: "autofieghana@gmail.com",
+      }),
+    }],
   }),
   component: AboutPage,
 });

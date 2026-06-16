@@ -168,7 +168,7 @@ function HomePage() {
               className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
             >
               <div className="overflow-hidden rounded-lg">
-                <img src={c.image} alt={c.label} width={72} height={72} loading="lazy" className="h-16 w-16 object-cover transition-transform duration-300 group-hover:scale-110" />
+                <img src={c.image} alt={`Browse ${c.label} listings on AutoFie`} width={72} height={72} loading="lazy" className="h-16 w-16 object-cover transition-transform duration-300 group-hover:scale-110" />
               </div>
               <span className="text-xs font-medium text-foreground">{c.label}</span>
             </Link>

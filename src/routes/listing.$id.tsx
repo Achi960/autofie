@@ -55,11 +55,11 @@ export const Route = createFileRoute("/listing/$id")({
     } : null;
     return {
       meta: [
-        { title: title.slice(0, 70) },
+        { title: title.slice(0, 60) },
         { name: "description", content: description },
-        { property: "og:title", content: title.slice(0, 70) },
+        { property: "og:title", content: title.slice(0, 60) },
         { property: "og:description", content: description },
-        { property: "og:type", content: "website" },
+        { property: "og:type", content: "product" },
         { property: "og:url", content: url },
       ],
       links: [{ rel: "canonical", href: url }],

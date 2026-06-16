@@ -14,6 +14,27 @@ export const Route = createFileRoute("/contact")({
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: "https://autofie.com/contact" }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        name: "AutoFie",
+        url: "https://autofie.com/",
+        email: "autofieghana@gmail.com",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Kumasi",
+          addressRegion: "Ashanti Region",
+          addressCountry: "GH",
+        },
+        areaServed: { "@type": "Country", name: "Ghana" },
+        openingHoursSpecification: [
+          { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday"], opens: "08:00", closes: "18:00" },
+          { "@type": "OpeningHoursSpecification", dayOfWeek: "Saturday", opens: "09:00", closes: "14:00" },
+        ],
+      }),
+    }],
   }),
   component: ContactPage,
 });

@@ -112,7 +112,7 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
-            <div className="flex-1"><Outlet /></div>
+            <main className="flex-1"><Outlet /></main>
             <SiteFooter />
           </div>
           <Toaster richColors position="top-center" />

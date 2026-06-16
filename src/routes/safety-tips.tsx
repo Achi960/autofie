@@ -3,21 +3,6 @@ import { Navbar } from "@/components/Navbar";
 import { LegalPage, Section } from "@/components/LegalPage";
 import { AlertTriangle, ShieldCheck, Eye, Banknote, Car, Users } from "lucide-react";
 
-export const Route = createFileRoute("/safety-tips")({
-  head: () => ({
-    meta: [
-      { title: "Safety Tips — Buy and sell vehicles safely in Ghana | AutoFie" },
-      { name: "description", content: "Practical safety tips for buying and selling vehicles in Ghana on AutoFie — meet in public, verify documents, inspect in daylight, and avoid common scams." },
-      { property: "og:title", content: "Safety Tips — AutoFie" },
-      { property: "og:description", content: "Meet in public, verify documents, inspect in daylight, avoid common scams." },
-      { property: "og:url", content: "https://autofie.com/safety-tips" },
-      { property: "og:type", content: "website" },
-    ],
-    links: [{ rel: "canonical", href: "https://autofie.com/safety-tips" }],
-  }),
-  component: SafetyPage,
-});
-
 const tips = [
   { icon: ShieldCheck, t: "Deal only with verified dealers", d: "Look for the verification badge before you commit. Verified dealers have provided a valid Ghana Card." },
   { icon: Eye, t: "Inspect in person, in daylight", d: "Always view the vehicle in person, in good light. Bring a mechanic friend if you can." },
@@ -26,6 +11,34 @@ const tips = [
   { icon: Banknote, t: "Use bank transfer, not cash", d: "Avoid carrying large amounts of cash. Prefer bank transfer or mobile money to a verified business account." },
   { icon: AlertTriangle, t: "Never pay before you see the car", d: "Deposits before a viewing are the #1 scam. No genuine dealer will demand money to 'reserve' a vehicle sight unseen." },
 ];
+
+export const Route = createFileRoute("/safety-tips")({
+  head: () => ({
+    meta: [
+      { title: "Safety Tips — Buy & sell vehicles safely | AutoFie" },
+      { name: "description", content: "Practical safety tips for buying and selling vehicles in Ghana on AutoFie — meet in public, verify documents, inspect in daylight, and avoid common scams." },
+      { property: "og:title", content: "Safety Tips — AutoFie" },
+      { property: "og:description", content: "Meet in public, verify documents, inspect in daylight, avoid common scams." },
+      { property: "og:url", content: "https://autofie.com/safety-tips" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: "https://autofie.com/safety-tips" }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: tips.map((tip) => ({
+          "@type": "Question",
+          name: tip.t,
+          acceptedAnswer: { "@type": "Answer", text: tip.d },
+        })),
+      }),
+    }],
+  }),
+  component: SafetyPage,
+});
+
 
 function SafetyPage() {
   return (
