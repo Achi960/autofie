@@ -177,84 +177,16 @@ function ChatPage() {
     setPhoneInput("");
   };
 
-  // ---- Image upload ----
-  const onPickImage = async (file: File | null | undefined) => {
-    if (!file || !user) return;
-    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be under 8MB"); return; }
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const path = `${listingId}/${user.id}/${crypto.randomUUID()}.${ext}`;
-    try {
-      await uploadFile("chat-media", path, file);
-      await sendMessage({ body: text, attachment: { path, type: "image" } });
-    } catch (e: any) {
-      toast.error(e.message ?? "Upload failed");
-    }
-  };
-
-  // ---- Voice recording ----
-  const startRecording = async () => {
-    if (recording || !user) return;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
-      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-      recorderRef.current = rec;
-      chunksRef.current = [];
-      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      rec.onstop = async () => {
-        const durationMs = Date.now() - recordStartRef.current;
-        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
-        stream.getTracks().forEach((t) => t.stop());
-        if (recordTimerRef.current) { clearInterval(recordTimerRef.current); recordTimerRef.current = null; }
-        setRecording(false);
-        setRecordSeconds(0);
-        if (blob.size < 1000) { toast.error("Recording too short"); return; }
-        const ext = (rec.mimeType || "audio/webm").includes("mp4") ? "m4a" : "webm";
-        const path = `${listingId}/${user.id}/${crypto.randomUUID()}.${ext}`;
-        try {
-          const file = new File([blob], `voice.${ext}`, { type: blob.type });
-          await uploadFile("chat-media", path, file);
-          await sendMessage({ attachment: { path, type: "audio", durationMs } });
-        } catch (e: any) {
-          toast.error(e.message ?? "Upload failed");
-        }
-      };
-      recordStartRef.current = Date.now();
-      setRecording(true);
-      setRecordSeconds(0);
-      recordTimerRef.current = setInterval(() => {
-        const s = Math.floor((Date.now() - recordStartRef.current) / 1000);
-        setRecordSeconds(s);
-        if (s >= 120) stopRecording(); // hard cap 2 min
-      }, 250);
-      rec.start();
-    } catch (e: any) {
-      toast.error(e.message ?? "Microphone permission denied");
-    }
-  };
-
-  const stopRecording = () => {
-    const rec = recorderRef.current;
-    if (rec && rec.state !== "inactive") rec.stop();
-  };
-
-  const cancelRecording = () => {
-    const rec = recorderRef.current;
-    if (!rec) return;
-    rec.ondataavailable = null;
-    rec.onstop = null;
-    if (rec.state !== "inactive") rec.stop();
-    rec.stream?.getTracks?.().forEach((t) => t.stop());
-    if (recordTimerRef.current) { clearInterval(recordTimerRef.current); recordTimerRef.current = null; }
-    chunksRef.current = [];
-    setRecording(false);
-    setRecordSeconds(0);
-  };
-
   const onEmojiClick = (e: EmojiClickData) => {
     setText((t) => t + e.emoji);
-    inputRef.current?.focus();
+  };
+
+  const toggleEmojiKeyboard = () => {
+    setEmojiOpen((open) => {
+      if (open) requestAnimationFrame(() => inputRef.current?.focus());
+      else inputRef.current?.blur();
+      return !open;
+    });
   };
 
   const headerName = other?.full_name || "Seller";
