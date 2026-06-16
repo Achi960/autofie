@@ -110,6 +110,7 @@ function EditListing() {
       await supabase.from("listing_photos").update({ is_cover: true }).eq("id", photoId);
       await supabase.from("listings").update({ cover_photo_url: target.url }).eq("id", id);
       setExistingPhotos(existingPhotos.map(p => ({ ...p, is_cover: p.id === photoId })));
+      setNewCoverIndex(null);
       toast.success("Cover updated");
     } catch (e: any) { toast.error(e.message ?? "Failed"); }
     finally { setPhotosBusy(false); }
@@ -202,13 +203,13 @@ function EditListing() {
                   <button type="button" disabled={photosBusy || p.is_cover} onClick={() => setCover(p.id)} className="h-full w-full" aria-label="Set as cover photo">
                     {p.src ? <img src={p.src} alt="Listing preview" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-muted" />}
                   </button>
-                  {p.is_cover && (
+                  {p.is_cover && newCoverIndex === null && (
                     <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground"><Star className="mr-0.5 inline h-3 w-3" />Cover</span>
                   )}
                   <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     {!p.is_cover && (
                       <button type="button" disabled={photosBusy} onClick={() => setCover(p.id)}
-                        className="rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white"><Star className="inline h-3 w-3" /> Cover</button>
+                        className="rounded bg-foreground/70 px-1.5 py-0.5 text-[10px] text-background"><Star className="inline h-3 w-3" /> Cover</button>
                     )}
                     <button type="button" disabled={photosBusy} onClick={() => deletePhoto(p.id)}
                       className="ml-auto rounded bg-destructive px-1.5 py-0.5 text-[10px] text-destructive-foreground"><Trash2 className="inline h-3 w-3" /></button>
