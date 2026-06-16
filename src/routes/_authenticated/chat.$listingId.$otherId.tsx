@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Phone, Send, Smile, Paperclip, Mic, Square, Trash2, X, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Phone, Send, Smile, Paperclip, Mic, Square, Trash2, X, Image as ImageIcon, ShieldAlert, Ban } from "lucide-react";
+import { ReportButton } from "@/components/ReportButton";
 import EmojiPicker, { type EmojiClickData, Theme as EmojiTheme } from "emoji-picker-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -95,7 +96,7 @@ function ChatPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [other, setOther] = useState<{ full_name: string | null; phone: string | null; avatar_url: string | null; last_seen_at: string | null } | null>(null);
+  const [other, setOther] = useState<{ full_name: string | null; phone: string | null; avatar_url: string | null; last_seen_at: string | null; is_banned: boolean } | null>(null);
   const [otherAvatar, setOtherAvatar] = useState<string | null>(null);
   const [listing, setListing] = useState<{ id: string; title: string; price: number; cover_photo_url: string | null } | null>(null);
   const [askPhone, setAskPhone] = useState(false);
