@@ -267,6 +267,7 @@ function ListingDetail() {
                   <Heart className={`mr-2 h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
                   {saved ? "Saved" : "Save"}
                 </Button>
+                <ReportButton reportedUserId={listing.user_id} listingId={listing.id} variant="ghost" className="w-full" label="Report this listing" />
               </div>
             </div>
           </aside>
