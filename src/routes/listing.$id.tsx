@@ -140,7 +140,7 @@ function ListingDetail() {
     }
   };
   const onChatClick = () => {
-    if (!user) { toast.error("Sign in to chat"); return; }
+    if (!user) { openAuth("choose"); return; }
     if (user.id === listing.user_id) { toast.error("You can't message yourself"); return; }
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "chat_clicks" });
     navigate({ to: "/chat/$listingId/$otherId", params: { listingId: listing.id, otherId: listing.user_id } });
