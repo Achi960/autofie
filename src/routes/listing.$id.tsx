@@ -28,6 +28,9 @@ function ListingDetail() {
   const [notFound, setNotFound] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [showWa, setShowWa] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authStep, setAuthStep] = useState<"choose" | "signin" | "register">("choose");
+  const openAuth = (step: "choose" | "signin" | "register" = "choose") => { setAuthStep(step); setAuthOpen(true); };
 
   useEffect(() => {
     let alive = true;
