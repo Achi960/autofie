@@ -513,6 +513,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      find_user_by_identifier: {
+        Args: { _identifier: string }
+        Returns: {
+          email: string
+          full_name: string
+          phone: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -525,6 +534,16 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      list_admins: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          granted_at: string
+          phone: string
+          user_id: string
+        }[]
+      }
       list_my_threads: {
         Args: never
         Returns: {
