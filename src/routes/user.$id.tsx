@@ -16,6 +16,49 @@ import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/user/$id")({
+  loader: async ({ params }) => {
+    const [{ data: p }, { data: d }] = await Promise.all([
+      supabase.from("profiles").select("full_name").eq("id", params.id).maybeSingle(),
+      supabase.from("dealer_profiles").select("business_name, region, district, status").eq("user_id", params.id).maybeSingle(),
+    ]);
+    const name = (d?.business_name as string | undefined) || (p?.full_name as string | undefined) || null;
+    const region = (d?.region as string | undefined) || null;
+    const district = (d?.district as string | undefined) || null;
+    const verified = d?.status === "approved";
+    return { name, region, district, verified };
+  },
+  head: ({ params, loaderData }) => {
+    const url = `https://autofie.com/user/${params.id}`;
+    const name = loaderData?.name || "Dealer";
+    const loc = [loaderData?.district, loaderData?.region].filter(Boolean).join(", ");
+    const verifiedTxt = loaderData?.verified ? "Verified dealer" : "Dealer";
+    const title = `${name} — ${verifiedTxt}${loc ? ` in ${loc}` : ""} on AutoFie`;
+    const description = `Browse vehicle listings from ${name}${loc ? `, based in ${loc}` : ""}${loaderData?.verified ? ", a Ghana Card verified dealer" : ""} on AutoFie.`;
+    return {
+      meta: [
+        { title: title.slice(0, 60) },
+        { name: "description", content: description.slice(0, 160) },
+        { property: "og:title", content: title.slice(0, 60) },
+        { property: "og:description", content: description.slice(0, 160) },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [{
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          mainEntity: {
+            "@type": loaderData?.verified ? "Organization" : "Person",
+            name,
+            url,
+            ...(loc ? { address: { "@type": "PostalAddress", addressLocality: loaderData?.district || undefined, addressRegion: loaderData?.region || undefined, addressCountry: "GH" } } : {}),
+          },
+        }),
+      }],
+    };
+  },
   component: UserProfilePage,
 });
 
