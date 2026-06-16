@@ -114,12 +114,12 @@ function ListingDetail() {
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
   };
   const onRevealPhone = () => {
-    if (!user) { toast.error("Sign in to view contact"); navigate({ to: "/auth" }); return; }
+    if (!user) { openAuth("choose"); return; }
     setShowPhone(true);
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
   };
   const onRevealWa = () => {
-    if (!user) { toast.error("Sign in to view WhatsApp"); navigate({ to: "/auth" }); return; }
+    if (!user) { openAuth("choose"); return; }
     setShowWa(true);
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
   };
