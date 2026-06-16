@@ -57,25 +57,24 @@ function UserProfilePage() {
     let alive = true;
     (async () => {
       setLoading(true);
-      const [{ data: p }, { data: d }, { data: lst }, { count: fcount }, { count: gcount }] = await Promise.all([
+      const [{ data: p }, { data: d }, { data: lst }, { data: fcount }, { data: gcount }] = await Promise.all([
         supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at, created_at").eq("id", id).maybeSingle(),
         supabase.from("dealer_profiles").select("business_name, region, district, status").eq("user_id", id).maybeSingle(),
         supabase.from("listings").select("id, title, price, region, condition, transmission, mileage, cover_photo_url").eq("user_id", id).eq("status", "approved").order("created_at", { ascending: false }),
-        supabase.from("follows").select("id", { count: "exact", head: true }).eq("dealer_id", id),
-        supabase.from("follows").select("id", { count: "exact", head: true }).eq("follower_id", id),
+        supabase.rpc("follower_count", { _user_id: id }),
+        supabase.rpc("following_count", { _user_id: id }),
       ]);
       if (!alive) return;
       if (!p) { setNotFound(true); setLoading(false); return; }
       setProfile(p as Profile);
       setDealer((d as Dealer) ?? null);
       setListings((lst as ListingCardData[]) ?? []);
-      setFollowers(fcount ?? 0);
-      setFollowing(gcount ?? 0);
+      setFollowers((fcount as unknown as number) ?? 0);
+      setFollowing((gcount as unknown as number) ?? 0);
       if (p.avatar_url) signedUrl("avatars", p.avatar_url).then((u) => alive && setAvatarSrc(u));
 
       if (user && !isSelf) {
-        const { data: f } = await supabase.from("follows").select("id")
-          .eq("follower_id", user.id).eq("dealer_id", id).maybeSingle();
+        const { data: f } = await supabase.rpc("is_following", { _follower: user.id, _dealer: id });
         if (alive) setIsFollowing(!!f);
       }
       setLoading(false);
