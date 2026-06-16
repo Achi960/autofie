@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { AuthModal } from "@/components/AuthModal";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, signedUrls } from "@/lib/storage";
 import { formatGHS, formatMileage, initialsOf } from "@/lib/format";
@@ -27,6 +28,9 @@ function ListingDetail() {
   const [notFound, setNotFound] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [showWa, setShowWa] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authStep, setAuthStep] = useState<"choose" | "signin" | "register">("choose");
+  const openAuth = (step: "choose" | "signin" | "register" = "choose") => { setAuthStep(step); setAuthOpen(true); };
 
   useEffect(() => {
     let alive = true;
@@ -110,12 +114,12 @@ function ListingDetail() {
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
   };
   const onRevealPhone = () => {
-    if (!user) { toast.error("Sign in to view contact"); navigate({ to: "/auth" }); return; }
+    if (!user) { openAuth("choose"); return; }
     setShowPhone(true);
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
   };
   const onRevealWa = () => {
-    if (!user) { toast.error("Sign in to view WhatsApp"); navigate({ to: "/auth" }); return; }
+    if (!user) { openAuth("choose"); return; }
     setShowWa(true);
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "phone_clicks" });
   };
@@ -136,7 +140,7 @@ function ListingDetail() {
     }
   };
   const onChatClick = () => {
-    if (!user) { toast.error("Sign in to chat"); return; }
+    if (!user) { openAuth("choose"); return; }
     if (user.id === listing.user_id) { toast.error("You can't message yourself"); return; }
     supabase.rpc("increment_listing_stat", { _listing_id: id, _field: "chat_clicks" });
     navigate({ to: "/chat/$listingId/$otherId", params: { listingId: listing.id, otherId: listing.user_id } });
@@ -268,6 +272,7 @@ function ListingDetail() {
           </aside>
         </div>
       </div>
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} initialStep={authStep} />
     </div>
   );
 }
