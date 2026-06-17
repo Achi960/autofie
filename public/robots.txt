@@ -1,4 +1,16 @@
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /account-settings
+Disallow: /complete-dealer-profile
+Disallow: /messages
+Disallow: /my-listings
+Disallow: /my-saved
+Disallow: /notifications
+Disallow: /submit-listing
+Disallow: /edit-listing/
+Disallow: /chat/
+Disallow: /admin/
+Disallow: /review/
 
 Sitemap: https://autofie.com/sitemap.xml
