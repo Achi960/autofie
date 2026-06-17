@@ -168,6 +168,7 @@ function BrowsePage() {
           <FilterSelect label="Condition" value={search.condition} options={CONDITIONS as unknown as string[]} onChange={(v) => setFilter("condition", v)} />
           <div className="col-span-2 flex items-center gap-2 sm:col-span-2 lg:col-span-2">
             <Input
+              aria-label="Minimum price"
               type="number"
               inputMode="numeric"
               placeholder="Min price"
@@ -175,6 +176,7 @@ function BrowsePage() {
               onBlur={(e) => setFilter("min_price", e.target.value || undefined)}
             />
             <Input
+              aria-label="Maximum price"
               type="number"
               inputMode="numeric"
               placeholder="Max price"
