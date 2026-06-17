@@ -25,6 +25,9 @@ const STATIC_ENTRIES: SitemapEntry[] = [
   { path: "/complete-dealer-profile", changefreq: "monthly", priority: "0.3" },
   { path: "/messages", changefreq: "weekly", priority: "0.3" },
   { path: "/my-listings", changefreq: "weekly", priority: "0.3" },
+  { path: "/my-saved", changefreq: "weekly", priority: "0.3" },
+  { path: "/notifications", changefreq: "weekly", priority: "0.3" },
+  { path: "/submit-listing", changefreq: "monthly", priority: "0.4" },
   { path: "/terms", changefreq: "yearly", priority: "0.3" },
   { path: "/privacy", changefreq: "yearly", priority: "0.3" },
 ];
@@ -52,6 +55,36 @@ export const Route = createFileRoute("/sitemap.xml")({
                 lastmod: (row as any).updated_at?.slice(0, 10),
                 changefreq: "weekly",
                 priority: "0.7",
+              });
+            }
+
+            // Dealer profile pages: /user/$id (verified dealers)
+            const { data: dealers } = await sb
+              .from("dealer_profiles")
+              .select("user_id, updated_at")
+              .eq("status", "verified")
+              .limit(5000);
+            for (const row of dealers ?? []) {
+              entries.push({
+                path: `/user/${(row as any).user_id}`,
+                lastmod: (row as any).updated_at?.slice(0, 10),
+                changefreq: "weekly",
+                priority: "0.5",
+              });
+            }
+
+            // Public review pages: /review/$id
+            const { data: reviews } = await sb
+              .from("reviews")
+              .select("id, updated_at")
+              .order("updated_at", { ascending: false })
+              .limit(5000);
+            for (const row of reviews ?? []) {
+              entries.push({
+                path: `/review/${(row as any).id}`,
+                lastmod: (row as any).updated_at?.slice(0, 10),
+                changefreq: "monthly",
+                priority: "0.4",
               });
             }
           }
