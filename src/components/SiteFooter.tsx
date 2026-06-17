@@ -24,7 +24,7 @@ export function SiteFooter() {
                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-extrabold">A</span>
                 <span className="text-lg font-extrabold tracking-tight">AutoFie</span>
               </div>
-              <p className="mt-3 text-sm text-white/75">
+              <p className="mt-3 text-sm text-white/90">
                 Ghana's verified vehicle marketplace. Built in Kumasi, trusted across all 16 regions.
               </p>
               <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
@@ -36,9 +36,9 @@ export function SiteFooter() {
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Company</h3>
               <ul className="mt-4 space-y-2.5 text-sm">
-                <li><Link to="/about" className="text-white/85 hover:text-white">About us</Link></li>
-                <li><Link to="/contact" className="text-white/85 hover:text-white">Contact us</Link></li>
-                <li><Link to="/safety-tips" className="text-white/85 hover:text-white">Safety tips</Link></li>
+                <li><Link to="/about" className="text-white/95 hover:text-white">About us</Link></li>
+                <li><Link to="/contact" className="text-white/95 hover:text-white">Contact us</Link></li>
+                <li><Link to="/safety-tips" className="text-white/95 hover:text-white">Safety tips</Link></li>
               </ul>
             </div>
 
@@ -46,8 +46,8 @@ export function SiteFooter() {
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Legal</h3>
               <ul className="mt-4 space-y-2.5 text-sm">
-                <li><Link to="/terms" className="text-white/85 hover:text-white">Terms &amp; Conditions</Link></li>
-                <li><Link to="/privacy" className="text-white/85 hover:text-white">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="text-white/95 hover:text-white">Terms &amp; Conditions</Link></li>
+                <li><Link to="/privacy" className="text-white/95 hover:text-white">Privacy Policy</Link></li>
               </ul>
             </div>
 
@@ -55,11 +55,11 @@ export function SiteFooter() {
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Reach us</h3>
               <ul className="mt-4 space-y-2.5 text-sm">
-                <li className="flex items-start gap-2 text-white/85">
+                <li className="flex items-start gap-2 text-white/95">
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <a href="mailto:autofieghana@gmail.com" className="hover:text-white break-all">autofieghana@gmail.com</a>
                 </li>
-                <li className="flex items-start gap-2 text-white/85">
+                <li className="flex items-start gap-2 text-white/95">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <span>Headquartered in Kumasi, Ashanti Region, Ghana</span>
                 </li>
@@ -74,8 +74,8 @@ export function SiteFooter() {
           </div>
 
           <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row">
-            <p className="text-xs text-white/70">© {new Date().getFullYear()} AutoFie Ghana. All rights reserved.</p>
-            <div className="flex items-center gap-2 text-xs text-white/70">
+            <p className="text-xs text-white/90">© {new Date().getFullYear()} AutoFie Ghana. All rights reserved.</p>
+            <div className="flex items-center gap-2 text-xs text-white/90">
               <span aria-hidden className="inline-block h-3 w-5 overflow-hidden rounded-sm">
                 <span className="flex h-full w-full flex-col">
                   <span className="h-1/3 bg-[#CE1126]" />
