@@ -130,6 +130,7 @@ function HomePage() {
           <form onSubmit={onSearch} className="mx-auto mt-7 flex max-w-xl items-center gap-2 rounded-full bg-white p-1.5 shadow-xl ring-1 ring-black/5">
             <Search className="ml-3 h-5 w-5 shrink-0 text-muted-foreground" />
             <Input
+              aria-label="Search vehicles"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search Toyota, Honda, Hyundai…"
