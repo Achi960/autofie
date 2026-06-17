@@ -13,10 +13,10 @@ import { shuffleByMinute } from "@/lib/shuffle";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AutoFie — Buy and sell cars in Ghana" },
-      { name: "description", content: "Browse thousands of cars, trucks, motorcycles and vehicle parts from verified dealers across Ghana. Post your ad free." },
-      { property: "og:title", content: "AutoFie — Buy and sell cars in Ghana" },
-      { property: "og:description", content: "Browse thousands of cars, trucks, motorcycles and vehicle parts from verified dealers across Ghana." },
+      { title: "AutoFie — Buy and Sell Cars in Ghana" },
+      { name: "description", content: "Browse thousands of cars, trucks, motorbikes and vehicle parts from identity-verified dealers across all 16 regions of Ghana. Post your ad free." },
+      { property: "og:title", content: "AutoFie — Buy and Sell Cars in Ghana" },
+      { property: "og:description", content: "Thousands of cars, trucks, motorbikes and parts from identity-verified dealers across Ghana. Post your ad free." },
       { property: "og:url", content: "https://autofie.com/" },
       { property: "og:type", content: "website" },
     ],
