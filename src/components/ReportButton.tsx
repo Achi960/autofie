@@ -68,7 +68,7 @@ export function ReportButton({ reportedUserId, listingId, variant = "outline", s
               </div>
             ))}
           </RadioGroup>
-          <Textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} placeholder="Optional: add more details…" maxLength={800} />
+          <Textarea aria-label="Report details" value={details} onChange={(e) => setDetails(e.target.value)} rows={3} placeholder="Optional: add more details…" maxLength={800} />
           <Button onClick={submit} disabled={busy} variant="destructive">{busy ? "Sending…" : "Submit report"}</Button>
         </DialogContent>
       </Dialog>
