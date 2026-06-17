@@ -25,6 +25,9 @@ const STATIC_ENTRIES: SitemapEntry[] = [
   { path: "/complete-dealer-profile", changefreq: "monthly", priority: "0.3" },
   { path: "/messages", changefreq: "weekly", priority: "0.3" },
   { path: "/my-listings", changefreq: "weekly", priority: "0.3" },
+  { path: "/my-saved", changefreq: "weekly", priority: "0.3" },
+  { path: "/notifications", changefreq: "weekly", priority: "0.3" },
+  { path: "/submit-listing", changefreq: "monthly", priority: "0.4" },
   { path: "/terms", changefreq: "yearly", priority: "0.3" },
   { path: "/privacy", changefreq: "yearly", priority: "0.3" },
 ];
