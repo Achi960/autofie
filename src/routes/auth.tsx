@@ -15,9 +15,14 @@ export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }).partial(),
   head: () => ({
     meta: [
-      { title: "Sign in — AutoFie" },
-      { name: "description", content: "Sign in or create an AutoFie account with your email or phone and password." },
+      { title: "Sign in or Sign up — AutoFie" },
+      { name: "description", content: "Sign in or create your AutoFie account with email or phone to post listings, message dealers and save vehicles across Ghana." },
+      { property: "og:title", content: "Sign in or Sign up — AutoFie" },
+      { property: "og:description", content: "Create your AutoFie account to post listings, message dealers and save vehicles across Ghana." },
+      { property: "og:url", content: "https://autofie.com/auth" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://autofie.com/auth" }],
   }),
   component: AuthPage,
 });
