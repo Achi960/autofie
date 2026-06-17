@@ -314,7 +314,7 @@ function HomePage() {
             >
               {isVerifiedDealer ? "Post a listing" : isPendingDealer ? "Application under review" : "Become a dealer"}
             </Button>
-            <p className="mt-3 text-xs text-white/75">Free to join · Verified with Ghana Card · No commission on sales</p>
+            <p className="mt-3 text-xs text-white/90">Free to join · Verified with Ghana Card · No commission on sales</p>
           </div>
         </div>
       </section>
