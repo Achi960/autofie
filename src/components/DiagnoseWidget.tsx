@@ -1,8 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useRouterState, Link } from "@tanstack/react-router";
-import { Stethoscope, X, Send, Loader2, Wrench, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Stethoscope, X, Send, Loader2, Wrench, AlertTriangle, CheckCircle2, Mic, Square } from "lucide-react";
 import { diagnoseVehicle, type DiagnoseResult } from "@/lib/diagnose.functions";
+import { transcribeAudio } from "@/lib/transcribe.functions";
+
+type Lang = "english" | "twi" | "hausa";
+const LANGS: { value: Lang; label: string }[] = [
+  { value: "english", label: "English" },
+  { value: "twi", label: "Twi" },
+  { value: "hausa", label: "Hausa" },
+];
 
 type Msg =
   | { role: "bot"; kind: "text"; text: string }
@@ -23,9 +31,17 @@ export function DiagnoseWidget() {
   const [messages, setMessages] = useState<Msg[]>(INTRO_MESSAGES);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [language, setLanguage] = useState<Lang>("english");
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
   const diagnose = useServerFn(diagnoseVehicle);
+  const transcribe = useServerFn(transcribeAudio);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   // First-visit greeting bubble
   useEffect(() => {
