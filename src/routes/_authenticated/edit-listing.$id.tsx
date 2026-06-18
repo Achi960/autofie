@@ -145,10 +145,16 @@ function EditListing() {
     try {
       // Upload any new photos first
       if (newPhotos.length && user) {
+        // Resolve shop name for the watermark
+        const { data: dp } = await supabase.from("dealer_profiles").select("business_name").eq("user_id", user.id).maybeSingle();
+        const { data: pr } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+        const shopName = dp?.business_name || pr?.full_name || "";
+        const stamped = await watermarkImages(newPhotos, shopName);
+
         const startOrder = existingPhotos.length;
         const rows = [] as { listing_id: string; url: string; is_cover: boolean; sort_order: number }[];
-        for (let i = 0; i < newPhotos.length; i++) {
-          const file = newPhotos[i];
+        for (let i = 0; i < stamped.length; i++) {
+          const file = stamped[i];
           const ext = file.name.split(".").pop() || "jpg";
           const path = `${user.id}/${id}/${startOrder + i}-${Date.now()}.${ext}`;
           await uploadFile("listing-photos", path, file);
