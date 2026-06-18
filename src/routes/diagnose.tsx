@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Stethoscope, Upload, AlertTriangle, Wrench, CheckCircle2, X, Loader2, ShieldAlert } from "lucide-react";
+import { Stethoscope, Upload, AlertTriangle, Wrench, CheckCircle2, X, Loader2, ShieldAlert, ScanLine, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
