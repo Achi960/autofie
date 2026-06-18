@@ -58,7 +58,7 @@ function SubmitListing() {
 
   const cfg = useMemo(() => fieldsFor(category), [category]);
 
-  // Auto-populate name + phone from the signed-in user's profile
+  // Auto-populate name + phone from the signed-in user's profile, and shop name from dealer profile
   useEffect(() => {
     if (!user) return;
     let alive = true;
@@ -67,6 +67,11 @@ function SubmitListing() {
         if (!alive || !data) return;
         if (!contactName && data.full_name) setContactName(data.full_name);
         if (!contactPhone && data.phone) setContactPhone(data.phone);
+      });
+    supabase.from("dealer_profiles").select("business_name").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        if (data.business_name) setShopName(data.business_name);
       });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
