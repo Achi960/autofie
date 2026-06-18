@@ -20,8 +20,8 @@ type Msg =
 const GREETED_KEY = "autofie_diagnose_greeted_v1";
 
 const INTRO_MESSAGES: Msg[] = [
-  { role: "bot", kind: "text", text: "👋 Hi there! I'm **AutoFie Diagnose** — your free AI car doctor." },
-  { role: "bot", kind: "text", text: "Tell me what's wrong with your vehicle — a noise, warning light, smell, or anything off — and I'll suggest a likely cause, safe DIY steps, and when to see a mechanic. 🚗🔧" },
+  { role: "bot", kind: "text", text: "👋 Hi, I'm **AutoFie Diagnose** — your professional AI car doctor." },
+  { role: "bot", kind: "text", text: "Describe the symptom (noise, smell, warning light) **or paste an OBD-II code** like `P0420`, `U0100`, `B1318`. I'll explain the meaning, causes, fixes, and link you to wiring diagrams & repair guides. 🚗🔧" },
 ];
 
 export function DiagnoseWidget() {
