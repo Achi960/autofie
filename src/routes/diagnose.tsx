@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Stethoscope, Upload, AlertTriangle, Wrench, CheckCircle2, X, Loader2, ShieldAlert } from "lucide-react";
+import { Stethoscope, Upload, AlertTriangle, Wrench, CheckCircle2, X, Loader2, ShieldAlert, ScanLine, ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -133,6 +133,14 @@ function DiagnosePage() {
             Describe a noise, warning light, smell or performance issue — or upload a photo — and get an
             instant AI-powered diagnosis with safe DIY steps and clear mechanic recommendations.
           </p>
+
+          <Link
+            to="/vin"
+            className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-110"
+          >
+            <ScanLine className="h-4 w-4" /> Free VIN Decoder &amp; History Check
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
