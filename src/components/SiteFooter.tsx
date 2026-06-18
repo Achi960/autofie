@@ -39,6 +39,8 @@ export function SiteFooter() {
                 <li><Link to="/about" className="text-white/95 hover:text-white">About us</Link></li>
                 <li><Link to="/contact" className="text-white/95 hover:text-white">Contact us</Link></li>
                 <li><Link to="/safety-tips" className="text-white/95 hover:text-white">Safety tips</Link></li>
+                <li><Link to="/diagnose" className="text-white/95 hover:text-white">AI Diagnose</Link></li>
+                <li><Link to="/vin" className="text-white/95 hover:text-white">VIN Decoder</Link></li>
               </ul>
             </div>
 

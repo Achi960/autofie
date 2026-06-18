@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VinRouteImport } from './routes/vin'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SafetyTipsRouteImport } from './routes/safety-tips'
@@ -40,6 +41,11 @@ import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
 import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authenticated/admin/listing.$id'
 
+const VinRoute = VinRouteImport.update({
+  id: '/vin',
+  path: '/vin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/safety-tips': typeof SafetyTipsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/vin': typeof VinRoute
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
   '/messages': typeof AuthenticatedMessagesRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/safety-tips': typeof SafetyTipsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/vin': typeof VinRoute
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
   '/messages': typeof AuthenticatedMessagesRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/safety-tips': typeof SafetyTipsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/vin': typeof VinRoute
   '/_authenticated/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/_authenticated/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/safety-tips'
     | '/sitemap.xml'
     | '/terms'
+    | '/vin'
     | '/account-settings'
     | '/complete-dealer-profile'
     | '/messages'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/safety-tips'
     | '/sitemap.xml'
     | '/terms'
+    | '/vin'
     | '/account-settings'
     | '/complete-dealer-profile'
     | '/messages'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/safety-tips'
     | '/sitemap.xml'
     | '/terms'
+    | '/vin'
     | '/_authenticated/account-settings'
     | '/_authenticated/complete-dealer-profile'
     | '/_authenticated/messages'
@@ -406,6 +418,7 @@ export interface RootRouteChildren {
   SafetyTipsRoute: typeof SafetyTipsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  VinRoute: typeof VinRoute
   BrowseCategoryRoute: typeof BrowseCategoryRoute
   ListingIdRoute: typeof ListingIdRoute
   ReviewIdRoute: typeof ReviewIdRoute
@@ -414,6 +427,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vin': {
+      id: '/vin'
+      path: '/vin'
+      fullPath: '/vin'
+      preLoaderRoute: typeof VinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -681,6 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   SafetyTipsRoute: SafetyTipsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  VinRoute: VinRoute,
   BrowseCategoryRoute: BrowseCategoryRoute,
   ListingIdRoute: ListingIdRoute,
   ReviewIdRoute: ReviewIdRoute,
