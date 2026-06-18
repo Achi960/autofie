@@ -50,6 +50,7 @@ function SubmitListing() {
   const [negotiable, setNegotiable] = useState(false);
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [shopName, setShopName] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [coverIndex, setCoverIndex] = useState(0);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
