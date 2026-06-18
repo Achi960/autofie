@@ -368,6 +368,42 @@ function ResultBlock({ result }: { result: DiagnoseResult }) {
       </span>
       <p className="text-sm leading-relaxed text-foreground">{result.likelyCause}</p>
 
+      {result.obdCodes.length > 0 && (
+        <div className="space-y-2">
+          {result.obdCodes.map((c, i) => (
+            <div key={i} className="rounded-md border border-border bg-background/60 p-2">
+              <p className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                <ScanLine className="h-3.5 w-3.5 text-primary" />
+                <span className="font-mono text-primary">{c.code}</span>
+                <span className="font-normal text-muted-foreground">— {c.system}</span>
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-foreground">{c.meaning}</p>
+              {c.commonCauses.length > 0 && (
+                <div className="mt-1.5">
+                  <p className="text-[11px] font-semibold text-foreground">Common causes:</p>
+                  <ul className="ml-4 list-disc text-[11px] text-muted-foreground">
+                    {c.commonCauses.slice(0, 5).map((x, j) => <li key={j}>{x}</li>)}
+                  </ul>
+                </div>
+              )}
+              {c.fixes.length > 0 && (
+                <div className="mt-1.5">
+                  <p className="text-[11px] font-semibold text-foreground">How to fix:</p>
+                  <ol className="ml-4 list-decimal text-[11px] text-muted-foreground">
+                    {c.fixes.slice(0, 5).map((x, j) => <li key={j}>{x}</li>)}
+                  </ol>
+                </div>
+              )}
+              {c.estimatedRepairCost && (
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  <span className="font-semibold text-foreground">Est. repair:</span> {c.estimatedRepairCost}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {result.diySteps.length > 0 && (
         <div>
           <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
@@ -387,6 +423,26 @@ function ResultBlock({ result }: { result: DiagnoseResult }) {
           <p className="mt-0.5 text-xs leading-relaxed text-foreground">
             {result.mechanicReason || "This issue needs a qualified mechanic."}
           </p>
+        </div>
+      )}
+
+      {result.references.length > 0 && (
+        <div>
+          <p className="text-[11px] font-semibold text-foreground">Learn more:</p>
+          <ul className="mt-1 space-y-0.5">
+            {result.references.map((r, i) => (
+              <li key={i}>
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                >
+                  <ExternalLink className="h-3 w-3" /> {r.title}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </>
