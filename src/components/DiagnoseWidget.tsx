@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useRouterState, Link } from "@tanstack/react-router";
-import { Stethoscope, X, Send, Loader2, Wrench, AlertTriangle, CheckCircle2, Mic, Square } from "lucide-react";
+import { Stethoscope, X, Send, Loader2, Wrench, AlertTriangle, CheckCircle2, Mic, Square, ScanLine, ExternalLink } from "lucide-react";
 import { diagnoseVehicle, type DiagnoseResult } from "@/lib/diagnose.functions";
 import { transcribeAudio } from "@/lib/transcribe.functions";
 
@@ -20,8 +20,8 @@ type Msg =
 const GREETED_KEY = "autofie_diagnose_greeted_v1";
 
 const INTRO_MESSAGES: Msg[] = [
-  { role: "bot", kind: "text", text: "👋 Hi there! I'm **AutoFie Diagnose** — your free AI car doctor." },
-  { role: "bot", kind: "text", text: "Tell me what's wrong with your vehicle — a noise, warning light, smell, or anything off — and I'll suggest a likely cause, safe DIY steps, and when to see a mechanic. 🚗🔧" },
+  { role: "bot", kind: "text", text: "👋 Hi, I'm **AutoFie Diagnose** — your professional AI car doctor." },
+  { role: "bot", kind: "text", text: "Describe the symptom (noise, smell, warning light) **or paste an OBD-II code** like `P0420`, `U0100`, `B1318`. I'll explain the meaning, causes, fixes, and link you to wiring diagrams & repair guides. 🚗🔧" },
 ];
 
 export function DiagnoseWidget() {
@@ -38,7 +38,7 @@ export function DiagnoseWidget() {
   const diagnose = useServerFn(diagnoseVehicle);
   const transcribe = useServerFn(transcribeAudio);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
@@ -274,16 +274,28 @@ export function DiagnoseWidget() {
 
             <form
               onSubmit={(e) => { e.preventDefault(); send(); }}
-              className="flex items-center gap-2 px-3 py-2"
+              className="flex items-end gap-2 px-3 py-2"
             >
-              <input
+              <textarea
                 ref={inputRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={recording ? "Listening…" : "Describe the problem or tap 🎤"}
-                aria-label="Describe your car problem"
-                className="flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-                maxLength={500}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  const el = e.currentTarget;
+                  el.style.height = "auto";
+                  el.style.height = Math.min(el.scrollHeight, 140) + "px";
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
+                placeholder={recording ? "Listening…" : "Describe the problem, or paste a code like P0420…"}
+                aria-label="Describe your car problem or paste an OBD code"
+                rows={1}
+                className="flex-1 resize-none rounded-2xl border border-input bg-background px-4 py-2 text-sm leading-snug text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 max-h-[140px] overflow-y-auto"
+                maxLength={2000}
               />
               <button
                 type="button"
@@ -356,6 +368,42 @@ function ResultBlock({ result }: { result: DiagnoseResult }) {
       </span>
       <p className="text-sm leading-relaxed text-foreground">{result.likelyCause}</p>
 
+      {result.obdCodes.length > 0 && (
+        <div className="space-y-2">
+          {result.obdCodes.map((c, i) => (
+            <div key={i} className="rounded-md border border-border bg-background/60 p-2">
+              <p className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                <ScanLine className="h-3.5 w-3.5 text-primary" />
+                <span className="font-mono text-primary">{c.code}</span>
+                <span className="font-normal text-muted-foreground">— {c.system}</span>
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-foreground">{c.meaning}</p>
+              {c.commonCauses.length > 0 && (
+                <div className="mt-1.5">
+                  <p className="text-[11px] font-semibold text-foreground">Common causes:</p>
+                  <ul className="ml-4 list-disc text-[11px] text-muted-foreground">
+                    {c.commonCauses.slice(0, 5).map((x, j) => <li key={j}>{x}</li>)}
+                  </ul>
+                </div>
+              )}
+              {c.fixes.length > 0 && (
+                <div className="mt-1.5">
+                  <p className="text-[11px] font-semibold text-foreground">How to fix:</p>
+                  <ol className="ml-4 list-decimal text-[11px] text-muted-foreground">
+                    {c.fixes.slice(0, 5).map((x, j) => <li key={j}>{x}</li>)}
+                  </ol>
+                </div>
+              )}
+              {c.estimatedRepairCost && (
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  <span className="font-semibold text-foreground">Est. repair:</span> {c.estimatedRepairCost}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {result.diySteps.length > 0 && (
         <div>
           <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
@@ -375,6 +423,26 @@ function ResultBlock({ result }: { result: DiagnoseResult }) {
           <p className="mt-0.5 text-xs leading-relaxed text-foreground">
             {result.mechanicReason || "This issue needs a qualified mechanic."}
           </p>
+        </div>
+      )}
+
+      {result.references.length > 0 && (
+        <div>
+          <p className="text-[11px] font-semibold text-foreground">Learn more:</p>
+          <ul className="mt-1 space-y-0.5">
+            {result.references.map((r, i) => (
+              <li key={i}>
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                >
+                  <ExternalLink className="h-3 w-3" /> {r.title}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </>

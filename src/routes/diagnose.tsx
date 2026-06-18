@@ -280,6 +280,50 @@ function DiagnosisResultCard({ result }: { result: DiagnoseResult }) {
         </div>
       )}
 
+      {result.obdCodes.length > 0 && (
+        <div className="mt-5 space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Diagnostic trouble codes</h3>
+          {result.obdCodes.map((c, i) => (
+            <div key={i} className="rounded-lg border border-border bg-background/60 p-4">
+              <p className="flex flex-wrap items-center gap-2 text-sm font-bold text-foreground">
+                <span className="rounded bg-primary/10 px-2 py-0.5 font-mono text-primary">{c.code}</span>
+                <span className="font-normal text-muted-foreground">{c.system}</span>
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-foreground">{c.meaning}</p>
+              {c.commonCauses.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-semibold text-foreground">Common causes</p>
+                  <ul className="ml-5 list-disc text-sm text-muted-foreground">
+                    {c.commonCauses.map((x, j) => <li key={j}>{x}</li>)}
+                  </ul>
+                </div>
+              )}
+              {c.symptoms.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-semibold text-foreground">Symptoms</p>
+                  <ul className="ml-5 list-disc text-sm text-muted-foreground">
+                    {c.symptoms.map((x, j) => <li key={j}>{x}</li>)}
+                  </ul>
+                </div>
+              )}
+              {c.fixes.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-semibold text-foreground">How to fix (step-by-step)</p>
+                  <ol className="ml-5 list-decimal text-sm text-muted-foreground">
+                    {c.fixes.map((x, j) => <li key={j}>{x}</li>)}
+                  </ol>
+                </div>
+              )}
+              {c.estimatedRepairCost && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">Estimated repair cost:</span> {c.estimatedRepairCost}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {result.seeMechanic && (
         <div className="mt-5 rounded-lg border border-primary/30 bg-primary/5 p-4">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
@@ -288,6 +332,26 @@ function DiagnosisResultCard({ result }: { result: DiagnoseResult }) {
           <p className="mt-1 text-sm leading-relaxed text-foreground">
             {result.mechanicReason || "This issue needs a qualified mechanic to inspect and repair safely."}
           </p>
+        </div>
+      )}
+
+      {result.references.length > 0 && (
+        <div className="mt-5">
+          <h3 className="text-sm font-semibold text-foreground">Reference guides & wiring diagrams</h3>
+          <ul className="mt-2 space-y-1.5">
+            {result.references.map((r, i) => (
+              <li key={i}>
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  {r.title} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
