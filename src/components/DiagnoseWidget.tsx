@@ -274,16 +274,28 @@ export function DiagnoseWidget() {
 
             <form
               onSubmit={(e) => { e.preventDefault(); send(); }}
-              className="flex items-center gap-2 px-3 py-2"
+              className="flex items-end gap-2 px-3 py-2"
             >
-              <input
+              <textarea
                 ref={inputRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={recording ? "Listening…" : "Describe the problem or tap 🎤"}
-                aria-label="Describe your car problem"
-                className="flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-                maxLength={500}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  const el = e.currentTarget;
+                  el.style.height = "auto";
+                  el.style.height = Math.min(el.scrollHeight, 140) + "px";
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
+                placeholder={recording ? "Listening…" : "Describe the problem, or paste a code like P0420…"}
+                aria-label="Describe your car problem or paste an OBD code"
+                rows={1}
+                className="flex-1 resize-none rounded-2xl border border-input bg-background px-4 py-2 text-sm leading-snug text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 max-h-[140px] overflow-y-auto"
+                maxLength={2000}
               />
               <button
                 type="button"
