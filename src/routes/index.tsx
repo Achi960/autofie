@@ -139,12 +139,20 @@ function HomePage() {
             <Button type="submit" size="sm" className="rounded-full px-5">Search</Button>
           </form>
 
-          <Link
-            to="/diagnose"
-            className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
-          >
-            <Stethoscope className="h-4 w-4" /> Free AI Car Diagnose tool
-          </Link>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <Link
+              to="/diagnose"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+            >
+              <Stethoscope className="h-4 w-4" /> Free AI Car Diagnose
+            </Link>
+            <Link
+              to="/vin"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-primary/90 px-4 py-2 text-sm font-semibold text-primary-foreground backdrop-blur transition hover:bg-primary"
+            >
+              <ScanLine className="h-4 w-4" /> Free VIN Decoder &amp; History
+            </Link>
+          </div>
 
           {/* Trust strip */}
           <div className="mt-8 grid grid-cols-3 gap-3 text-center text-[11px] sm:text-xs">
