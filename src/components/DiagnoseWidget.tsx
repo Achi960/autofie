@@ -90,6 +90,62 @@ export function DiagnoseWidget() {
     }
   };
 
+  const stopRecording = () => {
+    recorderRef.current?.state === "recording" && recorderRef.current.stop();
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setRecording(false);
+  };
+
+  const startRecording = async () => {
+    setMicError(null);
+    if (recording || transcribing) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mime = MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4")
+          ? "audio/mp4"
+          : "";
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      recorderRef.current = rec;
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+        if (blob.size < 1000) return;
+        setTranscribing(true);
+        try {
+          const buf = await blob.arrayBuffer();
+          // Base64 encode in chunks to avoid call-stack blowup
+          let binary = "";
+          const bytes = new Uint8Array(buf);
+          const CHUNK = 0x8000;
+          for (let i = 0; i < bytes.length; i += CHUNK) {
+            binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+          }
+          const audioBase64 = btoa(binary);
+          const format = blob.type.includes("mp4") ? "mp4" : blob.type.includes("ogg") ? "ogg" : "webm";
+          const { text } = await transcribe({ data: { audioBase64, format, language } });
+          if (text) setInput((prev) => (prev ? prev + " " : "") + text);
+          else setMicError("Couldn't hear anything. Try again closer to the mic.");
+        } catch (err) {
+          setMicError(err instanceof Error ? err.message : "Transcription failed.");
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      rec.start();
+      setRecording(true);
+    } catch {
+      setMicError("Microphone permission is required to record.");
+    }
+  };
+
+  const toggleMic = () => (recording ? stopRecording() : startRecording());
+
+
   return (
     <>
       {/* Greeting bubble */}
