@@ -13,6 +13,8 @@ import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DiagnoseWidget } from "@/components/DiagnoseWidget";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { registerPWA } from "@/lib/pwa-register";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -84,6 +86,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icons/icon-192.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "preload", as: "style", href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap", fetchpriority: "high" },
@@ -110,6 +115,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    registerPWA();
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -119,6 +127,7 @@ function RootComponent() {
             <SiteFooter />
           </div>
           <DiagnoseWidget />
+          <PWAInstallPrompt />
           <Toaster richColors position="top-center" />
         </AuthProvider>
       </ThemeProvider>
