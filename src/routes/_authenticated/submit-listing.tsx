@@ -164,9 +164,12 @@ function SubmitListing() {
       }).select().single();
       if (insErr) throw insErr;
 
+      // Watermark every photo with "Posted on AutoFie" + shop name before upload
+      const stamped = await watermarkImages(photos, shopName || contactName || "");
+
       const photoRows: { listing_id: string; url: string; is_cover: boolean; sort_order: number }[] = [];
-      for (let i = 0; i < photos.length; i++) {
-        const f = photos[i];
+      for (let i = 0; i < stamped.length; i++) {
+        const f = stamped[i];
         const ext = f.name.split(".").pop() || "jpg";
         const path = `${user.id}/${listing.id}/${i}-${Date.now()}.${ext}`;
         await uploadFile("listing-photos", path, f);
