@@ -38,7 +38,7 @@ export function DiagnoseWidget() {
   const diagnose = useServerFn(diagnoseVehicle);
   const transcribe = useServerFn(transcribeAudio);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
