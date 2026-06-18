@@ -133,6 +133,14 @@ function DiagnosePage() {
             Describe a noise, warning light, smell or performance issue — or upload a photo — and get an
             instant AI-powered diagnosis with safe DIY steps and clear mechanic recommendations.
           </p>
+
+          <Link
+            to="/vin"
+            className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-110"
+          >
+            <ScanLine className="h-4 w-4" /> Free VIN Decoder &amp; History Check
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
