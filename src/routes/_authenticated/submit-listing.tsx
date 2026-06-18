@@ -14,6 +14,7 @@ import { fieldsFor, brandLibFor, brandsFor } from "@/lib/category-fields";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
+import { watermarkImages } from "@/lib/watermark";
 import { toast } from "sonner";
 import { notifyAdminWhatsapp } from "@/lib/admin-notify.functions";
 import { GripVertical, Loader2, Star, Upload, X } from "lucide-react";
