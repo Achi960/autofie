@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useRouterState, Link } from "@tanstack/react-router";
-import { Stethoscope, X, Send, Loader2, Wrench, AlertTriangle, CheckCircle2, Mic, Square } from "lucide-react";
+import { Stethoscope, X, Send, Loader2, Wrench, AlertTriangle, CheckCircle2, Mic, Square, ScanLine, ExternalLink } from "lucide-react";
 import { diagnoseVehicle, type DiagnoseResult } from "@/lib/diagnose.functions";
 import { transcribeAudio } from "@/lib/transcribe.functions";
 
