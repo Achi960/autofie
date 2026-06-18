@@ -13,6 +13,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SafetyTipsRouteImport } from './routes/safety-tips'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as DiagnoseRouteImport } from './routes/diagnose'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
@@ -57,6 +58,11 @@ const SafetyTipsRoute = SafetyTipsRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiagnoseRoute = DiagnoseRouteImport.update({
+  id: '/diagnose',
+  path: '/diagnose',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -202,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/diagnose': typeof DiagnoseRoute
   '/privacy': typeof PrivacyRoute
   '/safety-tips': typeof SafetyTipsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/diagnose': typeof DiagnoseRoute
   '/privacy': typeof PrivacyRoute
   '/safety-tips': typeof SafetyTipsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/diagnose': typeof DiagnoseRoute
   '/privacy': typeof PrivacyRoute
   '/safety-tips': typeof SafetyTipsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -296,6 +305,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/diagnose'
     | '/privacy'
     | '/safety-tips'
     | '/sitemap.xml'
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/diagnose'
     | '/privacy'
     | '/safety-tips'
     | '/sitemap.xml'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/diagnose'
     | '/privacy'
     | '/safety-tips'
     | '/sitemap.xml'
@@ -389,6 +401,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  DiagnoseRoute: typeof DiagnoseRoute
   PrivacyRoute: typeof PrivacyRoute
   SafetyTipsRoute: typeof SafetyTipsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -427,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diagnose': {
+      id: '/diagnose'
+      path: '/diagnose'
+      fullPath: '/diagnose'
+      preLoaderRoute: typeof DiagnoseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -656,6 +676,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  DiagnoseRoute: DiagnoseRoute,
   PrivacyRoute: PrivacyRoute,
   SafetyTipsRoute: SafetyTipsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
