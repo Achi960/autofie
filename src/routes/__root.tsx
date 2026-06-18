@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme";
 import { SiteFooter } from "@/components/SiteFooter";
+import { DiagnoseWidget } from "@/components/DiagnoseWidget";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -117,6 +118,7 @@ function RootComponent() {
             <main className="flex-1"><Outlet /></main>
             <SiteFooter />
           </div>
+          <DiagnoseWidget />
           <Toaster richColors position="top-center" />
         </AuthProvider>
       </ThemeProvider>
