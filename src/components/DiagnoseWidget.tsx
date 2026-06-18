@@ -244,6 +244,34 @@ export function DiagnoseWidget() {
 
           {/* Footer / input */}
           <div className="border-t border-border bg-card">
+            {/* Language + mic status row */}
+            <div className="flex items-center justify-between gap-2 px-3 pt-2">
+              <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span>Voice language:</span>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as Lang)}
+                  disabled={recording || transcribing}
+                  className="rounded-md border border-input bg-background px-1.5 py-0.5 text-[11px] font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+                  aria-label="Voice transcription language"
+                >
+                  {LANGS.map((l) => (
+                    <option key={l.value} value={l.value}>{l.label}</option>
+                  ))}
+                </select>
+              </label>
+              {recording && (
+                <span className="flex items-center gap-1 text-[11px] font-medium text-primary">
+                  <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-primary" /> Recording…
+                </span>
+              )}
+              {transcribing && (
+                <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Transcribing…
+                </span>
+              )}
+            </div>
+
             <form
               onSubmit={(e) => { e.preventDefault(); send(); }}
               className="flex items-center gap-2 px-3 py-2"
@@ -252,11 +280,25 @@ export function DiagnoseWidget() {
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Describe the problem…"
+                placeholder={recording ? "Listening…" : "Describe the problem or tap 🎤"}
                 aria-label="Describe your car problem"
                 className="flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                 maxLength={500}
               />
+              <button
+                type="button"
+                onClick={toggleMic}
+                disabled={transcribing}
+                aria-label={recording ? "Stop recording" : "Record voice"}
+                title={recording ? "Stop recording" : "Record voice"}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition disabled:opacity-50 ${
+                  recording
+                    ? "bg-primary text-primary-foreground animate-pulse"
+                    : "bg-secondary text-white hover:bg-secondary/90"
+                }`}
+              >
+                {recording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </button>
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
@@ -266,6 +308,9 @@ export function DiagnoseWidget() {
                 <Send className="h-4 w-4" />
               </button>
             </form>
+            {micError && (
+              <p className="px-4 pb-1 text-[11px] text-primary">{micError}</p>
+            )}
             <p className="px-4 pb-2 text-[10px] text-muted-foreground">
               For photo uploads & detailed mode →{" "}
               <Link to="/diagnose" className="font-semibold text-primary hover:underline" onClick={() => setOpen(false)}>
@@ -273,6 +318,7 @@ export function DiagnoseWidget() {
               </Link>
             </p>
           </div>
+
         </div>
       )}
     </>
