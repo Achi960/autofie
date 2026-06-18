@@ -14,6 +14,7 @@ import { fieldsFor, brandLibFor, brandsFor } from "@/lib/category-fields";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
+import { watermarkImages } from "@/lib/watermark";
 import { toast } from "sonner";
 import { notifyAdminWhatsapp } from "@/lib/admin-notify.functions";
 import { GripVertical, Loader2, Star, Upload, X } from "lucide-react";
@@ -49,6 +50,7 @@ function SubmitListing() {
   const [negotiable, setNegotiable] = useState(false);
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [shopName, setShopName] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [coverIndex, setCoverIndex] = useState(0);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -56,7 +58,7 @@ function SubmitListing() {
 
   const cfg = useMemo(() => fieldsFor(category), [category]);
 
-  // Auto-populate name + phone from the signed-in user's profile
+  // Auto-populate name + phone from the signed-in user's profile, and shop name from dealer profile
   useEffect(() => {
     if (!user) return;
     let alive = true;
@@ -65,6 +67,11 @@ function SubmitListing() {
         if (!alive || !data) return;
         if (!contactName && data.full_name) setContactName(data.full_name);
         if (!contactPhone && data.phone) setContactPhone(data.phone);
+      });
+    supabase.from("dealer_profiles").select("business_name").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => {
+        if (!alive || !data) return;
+        if (data.business_name) setShopName(data.business_name);
       });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -157,9 +164,12 @@ function SubmitListing() {
       }).select().single();
       if (insErr) throw insErr;
 
+      // Watermark every photo with "Posted on AutoFie" + shop name before upload
+      const stamped = await watermarkImages(photos, shopName || contactName || "");
+
       const photoRows: { listing_id: string; url: string; is_cover: boolean; sort_order: number }[] = [];
-      for (let i = 0; i < photos.length; i++) {
-        const f = photos[i];
+      for (let i = 0; i < stamped.length; i++) {
+        const f = stamped[i];
         const ext = f.name.split(".").pop() || "jpg";
         const path = `${user.id}/${listing.id}/${i}-${Date.now()}.${ext}`;
         await uploadFile("listing-photos", path, f);
@@ -315,32 +325,61 @@ function SubmitListing() {
           </Field>
 
           <div className="space-y-2">
-            <Label>Photos ({photos.length}/10) — tap a photo to set it as cover</Label>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+            <Label>Photos ({photos.length}/10)</Label>
+            <p className="text-xs text-muted-foreground">
+              Tap <span className="font-medium text-foreground">Set as cover</span> to choose what buyers see first, or the
+              <span className="mx-1 inline-flex items-center"><X className="inline h-3 w-3" /></span>
+              to remove a photo. Every photo is automatically watermarked with
+              <span className="ml-1 font-medium text-foreground">"Posted on AutoFie · {shopName || contactName || "Your shop"}"</span>.
+            </p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {photos.map((f, i) => (
                 <div
                   key={`${f.name}-${i}`}
-                  className={`group relative aspect-square overflow-hidden rounded-md border ${i === coverIndex ? "ring-2 ring-primary" : ""}`}
+                  className={`group relative aspect-square overflow-hidden rounded-lg border-2 transition ${i === coverIndex ? "border-primary ring-2 ring-primary/40" : "border-border hover:border-primary/60"}`}
                   draggable
                   onDragStart={() => setDragIndex(i)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => { e.preventDefault(); if (dragIndex !== null) movePhoto(dragIndex, i); setDragIndex(null); }}
                   onDragEnd={() => setDragIndex(null)}
                 >
-                  <button type="button" onClick={() => setCoverIndex(i)} className="h-full w-full" aria-label="Set as cover photo">
-                    <img src={URL.createObjectURL(f)} alt="Listing preview" className="h-full w-full object-cover" />
+                  <img src={URL.createObjectURL(f)} alt="Listing preview" className="h-full w-full object-cover" />
+
+                  {/* Remove button — always visible */}
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(i)}
+                    aria-label="Remove photo"
+                    className="absolute right-1.5 top-1.5 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-md hover:scale-110 transition"
+                  >
+                    <X className="h-4 w-4" />
                   </button>
-                  <span className="absolute bottom-1 left-1 rounded bg-background/85 px-1 py-0.5 text-muted-foreground shadow-sm">
+
+                  {/* Drag handle */}
+                  <span className="absolute left-1.5 top-1.5 rounded bg-background/85 px-1 py-0.5 text-muted-foreground shadow-sm">
                     <GripVertical className="h-3 w-3" />
                   </span>
-                  <button type="button" onClick={() => removePhoto(i)}
-                    className="absolute right-1 top-1 rounded-full bg-foreground/70 p-1 text-background"><X className="h-3 w-3" /></button>
-                  {i === coverIndex && <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground"><Star className="mr-0.5 inline h-3 w-3" />Cover</span>}
+
+                  {/* Cover badge or Set-as-cover button */}
+                  {i === coverIndex ? (
+                    <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground shadow">
+                      <Star className="h-3 w-3 fill-current" /> Cover photo
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setCoverIndex(i)}
+                      className="absolute inset-x-0 bottom-0 bg-background/90 px-2 py-1.5 text-[11px] font-medium text-foreground opacity-0 transition group-hover:opacity-100 focus:opacity-100"
+                    >
+                      <Star className="mr-1 inline h-3 w-3" /> Set as cover
+                    </button>
+                  )}
                 </div>
               ))}
               {photos.length < 10 && (
-                <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed text-xs text-muted-foreground hover:border-primary">
-                  <Upload className="h-5 w-5" />Add
+                <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed text-xs text-muted-foreground hover:border-primary hover:text-primary">
+                  <Upload className="h-6 w-6" />
+                  Add photo
                   <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => onPickPhotos(e.target.files)} />
                 </label>
               )}
