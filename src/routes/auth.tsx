@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/lib/auth-context";
+import { signInWithPhone } from "@/lib/phone-auth.functions";
+
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
