@@ -73,14 +73,26 @@ function AuthPage() {
     setLoading(true);
     const id = parsed.data.identifier.trim();
     const isEmail = id.includes("@");
-    const creds = isEmail
-      ? { email: id, password: parsed.data.password }
-      : { phone: normalisePhone(id), password: parsed.data.password };
-    const { error } = await supabase.auth.signInWithPassword(creds as any);
+
+    if (!isEmail) {
+      const res = await signInWithPhone({ data: { phone: normalisePhone(id), password: parsed.data.password } });
+      if ("error" in res) { setLoading(false); toast.error(res.error); return; }
+      const { error: sessErr } = await supabase.auth.setSession({
+        access_token: res.access_token,
+        refresh_token: res.refresh_token,
+      });
+      setLoading(false);
+      if (sessErr) { toast.error(sessErr.message); return; }
+      toast.success("Signed in");
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email: id, password: parsed.data.password });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Signed in");
   };
+
 
   const doRegister = async () => {
     const parsed = registerSchema.safeParse({
