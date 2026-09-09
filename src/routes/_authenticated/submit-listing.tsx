@@ -215,17 +215,27 @@ function SubmitListing() {
           {cfg.make === "list" && (
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={cfg.makeLabel}>
-                <Select value={make} onValueChange={(v) => { setMake(v); setModel(""); }}>
-                  <SelectTrigger><SelectValue placeholder={`Select ${cfg.makeLabel.toLowerCase()}`} /></SelectTrigger>
-                  <SelectContent className="max-h-72">{brands.map(b => <SelectItem key={b} value={b}>{b.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
-                </Select>
+                <ComboBox
+                  value={make}
+                  onChange={(v) => { setMake(v); setModel(""); }}
+                  options={brands}
+                  noun={cfg.makeLabel.toLowerCase()}
+                  placeholder={`Select ${cfg.makeLabel.toLowerCase()}`}
+                />
               </Field>
               <Field label={cfg.modelLabel}>
-                <Select value={model} onValueChange={setModel} disabled={!make}>
-                  <SelectTrigger><SelectValue placeholder={`Select ${cfg.modelLabel.toLowerCase()}`} /></SelectTrigger>
-                  <SelectContent>{models.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
-                </Select>
+                <ComboBox
+                  value={model}
+                  onChange={setModel}
+                  options={models}
+                  disabled={!make}
+                  noun={cfg.modelLabel.toLowerCase()}
+                  placeholder={`Select ${cfg.modelLabel.toLowerCase()}`}
+                />
               </Field>
+              <p className="-mt-2 text-xs text-muted-foreground sm:col-span-2">
+                Can't find yours? Just type it in — we'll check the spelling for you before it goes live.
+              </p>
             </div>
           )}
           {cfg.make === "text" && (
