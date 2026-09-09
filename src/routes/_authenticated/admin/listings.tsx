@@ -100,10 +100,11 @@ function AdminListings() {
                   <p className="line-clamp-1 font-semibold">{r.title}</p>
                   <p className="text-sm font-semibold text-primary">{formatGHS(r.price)}</p>
                   <p className="text-xs text-muted-foreground">{r.profiles?.full_name} · {r.region}, {r.district}</p>
+                  {r.profiles?.public_code && <p className="text-xs font-mono text-muted-foreground">{r.profiles.public_code}</p>}
                   <p className={`text-xs font-medium ${w.cls}`}>Waiting {w.txt}</p>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Link to="/admin/listing/$id" params={{ id: r.id }}><Button size="sm" className="w-full">Review</Button></Link>
+                  <Link to="/admin/listing/$handle/$slug" params={{ handle: r.profiles?.handle || "seller", slug: r.slug || r.id }}><Button size="sm" className="w-full">Review</Button></Link>
                   <Button size="sm" onClick={() => approve(r)} className="bg-success text-success-foreground hover:bg-success/90">Approve</Button>
                   <Button size="sm" variant="outline" onClick={() => setReviewing(r)}>Reject</Button>
                 </div>
