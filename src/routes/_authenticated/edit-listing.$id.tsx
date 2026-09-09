@@ -255,30 +255,52 @@ function EditListing() {
             </div>
           </div>
 
-          <Field label="Title"><Input value={f.title ?? ""} onChange={(e) => set("title", e.target.value)} maxLength={120} /></Field>
+          <Field label="Title">
+            <Input value={f.title ?? ""} onChange={(e) => set("title", e.target.value)} maxLength={120} />
+            <button
+              type="button"
+              onClick={() => {
+                const auto = buildAutoTitle({ make: f.make, model: f.model, year: f.year, colour: f.colour });
+                if (auto) set("title", auto); else toast.error("Add make, model, year or colour first");
+              }}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Rebuild title from make, model, year and colour
+            </button>
+          </Field>
 
           {cfg.make !== "off" && (
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={cfg.makeLabel}>
                 {cfg.make === "list" ? (
-                  <Select value={f.make ?? ""} onValueChange={(v) => setF({ ...f, make: v, model: "" })}>
-                    <SelectTrigger><SelectValue placeholder={`Select ${cfg.makeLabel.toLowerCase()}`} /></SelectTrigger>
-                    <SelectContent className="max-h-72">{brands.map(b => <SelectItem key={b} value={b}>{b.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <ComboBox
+                    value={f.make ?? ""}
+                    onChange={(v) => setF({ ...f, make: v, model: "" })}
+                    options={brands}
+                    noun={cfg.makeLabel.toLowerCase()}
+                    placeholder={`Select ${cfg.makeLabel.toLowerCase()}`}
+                  />
                 ) : (
                   <Input value={f.make ?? ""} onChange={(e) => set("make", e.target.value)} maxLength={40} />
                 )}
               </Field>
               <Field label={cfg.modelLabel}>
                 {cfg.make === "list" ? (
-                  <Select value={f.model ?? ""} onValueChange={(v) => set("model", v)} disabled={!f.make}>
-                    <SelectTrigger><SelectValue placeholder={`Select ${cfg.modelLabel.toLowerCase()}`} /></SelectTrigger>
-                    <SelectContent>{models.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <ComboBox
+                    value={f.model ?? ""}
+                    onChange={(v) => set("model", v)}
+                    options={models}
+                    disabled={!f.make}
+                    noun={cfg.modelLabel.toLowerCase()}
+                    placeholder={`Select ${cfg.modelLabel.toLowerCase()}`}
+                  />
                 ) : (
                   <Input value={f.model ?? ""} onChange={(e) => set("model", e.target.value)} maxLength={40} />
                 )}
               </Field>
+              <p className="-mt-2 text-xs text-muted-foreground sm:col-span-2">
+                Can't find yours? Type it in — we'll check the spelling when you save.
+              </p>
             </div>
           )}
 
