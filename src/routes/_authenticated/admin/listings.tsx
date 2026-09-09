@@ -41,10 +41,10 @@ function AdminListings() {
     if (error) { console.error("admin listings load error", error); toast.error(error.message); setRows([]); return; }
     const list = data ?? [];
     const ids = Array.from(new Set(list.map((r: any) => r.user_id).filter(Boolean)));
-    let profMap: Record<string, { full_name: string | null; phone: string | null }> = {};
+    let profMap: Record<string, { full_name: string | null; phone: string | null; handle: string | null; public_code: string | null }> = {};
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, phone").in("id", ids);
-      profMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, { full_name: p.full_name, phone: p.phone }]));
+      const { data: profs } = await (supabase.from("profiles") as any).select("id, full_name, phone, handle, public_code").in("id", ids);
+      profMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, { full_name: p.full_name, phone: p.phone, handle: p.handle, public_code: p.public_code }]));
     }
     setRows(list.map((r: any) => ({ ...r, profiles: profMap[r.user_id] ?? null })));
   };
@@ -100,10 +100,11 @@ function AdminListings() {
                   <p className="line-clamp-1 font-semibold">{r.title}</p>
                   <p className="text-sm font-semibold text-primary">{formatGHS(r.price)}</p>
                   <p className="text-xs text-muted-foreground">{r.profiles?.full_name} · {r.region}, {r.district}</p>
+                  {r.profiles?.public_code && <p className="text-xs font-mono text-muted-foreground">{r.profiles.public_code}</p>}
                   <p className={`text-xs font-medium ${w.cls}`}>Waiting {w.txt}</p>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Link to="/admin/listing/$id" params={{ id: r.id }}><Button size="sm" className="w-full">Review</Button></Link>
+                  <Link to="/admin/listing/$handle/$slug" params={{ handle: r.profiles?.handle || "seller", slug: r.slug || r.id }}><Button size="sm" className="w-full">Review</Button></Link>
                   <Button size="sm" onClick={() => approve(r)} className="bg-success text-success-foreground hover:bg-success/90">Approve</Button>
                   <Button size="sm" variant="outline" onClick={() => setReviewing(r)}>Reject</Button>
                 </div>
