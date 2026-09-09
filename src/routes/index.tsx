@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, ShieldCheck, BadgeCheck, Users, MessageCircle, Star, MapPin, Lock, Zap, Quote, Stethoscope, ScanLine } from "lucide-react";
+import { CATEGORY_URL } from "@/lib/urls";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -184,7 +185,7 @@ function HomePage() {
             <Link
               key={c.slug}
               to="/browse/$category"
-              params={{ category: c.slug }}
+              params={{ category: CATEGORY_URL[c.slug] ?? c.slug }}
               className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
             >
               <div className="overflow-hidden rounded-lg">
@@ -203,7 +204,7 @@ function HomePage() {
             <h2 className="text-xl font-bold text-foreground sm:text-2xl">Fresh listings</h2>
             <p className="mt-1 text-sm text-muted-foreground">Updated every minute — see something new each visit</p>
           </div>
-          <Link to="/browse/$category" params={{ category: "car" }} className="text-sm font-medium text-primary hover:underline">View all →</Link>
+          <Link to="/browse/$category" params={{ category: "cars" }} className="text-sm font-medium text-primary hover:underline">View all →</Link>
         </div>
         {loading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
