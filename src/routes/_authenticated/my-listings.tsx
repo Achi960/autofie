@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { ListingLink } from "@/components/ListingLink";
 import { Navbar } from "@/components/Navbar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/my-listings")({
   component: MyListings,
 });
 
-type Row = { id: string; title: string; price: number; status: string; cover_photo_url: string | null; created_at: string };
+type Row = { id: string; slug: string | null; category: string | null; make: string | null; title: string; price: number; status: string; cover_photo_url: string | null; created_at: string };
 
 function MyListings() {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ function MyListings() {
   const load = async () => {
     if (!user) return;
     const { data } = await supabase.from("listings")
-      .select("id, title, price, status, cover_photo_url, created_at")
+      .select("id, slug, category, make, title, price, status, cover_photo_url, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     setRows(data ?? []);
@@ -89,7 +90,7 @@ function MyListings() {
                   <StatusPill status={r.status} />
                 </div>
                 <div className="flex gap-2">
-                  <Link to="/listing/$id" params={{ id: r.id }}><Button variant="outline" size="sm">View</Button></Link>
+                  <ListingLink listing={r}><Button variant="outline" size="sm">View</Button></ListingLink>
                   <Link to="/edit-listing/$id" params={{ id: r.id }}><Button variant="outline" size="sm">Edit</Button></Link>
                   <Button size="sm" variant={r.status === "closed" ? "default" : "outline"} onClick={() => toggleClose(r)}>
                     {r.status === "closed" ? "Review & reactivate" : "Close"}

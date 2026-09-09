@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, ShieldCheck, BadgeCheck, Users, MessageCircle, Star, MapPin, Lock, Zap, Quote, Stethoscope, ScanLine } from "lucide-react";
+import { CATEGORY_URL } from "@/lib/urls";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +53,7 @@ function HomePage() {
     const load = async () => {
       const { data } = await supabase
         .from("listings")
-        .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url, user_id, category, make, year,
+        .select(`id, slug, title, price, region, condition, transmission, mileage, cover_photo_url, user_id, category, make, year,
                  listing_stats(views)`)
         .eq("status", "approved")
         .order("created_at", { ascending: false })
@@ -74,6 +75,7 @@ function HomePage() {
 
       const mapped: ListingCardData[] = data.map((row: any) => ({
         id: row.id,
+        slug: row.slug,
         title: row.title,
         price: Number(row.price),
         region: row.region,
@@ -183,7 +185,7 @@ function HomePage() {
             <Link
               key={c.slug}
               to="/browse/$category"
-              params={{ category: c.slug }}
+              params={{ category: CATEGORY_URL[c.slug] ?? c.slug }}
               className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
             >
               <div className="overflow-hidden rounded-lg">
@@ -202,7 +204,7 @@ function HomePage() {
             <h2 className="text-xl font-bold text-foreground sm:text-2xl">Fresh listings</h2>
             <p className="mt-1 text-sm text-muted-foreground">Updated every minute — see something new each visit</p>
           </div>
-          <Link to="/browse/$category" params={{ category: "car" }} className="text-sm font-medium text-primary hover:underline">View all →</Link>
+          <Link to="/browse/$category" params={{ category: "cars" }} className="text-sm font-medium text-primary hover:underline">View all →</Link>
         </div>
         {loading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

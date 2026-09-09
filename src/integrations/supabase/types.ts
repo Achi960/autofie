@@ -205,6 +205,7 @@ export type Database = {
           registration_status: string | null
           registration_year: number | null
           rejection_reason: string | null
+          slug: string | null
           status: Database["public"]["Enums"]["listing_status"]
           title: string
           transmission: string | null
@@ -237,6 +238,7 @@ export type Database = {
           registration_status?: string | null
           registration_year?: number | null
           rejection_reason?: string | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["listing_status"]
           title: string
           transmission?: string | null
@@ -269,6 +271,7 @@ export type Database = {
           registration_status?: string | null
           registration_year?: number | null
           rejection_reason?: string | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["listing_status"]
           title?: string
           transmission?: string | null
@@ -334,11 +337,13 @@ export type Database = {
           created_at: string
           first_name: string | null
           full_name: string | null
+          handle: string | null
           id: string
           is_banned: boolean
           last_name: string | null
           last_seen_at: string | null
           phone: string | null
+          public_code: string | null
           updated_at: string
           whatsapp_enabled: boolean
           whatsapp_number: string | null
@@ -350,11 +355,13 @@ export type Database = {
           created_at?: string
           first_name?: string | null
           full_name?: string | null
+          handle?: string | null
           id: string
           is_banned?: boolean
           last_name?: string | null
           last_seen_at?: string | null
           phone?: string | null
+          public_code?: string | null
           updated_at?: string
           whatsapp_enabled?: boolean
           whatsapp_number?: string | null
@@ -366,11 +373,13 @@ export type Database = {
           created_at?: string
           first_name?: string | null
           full_name?: string | null
+          handle?: string | null
           id?: string
           is_banned?: boolean
           last_name?: string | null
           last_seen_at?: string | null
           phone?: string | null
+          public_code?: string | null
           updated_at?: string
           whatsapp_enabled?: boolean
           whatsapp_number?: string | null
@@ -567,6 +576,15 @@ export type Database = {
     }
     Functions: {
       admin_overview: { Args: never; Returns: Json }
+      build_listing_slug: {
+        Args: { _row: Database["public"]["Tables"]["listings"]["Row"] }
+        Returns: string
+      }
+      build_profile_handle: {
+        Args: { _name: string; _user_id: string }
+        Returns: string
+      }
+      build_public_code: { Args: { _user_id: string }; Returns: string }
       find_user_by_identifier: {
         Args: { _identifier: string }
         Returns: {
@@ -630,6 +648,8 @@ export type Database = {
           unread_count: number
         }[]
       }
+      short_code: { Args: { _len?: number; _seed: string }; Returns: string }
+      slugify: { Args: { _input: string }; Returns: string }
       touch_last_seen: { Args: never; Returns: undefined }
     }
     Enums: {

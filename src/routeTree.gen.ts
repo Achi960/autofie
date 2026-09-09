@@ -31,6 +31,9 @@ import { Route as AuthenticatedMyListingsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedCompleteDealerProfileRouteImport } from './routes/_authenticated/complete-dealer-profile'
 import { Route as AuthenticatedAccountSettingsRouteImport } from './routes/_authenticated/account-settings'
+import { Route as CategorySlugRouteImport } from './routes/$category.$slug'
+import { Route as DealerHandleIndexRouteImport } from './routes/dealer.$handle.index'
+import { Route as DealerHandleReviewsRouteImport } from './routes/dealer.$handle.reviews'
 import { Route as AuthenticatedEditListingIdRouteImport } from './routes/_authenticated/edit-listing.$id'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin/notifications'
@@ -38,6 +41,7 @@ import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminInsightsRouteImport } from './routes/_authenticated/admin/insights'
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin/dealers'
 import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenticated/admin/admins'
+import { Route as CategoryMakeSlugRouteImport } from './routes/$category.$make.$slug'
 import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
 import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authenticated/admin/listing.$id'
 
@@ -154,6 +158,21 @@ const AuthenticatedAccountSettingsRoute =
     path: '/account-settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const CategorySlugRoute = CategorySlugRouteImport.update({
+  id: '/$category/$slug',
+  path: '/$category/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DealerHandleIndexRoute = DealerHandleIndexRouteImport.update({
+  id: '/dealer/$handle/',
+  path: '/dealer/$handle/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DealerHandleReviewsRoute = DealerHandleReviewsRouteImport.update({
+  id: '/dealer/$handle/reviews',
+  path: '/dealer/$handle/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedEditListingIdRoute =
   AuthenticatedEditListingIdRouteImport.update({
     id: '/edit-listing/$id',
@@ -196,6 +215,11 @@ const AuthenticatedAdminAdminsRoute =
     path: '/admin/admins',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const CategoryMakeSlugRoute = CategoryMakeSlugRouteImport.update({
+  id: '/$category/$make/$slug',
+  path: '/$category/$make/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedChatListingIdOtherIdRoute =
   AuthenticatedChatListingIdOtherIdRouteImport.update({
     id: '/chat/$listingId/$otherId',
@@ -220,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vin': typeof VinRoute
+  '/$category/$slug': typeof CategorySlugRoute
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
   '/messages': typeof AuthenticatedMessagesRoute
@@ -231,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/listing/$id': typeof ListingIdRoute
   '/review/$id': typeof ReviewIdRoute
   '/user/$id': typeof UserIdRoute
+  '/$category/$make/$slug': typeof CategoryMakeSlugRoute
   '/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/insights': typeof AuthenticatedAdminInsightsRoute
@@ -238,6 +264,8 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/dealer/$handle/reviews': typeof DealerHandleReviewsRoute
+  '/dealer/$handle/': typeof DealerHandleIndexRoute
   '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
 }
@@ -252,6 +280,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vin': typeof VinRoute
+  '/$category/$slug': typeof CategorySlugRoute
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
   '/messages': typeof AuthenticatedMessagesRoute
@@ -263,6 +292,7 @@ export interface FileRoutesByTo {
   '/listing/$id': typeof ListingIdRoute
   '/review/$id': typeof ReviewIdRoute
   '/user/$id': typeof UserIdRoute
+  '/$category/$make/$slug': typeof CategoryMakeSlugRoute
   '/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/insights': typeof AuthenticatedAdminInsightsRoute
@@ -270,6 +300,8 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/dealer/$handle/reviews': typeof DealerHandleReviewsRoute
+  '/dealer/$handle': typeof DealerHandleIndexRoute
   '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
 }
@@ -286,6 +318,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vin': typeof VinRoute
+  '/$category/$slug': typeof CategorySlugRoute
   '/_authenticated/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/_authenticated/complete-dealer-profile': typeof AuthenticatedCompleteDealerProfileRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
@@ -297,6 +330,7 @@ export interface FileRoutesById {
   '/listing/$id': typeof ListingIdRoute
   '/review/$id': typeof ReviewIdRoute
   '/user/$id': typeof UserIdRoute
+  '/$category/$make/$slug': typeof CategoryMakeSlugRoute
   '/_authenticated/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/_authenticated/admin/insights': typeof AuthenticatedAdminInsightsRoute
@@ -304,6 +338,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/edit-listing/$id': typeof AuthenticatedEditListingIdRoute
+  '/dealer/$handle/reviews': typeof DealerHandleReviewsRoute
+  '/dealer/$handle/': typeof DealerHandleIndexRoute
   '/_authenticated/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/_authenticated/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
 }
@@ -320,6 +356,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vin'
+    | '/$category/$slug'
     | '/account-settings'
     | '/complete-dealer-profile'
     | '/messages'
@@ -331,6 +368,7 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/review/$id'
     | '/user/$id'
+    | '/$category/$make/$slug'
     | '/admin/admins'
     | '/admin/dealers'
     | '/admin/insights'
@@ -338,6 +376,8 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/reports'
     | '/edit-listing/$id'
+    | '/dealer/$handle/reviews'
+    | '/dealer/$handle/'
     | '/admin/listing/$id'
     | '/chat/$listingId/$otherId'
   fileRoutesByTo: FileRoutesByTo
@@ -352,6 +392,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vin'
+    | '/$category/$slug'
     | '/account-settings'
     | '/complete-dealer-profile'
     | '/messages'
@@ -363,6 +404,7 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/review/$id'
     | '/user/$id'
+    | '/$category/$make/$slug'
     | '/admin/admins'
     | '/admin/dealers'
     | '/admin/insights'
@@ -370,6 +412,8 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/reports'
     | '/edit-listing/$id'
+    | '/dealer/$handle/reviews'
+    | '/dealer/$handle'
     | '/admin/listing/$id'
     | '/chat/$listingId/$otherId'
   id:
@@ -385,6 +429,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vin'
+    | '/$category/$slug'
     | '/_authenticated/account-settings'
     | '/_authenticated/complete-dealer-profile'
     | '/_authenticated/messages'
@@ -396,6 +441,7 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/review/$id'
     | '/user/$id'
+    | '/$category/$make/$slug'
     | '/_authenticated/admin/admins'
     | '/_authenticated/admin/dealers'
     | '/_authenticated/admin/insights'
@@ -403,6 +449,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/reports'
     | '/_authenticated/edit-listing/$id'
+    | '/dealer/$handle/reviews'
+    | '/dealer/$handle/'
     | '/_authenticated/admin/listing/$id'
     | '/_authenticated/chat/$listingId/$otherId'
   fileRoutesById: FileRoutesById
@@ -419,10 +467,14 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   VinRoute: typeof VinRoute
+  CategorySlugRoute: typeof CategorySlugRoute
   BrowseCategoryRoute: typeof BrowseCategoryRoute
   ListingIdRoute: typeof ListingIdRoute
   ReviewIdRoute: typeof ReviewIdRoute
   UserIdRoute: typeof UserIdRoute
+  CategoryMakeSlugRoute: typeof CategoryMakeSlugRoute
+  DealerHandleReviewsRoute: typeof DealerHandleReviewsRoute
+  DealerHandleIndexRoute: typeof DealerHandleIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -581,6 +633,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/$category/$slug': {
+      id: '/$category/$slug'
+      path: '/$category/$slug'
+      fullPath: '/$category/$slug'
+      preLoaderRoute: typeof CategorySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dealer/$handle/': {
+      id: '/dealer/$handle/'
+      path: '/dealer/$handle'
+      fullPath: '/dealer/$handle/'
+      preLoaderRoute: typeof DealerHandleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dealer/$handle/reviews': {
+      id: '/dealer/$handle/reviews'
+      path: '/dealer/$handle/reviews'
+      fullPath: '/dealer/$handle/reviews'
+      preLoaderRoute: typeof DealerHandleReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/edit-listing/$id': {
       id: '/_authenticated/edit-listing/$id'
       path: '/edit-listing/$id'
@@ -629,6 +702,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/admins'
       preLoaderRoute: typeof AuthenticatedAdminAdminsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/$category/$make/$slug': {
+      id: '/$category/$make/$slug'
+      path: '/$category/$make/$slug'
+      fullPath: '/$category/$make/$slug'
+      preLoaderRoute: typeof CategoryMakeSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/chat/$listingId/$otherId': {
       id: '/_authenticated/chat/$listingId/$otherId'
@@ -702,10 +782,14 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   VinRoute: VinRoute,
+  CategorySlugRoute: CategorySlugRoute,
   BrowseCategoryRoute: BrowseCategoryRoute,
   ListingIdRoute: ListingIdRoute,
   ReviewIdRoute: ReviewIdRoute,
   UserIdRoute: UserIdRoute,
+  CategoryMakeSlugRoute: CategoryMakeSlugRoute,
+  DealerHandleReviewsRoute: DealerHandleReviewsRoute,
+  DealerHandleIndexRoute: DealerHandleIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { DealerLink } from "@/components/ListingLink";
 import { useAuth } from "@/lib/auth-context";
 import { initialsOf } from "@/lib/format";
 import { signedUrl } from "@/lib/storage";
@@ -23,7 +24,7 @@ export type ReviewRow = {
   updated_at: string;
 };
 
-type Reviewer = { id: string; full_name: string | null; avatar_url: string | null };
+type Reviewer = { id: string; full_name: string | null; handle?: string | null; avatar_url: string | null };
 
 type Props = {
   dealerId: string;
@@ -94,7 +95,7 @@ export function ReviewsSection({ dealerId, dealerName, summaryOnly, autoOpen, on
     if (ids.length) {
       const { data: profs } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url")
+        .select("id, full_name, handle, avatar_url")
         .in("id", ids);
       const map: Record<string, Reviewer & { avatarSrc?: string | null }> = {};
       for (const p of (profs as Reviewer[]) ?? []) {
@@ -259,18 +260,18 @@ export function ReviewsSection({ dealerId, dealerName, summaryOnly, autoOpen, on
             return (
               <article key={r.id} className="p-4">
                 <div className="flex items-start gap-3">
-                  <Link to="/user/$id" params={{ id: r.reviewer_id }}>
+                  <DealerLink handle={rev?.handle} userId={r.reviewer_id}>
                     <Avatar className="h-10 w-10">
                       {rev?.avatarSrc && <AvatarImage src={rev.avatarSrc} alt={name} />}
                       <AvatarFallback className="bg-primary/10 text-primary">{initialsOf(name)}</AvatarFallback>
                     </Avatar>
-                  </Link>
+                  </DealerLink>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <Link to="/user/$id" params={{ id: r.reviewer_id }} className="font-semibold text-foreground hover:underline">
+                        <DealerLink handle={rev?.handle} userId={r.reviewer_id} className="font-semibold text-foreground hover:underline">
                           {name}
-                        </Link>
+                        </DealerLink>
                         <div className="mt-0.5 flex items-center gap-2">
                           <Stars value={r.rating} size={14} />
                           <span className="text-xs text-muted-foreground">
