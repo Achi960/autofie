@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { ListingLink } from "@/components/ListingLink";
 import { Heart, MapPin, Gauge, Settings, BadgeCheck, Calendar, Tag } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import type { CategorySlug } from "@/lib/ghana";
 
 export interface ListingCardData {
   id: string;
+  slug?: string | null;
   title: string;
   price: number;
   region: string | null;
@@ -50,9 +51,8 @@ export function ListingCard({
 
   return (
     <article className="group overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md">
-      <Link
-        to="/listing/$id"
-        params={{ id: listing.id }}
+      <ListingLink
+        listing={listing}
         className="block relative aspect-[4/3] overflow-hidden bg-muted"
       >
         {photo ? (
@@ -81,12 +81,12 @@ export function ListingCard({
             <Heart className={cn("h-4 w-4", isSaved ? "fill-primary text-primary" : "text-foreground")} />
           </button>
         )}
-      </Link>
+      </ListingLink>
 
       <div className="p-3">
         <p className="text-lg font-bold text-primary">{formatGHS(listing.price)}</p>
         <h3 className="line-clamp-1 text-sm font-semibold text-foreground">
-          <Link to="/listing/$id" params={{ id: listing.id }}>{listing.title}</Link>
+          <ListingLink listing={listing}>{listing.title}</ListingLink>
         </h3>
 
         <div className="mt-2 flex flex-wrap gap-1.5">

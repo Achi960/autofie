@@ -52,7 +52,7 @@ function HomePage() {
     const load = async () => {
       const { data } = await supabase
         .from("listings")
-        .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url, user_id, category, make, year,
+        .select(`id, slug, title, price, region, condition, transmission, mileage, cover_photo_url, user_id, category, make, year,
                  listing_stats(views)`)
         .eq("status", "approved")
         .order("created_at", { ascending: false })
@@ -74,6 +74,7 @@ function HomePage() {
 
       const mapped: ListingCardData[] = data.map((row: any) => ({
         id: row.id,
+        slug: row.slug,
         title: row.title,
         price: Number(row.price),
         region: row.region,

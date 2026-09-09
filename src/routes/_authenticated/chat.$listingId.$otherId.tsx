@@ -77,7 +77,7 @@ function ChatPage() {
 
       const [{ data: prof }, { data: lst }] = await Promise.all([
         supabase.from("profiles").select("full_name, phone, avatar_url, last_seen_at, is_banned").eq("id", otherId).maybeSingle(),
-        supabase.from("listings").select("id, title, price, cover_photo_url").eq("id", listingId).maybeSingle(),
+        supabase.from("listings").select("id, slug, category, make, title, price, cover_photo_url").eq("id", listingId).maybeSingle(),
       ]);
       if (!alive) return;
       setOther((prof as any) ?? { full_name: null, phone: null, avatar_url: null, last_seen_at: null, is_banned: false });
@@ -237,7 +237,7 @@ function ChatPage() {
         )}
         {listing && (
           <div className="mx-auto max-w-3xl px-4 pb-2">
-            <Link to="/listing/$id" params={{ id: listing.id }} className="truncate text-xs text-muted-foreground hover:underline">
+            <ListingLink listing={listing} className="truncate text-xs text-muted-foreground hover:underline">
               About: {listing.title}
             </Link>
           </div>

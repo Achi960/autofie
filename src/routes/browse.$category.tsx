@@ -72,7 +72,7 @@ function BrowsePage() {
       const to = from + PAGE_SIZE - 1;
       let q = supabase
         .from("listings")
-        .select(`id, title, price, region, condition, transmission, mileage, cover_photo_url, user_id, category, make, year,
+        .select(`id, slug, title, price, region, condition, transmission, mileage, cover_photo_url, user_id, category, make, year,
                  listing_stats(views)`, { count: "exact" })
         .eq("status", "approved")
         .eq("category", category as any);
@@ -106,6 +106,7 @@ function BrowsePage() {
 
       const mapped = rows.map((row: any) => ({
         id: row.id,
+        slug: row.slug,
         title: row.title,
         price: Number(row.price),
         region: row.region,
