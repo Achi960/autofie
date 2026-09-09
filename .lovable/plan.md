@@ -1,43 +1,39 @@
-## 1. Chat upgrades (voice notes, images, emoji)
+# Readable web addresses and short user IDs
 
-**Storage**: new private bucket `chat-media` with RLS so only sender/receiver of a message can read its files.
+Today a car page looks like `autofie.com/listing/cd14c0c2-0600-40ca-b57b-84780564b67c` and a user is shown as `bce29ce1-02fe-483b-a028-73d56e6359ac`. Both become short, readable and unique.
 
-**DB**: extend `messages` with:
-- `attachment_url text` (storage path)
-- `attachment_type text` ('image' | 'audio')
-- `attachment_duration_ms int` (for voice)
+## New address shapes
 
-**Chat page (`chat.$listingId.$otherId.tsx`)**:
-- **Emoji**: add a smiley button that opens a lightweight emoji picker (use `emoji-picker-react`) and inserts into the text input.
-- **Image attach**: paperclip button → file input (image/*). Upload to `chat-media/{listingId}/{uuid}.jpg`, insert message with `attachment_type='image'`. Render inline thumbnail (signed URL) that opens full-size.
-- **Voice note**: mic button → press to record (MediaRecorder, webm/opus). Show recording timer + cancel. On stop, upload + send message with `attachment_type='audio'` and duration. Render with `<audio controls>` and duration label.
-- All bubbles support optional caption (text + attachment together).
+| Page | Now | After |
+| --- | --- | --- |
+| Car for sale | `/listing/cd14c0c2-...` | `/cars/toyota/toyota-corolla-2015-red-8kd2` |
+| Motorbike | `/listing/...` | `/motorcycles/honda/honda-cb125-2019-black-p4qa` |
+| Part / accessory / service | `/listing/...` | `/parts/bosch-brake-pads-front-3nvx` |
+| Seller page | `/user/bce29ce1-...` | `/dealer/kwame-motors` |
+| Review link | `/review/<long id>` | `/dealer/kwame-motors/reviews` |
 
-## 2. Dark / Light mode
+The four characters at the end of a car address keep every address unique when two people list the same car, and they never change.
 
-- Add a `ThemeProvider` (`src/lib/theme.tsx`) — reads `localStorage.theme` (default `system`), toggles `dark` class on `<html>`, follows OS when set to system.
-- Mount provider in `__root.tsx`.
-- Add a sun/moon toggle in `Navbar.tsx` (and inside profile dropdown for mobile).
-- Verify `src/styles.css` has `.dark` token block; if missing/incomplete, fill semantic tokens so all pages flip correctly (the project already uses semantic tokens so most UI auto-adapts).
+## Short user ID
 
-## 3. WhatsApp admin alerts (+233 24 520 9130)
+Every account gets a short public code such as `AF-8KD2QP` (8 characters, unique, never reused). This is what shows anywhere an ID is displayed today, and it is what admins search by. The long internal ID stays behind the scenes so nothing breaks.
 
-Use the existing **Twilio** connector path (per system instructions, WhatsApp via Twilio).
+Sellers also get a name-based handle (`kwame-motors`) used in their page address, taken from their business or full name, with a number added if that name is taken.
 
-**Plan**:
-- Connect Twilio standard connector (`standard_connectors--connect twilio`) — user enters Twilio API key + WhatsApp From number in the connector form.
-- New server fn `notifyAdminWhatsapp(message)` in `src/lib/admin-notify.functions.ts` — POSTs to `https://connector-gateway.lovable.dev/twilio/Messages.json` with `From=whatsapp:<TWILIO_WA_FROM>`, `To=whatsapp:+233245209130`, `Body=<message>`.
-- Call it from:
-  - `submit-listing.tsx` after successful insert (status `pending`) → "📋 New listing pending review: {title} by {seller}. {adminUrl}"
-  - `ReviewsSection.tsx` after a review insert → "⭐ New review ({rating}★) on {dealer} — {adminUrl}" (admin reviews list)
-- Fire-and-forget (errors don't block the user flow); log on the server.
-- Admin number is hardcoded in the server fn (per user choice).
+## Old links keep working
 
-**Note**: I'll trigger the Twilio connection flow first; the user must approve it before the alerts can actually send. Code will gracefully no-op if `TWILIO_API_KEY` is missing.
+Every existing long address permanently forwards to its new short one, so links already shared, and anything Google has indexed, keep working and pass their ranking on.
 
-## Files
+## Search results
 
-- migration: chat-media bucket policies + `messages` columns + grants
-- new: `src/lib/theme.tsx`, `src/lib/admin-notify.functions.ts`, `src/components/EmojiButton.tsx`, `src/components/VoiceRecorder.tsx`
-- edit: `src/routes/__root.tsx`, `src/components/Navbar.tsx`, `src/routes/_authenticated/chat.$listingId.$otherId.tsx`, `src/routes/_authenticated/submit-listing.tsx`, `src/components/ReviewsSection.tsx`, `src/integrations/supabase/types.ts` (regen)
-- deps: `emoji-picker-react`
+- Sitemap lists the new readable addresses only, grouped by category, plus category and make pages.
+- Each page keeps its own title, description and canonical address, now pointing at the new address.
+- Breadcrumb data is added (Home > Cars > Toyota > this car) so Google can show the trail under the result.
+
+## Technical notes
+
+- Migration: add `slug` (unique) to `listings`, `handle` (unique) + `public_code` (unique) to `profiles`; backfill all existing rows; database trigger keeps slug/handle in sync on insert and on make/model/year/colour changes (slug is only regenerated while a listing is still a draft, so live addresses stay stable).
+- New routes: `src/routes/$category.$make.$slug.tsx`, `src/routes/$category.$slug.tsx` (non-vehicle), `src/routes/dealer.$handle.tsx`, `src/routes/dealer.$handle.reviews.tsx`.
+- Old routes `listing.$id.tsx`, `user.$id.tsx`, `review.$id.tsx` become thin 301 redirect loaders.
+- All `Link to="/listing/$id"` / `"/user/$id"` call sites updated to the new params (cards, chat, admin, reviews, navbar, my-listings).
+- `sitemap.xml` rebuilt from slugs and handles; JSON-LD gains `BreadcrumbList`.
