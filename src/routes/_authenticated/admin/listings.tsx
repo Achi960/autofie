@@ -41,10 +41,10 @@ function AdminListings() {
     if (error) { console.error("admin listings load error", error); toast.error(error.message); setRows([]); return; }
     const list = data ?? [];
     const ids = Array.from(new Set(list.map((r: any) => r.user_id).filter(Boolean)));
-    let profMap: Record<string, { full_name: string | null; phone: string | null }> = {};
+    let profMap: Record<string, { full_name: string | null; phone: string | null; handle: string | null; public_code: string | null }> = {};
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, phone").in("id", ids);
-      profMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, { full_name: p.full_name, phone: p.phone }]));
+      const { data: profs } = await (supabase.from("profiles") as any).select("id, full_name, phone, handle, public_code").in("id", ids);
+      profMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, { full_name: p.full_name, phone: p.phone, handle: p.handle, public_code: p.public_code }]));
     }
     setRows(list.map((r: any) => ({ ...r, profiles: profMap[r.user_id] ?? null })));
   };
