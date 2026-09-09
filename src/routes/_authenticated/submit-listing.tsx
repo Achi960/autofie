@@ -208,7 +208,17 @@ function SubmitListing() {
           </Field>
 
           <Field label="Title">
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={cfg.titlePlaceholder} maxLength={120} />
+            <Input
+              value={title}
+              onChange={(e) => { setTitleTouched(true); setTitle(e.target.value); }}
+              placeholder={cfg.titlePlaceholder}
+              maxLength={120}
+            />
+            {cfg.vehicle && cfg.make === "list" && (
+              <p className="text-xs text-muted-foreground">
+                Built automatically from make, model, year and colour — e.g. “Kia Morning 2009 Red”.
+              </p>
+            )}
           </Field>
 
           {/* Make / model */}
