@@ -9,8 +9,11 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { ColourPicker } from "@/components/ColourPicker";
-import { REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, type CategorySlug } from "@/lib/ghana";
+import { ComboBox } from "@/components/ComboBox";
+import { REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, CATEGORIES, type CategorySlug } from "@/lib/ghana";
 import { fieldsFor, brandLibFor, brandsFor } from "@/lib/category-fields";
+import { buildAutoTitle } from "@/lib/listing-title";
+import { reviewListingDetails } from "@/lib/listing-ai.functions";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
@@ -31,6 +34,7 @@ function SubmitListing() {
 
   const [category, setCategory] = useState<CategorySlug | "">("");
   const [title, setTitle] = useState("");
+  const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
@@ -57,6 +61,14 @@ function SubmitListing() {
   const [submitting, setSubmitting] = useState(false);
 
   const cfg = useMemo(() => fieldsFor(category), [category]);
+
+  // Title is generated from make + model + year + colour (e.g. "Kia Morning 2009 Red")
+  useEffect(() => {
+    if (titleTouched) return;
+    const auto = buildAutoTitle({ make, model, year, colour });
+    if (auto) setTitle(auto);
+  }, [make, model, year, colour, titleTouched]);
+
 
   // Auto-populate name + phone from the signed-in user's profile, and shop name from dealer profile
   useEffect(() => {
@@ -135,27 +147,65 @@ function SubmitListing() {
   const submit = async () => {
     if (!user) return;
     if (!category) { toast.error("Pick a category"); return; }
-    if (!title || !price || !region || !district) { toast.error("Fill title, price, region, district"); return; }
+    if (!price || !region || !district) { toast.error("Fill price, region and district"); return; }
     if (photos.length === 0) { toast.error("Add at least one photo"); return; }
 
     setSubmitting(true);
     try {
+      // 1. Let AI tidy spelling of make/model and confirm the category fits
+      let finalCategory = category as CategorySlug;
+      let finalMake = make;
+      let finalModel = model;
+      if (make || model || title) {
+        try {
+          const review = await reviewListingDetails({
+            data: {
+              category: finalCategory,
+              make, model, title, description, year, colour,
+              knownMakes: brands.slice(0, 300),
+              knownModels: (models.length ? models : Object.values(brandLib).flat()).slice(0, 300),
+            },
+          });
+          const notes: string[] = [];
+          if (review.make && review.make !== make) { finalMake = review.make; }
+          if (review.model && review.model !== model) { finalModel = review.model; }
+          if (review.category !== finalCategory) {
+            const label = CATEGORIES.find((c) => c.slug === review.category)?.label ?? review.category;
+            finalCategory = review.category;
+            setCategory(review.category);
+            notes.push(`Moved to ${label}`);
+          }
+          if (finalMake !== make) setMake(finalMake);
+          if (finalModel !== model) setModel(finalModel);
+          notes.push(...review.notes);
+          if (notes.length) toast.info(notes.slice(0, 3).join(" · "));
+        } catch { /* AI check is best-effort — never block a listing */ }
+      }
+
+      const finalCfg = fieldsFor(finalCategory);
+
+      // 2. Title is generated from make + model + year + colour
+      const auto = buildAutoTitle({ make: finalMake, model: finalModel, year, colour });
+      const finalTitle = (auto || title || "").trim();
+      if (!finalTitle) { toast.error("Add a title, or pick the make and model"); setSubmitting(false); return; }
+      setTitle(finalTitle);
+
       const { data: listing, error: insErr } = await supabase.from("listings").insert({
         user_id: user.id,
-        category: category as any,
-        title, description: description || null,
-        make: cfg.make !== "off" && make ? make : null,
-        model: cfg.make !== "off" && model ? model : null,
-        year: cfg.year && year ? Number(year) : null,
-        condition: cfg.condition && condition ? condition : null,
-        transmission: cfg.transmission && transmission ? transmission : null,
-        fuel: cfg.fuel && fuel ? fuel : null,
-        mileage: cfg.mileage && mileage ? Number(mileage) : null,
-        body_type: cfg.bodyType && bodyType ? bodyType : null,
-        colour: cfg.colour && colour ? colour : null,
-        engine: cfg.engine && engine ? engine : null,
-        registration_status: cfg.registration && registration ? registration : null,
-        registration_year: cfg.registration && registration === "Registered" && registrationYear ? Number(registrationYear) : null,
+        category: finalCategory as any,
+        title: finalTitle, description: description || null,
+        make: finalCfg.make !== "off" && finalMake ? finalMake.replace(/_/g, " ") : null,
+        model: finalCfg.make !== "off" && finalModel ? finalModel : null,
+        year: finalCfg.year && year ? Number(year) : null,
+        condition: finalCfg.condition && condition ? condition : null,
+        transmission: finalCfg.transmission && transmission ? transmission : null,
+        fuel: finalCfg.fuel && fuel ? fuel : null,
+        mileage: finalCfg.mileage && mileage ? Number(mileage) : null,
+        body_type: finalCfg.bodyType && bodyType ? bodyType : null,
+        colour: finalCfg.colour && colour ? colour : null,
+        engine: finalCfg.engine && engine ? engine : null,
+        registration_status: finalCfg.registration && registration ? registration : null,
+        registration_year: finalCfg.registration && registration === "Registered" && registrationYear ? Number(registrationYear) : null,
         region, district,
         price: Number(price), negotiable,
         contact: contactPhone || null,
@@ -169,10 +219,10 @@ function SubmitListing() {
 
       const photoRows: { listing_id: string; url: string; is_cover: boolean; sort_order: number }[] = [];
       for (let i = 0; i < stamped.length; i++) {
-        const f = stamped[i];
-        const ext = f.name.split(".").pop() || "jpg";
+        const file = stamped[i];
+        const ext = file.name.split(".").pop() || "jpg";
         const path = `${user.id}/${listing.id}/${i}-${Date.now()}.${ext}`;
-        await uploadFile("listing-photos", path, f);
+        await uploadFile("listing-photos", path, file);
         photoRows.push({ listing_id: listing.id, url: path, is_cover: i === coverIndex, sort_order: i });
       }
       await supabase.from("listing_photos").insert(photoRows);
@@ -180,7 +230,7 @@ function SubmitListing() {
 
       // Fire-and-forget admin WhatsApp alert (no-op if Twilio not configured)
       notifyAdminWhatsapp({
-        data: { message: `📋 New listing pending review on AutoFie\n\n"${title}"\nby ${contactName || user.email}\nGH₵${Number(price).toLocaleString("en-GH")}\n\nReview: ${window.location.origin}/admin/listings` },
+        data: { message: `📋 New listing pending review on AutoFie\n\n"${finalTitle}"\nby ${contactName || user.email}\nGH₵${Number(price).toLocaleString("en-GH")}\n\nReview: ${window.location.origin}/admin/listings` },
       }).catch(() => {});
 
       toast.success("Listing submitted. An admin will review it shortly.");
@@ -205,24 +255,44 @@ function SubmitListing() {
           </Field>
 
           <Field label="Title">
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={cfg.titlePlaceholder} maxLength={120} />
+            <Input
+              value={title}
+              onChange={(e) => { setTitleTouched(true); setTitle(e.target.value); }}
+              placeholder={cfg.titlePlaceholder}
+              maxLength={120}
+            />
+            {cfg.vehicle && cfg.make === "list" && (
+              <p className="text-xs text-muted-foreground">
+                Built automatically from make, model, year and colour — e.g. “Kia Morning 2009 Red”.
+              </p>
+            )}
           </Field>
 
           {/* Make / model */}
           {cfg.make === "list" && (
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={cfg.makeLabel}>
-                <Select value={make} onValueChange={(v) => { setMake(v); setModel(""); }}>
-                  <SelectTrigger><SelectValue placeholder={`Select ${cfg.makeLabel.toLowerCase()}`} /></SelectTrigger>
-                  <SelectContent className="max-h-72">{brands.map(b => <SelectItem key={b} value={b}>{b.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
-                </Select>
+                <ComboBox
+                  value={make}
+                  onChange={(v) => { setMake(v); setModel(""); }}
+                  options={brands}
+                  noun={cfg.makeLabel.toLowerCase()}
+                  placeholder={`Select ${cfg.makeLabel.toLowerCase()}`}
+                />
               </Field>
               <Field label={cfg.modelLabel}>
-                <Select value={model} onValueChange={setModel} disabled={!make}>
-                  <SelectTrigger><SelectValue placeholder={`Select ${cfg.modelLabel.toLowerCase()}`} /></SelectTrigger>
-                  <SelectContent>{models.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
-                </Select>
+                <ComboBox
+                  value={model}
+                  onChange={setModel}
+                  options={models}
+                  disabled={!make}
+                  noun={cfg.modelLabel.toLowerCase()}
+                  placeholder={`Select ${cfg.modelLabel.toLowerCase()}`}
+                />
               </Field>
+              <p className="-mt-2 text-xs text-muted-foreground sm:col-span-2">
+                Can't find yours? Just type it in — we'll check the spelling for you before it goes live.
+              </p>
             </div>
           )}
           {cfg.make === "text" && (

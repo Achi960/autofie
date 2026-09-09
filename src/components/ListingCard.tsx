@@ -56,9 +56,17 @@ export function ListingCard({
         className="block relative aspect-[4/3] overflow-hidden bg-muted"
       >
         {photo ? (
-          <img src={photo} alt={listing.title} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
+          <img
+            src={photo}
+            alt={listing.title}
+            loading="lazy"
+            decoding="async"
+            width={640}
+            height={480}
+            className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
+          />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-muted-foreground">No photo</div>
+          <div className="h-full w-full animate-pulse bg-muted" />
         )}
         {popular && (
           <Badge className="absolute left-2 top-2 bg-primary text-primary-foreground">Popular</Badge>

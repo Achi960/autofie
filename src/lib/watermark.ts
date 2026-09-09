@@ -2,7 +2,7 @@
 // Adds "Posted on AutoFie" + shop name to the bottom-right of each photo
 // before uploading, so the watermark is baked into the stored file.
 
-const MAX_DIM = 2000; // cap large photos so canvas + upload stay fast
+const MAX_DIM = 1600; // cap large photos so upload + page load stay fast
 
 function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -90,9 +90,10 @@ export async function watermarkImage(file: File, shopName: string): Promise<File
       ctx.fillText(line1, x, yBottom);
     }
 
-    const isPng = file.type === "image/png";
-    const mime = isPng ? "image/png" : "image/jpeg";
-    const quality = isPng ? undefined : 0.9;
+    // Always encode to JPEG: far smaller files, so listing photos load fast.
+    const isPng = false;
+    const mime = "image/jpeg";
+    const quality = 0.82;
 
     const blob: Blob | null = await new Promise((resolve) =>
       canvas.toBlob((b) => resolve(b), mime, quality)
