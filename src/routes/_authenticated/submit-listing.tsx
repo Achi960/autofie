@@ -34,6 +34,7 @@ function SubmitListing() {
 
   const [category, setCategory] = useState<CategorySlug | "">("");
   const [title, setTitle] = useState("");
+  const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
@@ -60,6 +61,14 @@ function SubmitListing() {
   const [submitting, setSubmitting] = useState(false);
 
   const cfg = useMemo(() => fieldsFor(category), [category]);
+
+  // Title is generated from make + model + year + colour (e.g. "Kia Morning 2009 Red")
+  useEffect(() => {
+    if (titleTouched) return;
+    const auto = buildAutoTitle({ make, model, year, colour });
+    if (auto) setTitle(auto);
+  }, [make, model, year, colour, titleTouched]);
+
 
   // Auto-populate name + phone from the signed-in user's profile, and shop name from dealer profile
   useEffect(() => {
