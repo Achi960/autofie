@@ -139,10 +139,35 @@ function EditListing() {
   };
 
   const save = async (resubmit: boolean) => {
-    if (!f.title || !f.price || !f.region || !f.district) { toast.error("Fill title, price, region, district"); return; }
+    if (!f.price || !f.region || !f.district) { toast.error("Fill price, region and district"); return; }
     if (totalPhotos === 0) { toast.error("Add at least one photo"); return; }
     setSaving(true);
     try {
+      // Spell-check the make/model the dealer typed before saving
+      if (f.make || f.model) {
+        try {
+          const review = await reviewListingDetails({
+            data: {
+              category: (f.category as any) ?? "car",
+              make: f.make ?? "", model: f.model ?? "",
+              title: f.title ?? "", description: f.description ?? "",
+              year: f.year ? String(f.year) : "", colour: f.colour ?? "",
+              knownMakes: brands.slice(0, 300),
+              knownModels: (models.length ? models : Object.values(brandLib).flat()).slice(0, 300),
+            },
+          });
+          const notes = [...review.notes];
+          if (review.make !== (f.make ?? "") || review.model !== (f.model ?? "")) {
+            f.make = review.make;
+            f.model = review.model;
+          }
+          if (notes.length) toast.info(notes.slice(0, 3).join(" · "));
+        } catch { /* best-effort */ }
+      }
+      if (!f.title) {
+        f.title = buildAutoTitle({ make: f.make, model: f.model, year: f.year, colour: f.colour });
+        if (!f.title) { toast.error("Add a title"); setSaving(false); return; }
+      }
       // Upload any new photos first
       if (newPhotos.length && user) {
         // Resolve shop name for the watermark
