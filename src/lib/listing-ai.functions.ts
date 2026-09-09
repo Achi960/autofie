@@ -27,6 +27,8 @@ const ReviewInput = z.object({
 export type ListingReview = {
   make: string;
   model: string;
+  year: string;
+  colour: string;
   category: (typeof CATEGORY_SLUGS)[number];
   notes: string[];
 };
@@ -55,11 +57,15 @@ Rules:
    - accessories: stereos, alarms, mats, rims (aftermarket add-ons)
    - services: repair, spraying, towing, workshops, car hire
    Only change the category when the listing clearly does not belong to the one chosen.
-6. "notes": short, plain-English sentences describing every correction you made (max 4).
+6. If the make, model, year or colour fields are empty, EXTRACT them from the title and
+   description the dealer typed. Example: title "kia morningg 2009 red" ->
+   make "Kia", model "Morning", year "2009", colour "Red". Never invent values that are
+   not implied by the text; leave them as empty strings when unknown. Year must be 4 digits.
+7. "notes": short, plain-English sentences describing every correction you made (max 4).
    Empty array when nothing changed.
 
 Reply with ONLY valid JSON:
-{"make": string, "model": string, "category": string, "notes": string[]}`;
+{"make": string, "model": string, "year": string, "colour": string, "category": string, "notes": string[]}`;
 
 export const reviewListingDetails = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ReviewInput.parse(input))
@@ -67,6 +73,8 @@ export const reviewListingDetails = createServerFn({ method: "POST" })
     const fallback: ListingReview = {
       make: data.make,
       model: data.model,
+      year: data.year,
+      colour: data.colour,
       category: data.category,
       notes: [],
     };
@@ -111,6 +119,8 @@ export const reviewListingDetails = createServerFn({ method: "POST" })
       return {
         make: String(parsed.make ?? data.make).slice(0, 60) || data.make,
         model: String(parsed.model ?? data.model).slice(0, 60) || data.model,
+        year: (String(parsed.year ?? "").match(/\d{4}/)?.[0] ?? data.year),
+        colour: String(parsed.colour ?? data.colour).slice(0, 40) || data.colour,
         category,
         notes: Array.isArray(parsed.notes) ? parsed.notes.map(String).slice(0, 4) : [],
       };

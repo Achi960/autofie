@@ -156,7 +156,9 @@ function SubmitListing() {
       let finalCategory = category as CategorySlug;
       let finalMake = make;
       let finalModel = model;
-      if (make || model || title) {
+      let finalYear = year;
+      let finalColour = colour;
+      if (make || model || title || description) {
         try {
           const review = await reviewListingDetails({
             data: {
@@ -169,6 +171,8 @@ function SubmitListing() {
           const notes: string[] = [];
           if (review.make && review.make !== make) { finalMake = review.make; }
           if (review.model && review.model !== model) { finalModel = review.model; }
+          if (review.year && review.year !== year) { finalYear = review.year; }
+          if (review.colour && review.colour !== colour) { finalColour = review.colour; }
           if (review.category !== finalCategory) {
             const label = CATEGORIES.find((c) => c.slug === review.category)?.label ?? review.category;
             finalCategory = review.category;
@@ -177,6 +181,8 @@ function SubmitListing() {
           }
           if (finalMake !== make) setMake(finalMake);
           if (finalModel !== model) setModel(finalModel);
+          if (finalYear !== year) setYear(finalYear);
+          if (finalColour !== colour) setColour(finalColour);
           notes.push(...review.notes);
           if (notes.length) toast.info(notes.slice(0, 3).join(" · "));
         } catch { /* AI check is best-effort — never block a listing */ }
@@ -185,7 +191,12 @@ function SubmitListing() {
       const finalCfg = fieldsFor(finalCategory);
 
       // 2. Title is generated from make + model + year + colour
-      const auto = buildAutoTitle({ make: finalMake, model: finalModel, year, colour });
+      const auto = buildAutoTitle({
+        make: finalMake,
+        model: finalModel,
+        year: finalCfg.year ? finalYear : "",
+        colour: finalCfg.colour ? finalColour : "",
+      });
       const finalTitle = (auto || title || "").trim();
       if (!finalTitle) { toast.error("Add a title, or pick the make and model"); setSubmitting(false); return; }
       setTitle(finalTitle);
@@ -196,13 +207,13 @@ function SubmitListing() {
         title: finalTitle, description: description || null,
         make: finalCfg.make !== "off" && finalMake ? finalMake.replace(/_/g, " ") : null,
         model: finalCfg.make !== "off" && finalModel ? finalModel : null,
-        year: finalCfg.year && year ? Number(year) : null,
+        year: finalCfg.year && finalYear ? Number(finalYear) : null,
         condition: finalCfg.condition && condition ? condition : null,
         transmission: finalCfg.transmission && transmission ? transmission : null,
         fuel: finalCfg.fuel && fuel ? fuel : null,
         mileage: finalCfg.mileage && mileage ? Number(mileage) : null,
         body_type: finalCfg.bodyType && bodyType ? bodyType : null,
-        colour: finalCfg.colour && colour ? colour : null,
+        colour: finalCfg.colour && finalColour ? finalColour : null,
         engine: finalCfg.engine && engine ? engine : null,
         registration_status: finalCfg.registration && registration ? registration : null,
         registration_year: finalCfg.registration && registration === "Registered" && registrationYear ? Number(registrationYear) : null,
