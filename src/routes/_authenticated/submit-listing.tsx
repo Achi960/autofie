@@ -138,27 +138,65 @@ function SubmitListing() {
   const submit = async () => {
     if (!user) return;
     if (!category) { toast.error("Pick a category"); return; }
-    if (!title || !price || !region || !district) { toast.error("Fill title, price, region, district"); return; }
+    if (!price || !region || !district) { toast.error("Fill price, region and district"); return; }
     if (photos.length === 0) { toast.error("Add at least one photo"); return; }
 
     setSubmitting(true);
     try {
+      // 1. Let AI tidy spelling of make/model and confirm the category fits
+      let finalCategory = category as CategorySlug;
+      let finalMake = make;
+      let finalModel = model;
+      if (make || model || title) {
+        try {
+          const review = await reviewListingDetails({
+            data: {
+              category: finalCategory,
+              make, model, title, description, year, colour,
+              knownMakes: brands.slice(0, 300),
+              knownModels: (models.length ? models : Object.values(brandLib).flat()).slice(0, 300),
+            },
+          });
+          const notes: string[] = [];
+          if (review.make && review.make !== make) { finalMake = review.make; }
+          if (review.model && review.model !== model) { finalModel = review.model; }
+          if (review.category !== finalCategory) {
+            const label = CATEGORIES.find((c) => c.slug === review.category)?.label ?? review.category;
+            finalCategory = review.category;
+            setCategory(review.category);
+            notes.push(`Moved to ${label}`);
+          }
+          if (finalMake !== make) setMake(finalMake);
+          if (finalModel !== model) setModel(finalModel);
+          notes.push(...review.notes);
+          if (notes.length) toast.info(notes.slice(0, 3).join(" · "));
+        } catch { /* AI check is best-effort — never block a listing */ }
+      }
+
+      const finalCfg = fieldsFor(finalCategory);
+
+      // 2. Title is generated from make + model + year + colour
+      const auto = buildAutoTitle({ make: finalMake, model: finalModel, year, colour });
+      const finalTitle = (auto || title || "").trim();
+      if (!finalTitle) { toast.error("Add a title, or pick the make and model"); setSubmitting(false); return; }
+      setTitle(finalTitle);
+
       const { data: listing, error: insErr } = await supabase.from("listings").insert({
         user_id: user.id,
-        category: category as any,
-        title, description: description || null,
-        make: cfg.make !== "off" && make ? make : null,
-        model: cfg.make !== "off" && model ? model : null,
-        year: cfg.year && year ? Number(year) : null,
-        condition: cfg.condition && condition ? condition : null,
-        transmission: cfg.transmission && transmission ? transmission : null,
-        fuel: cfg.fuel && fuel ? fuel : null,
-        mileage: cfg.mileage && mileage ? Number(mileage) : null,
-        body_type: cfg.bodyType && bodyType ? bodyType : null,
-        colour: cfg.colour && colour ? colour : null,
-        engine: cfg.engine && engine ? engine : null,
-        registration_status: cfg.registration && registration ? registration : null,
-        registration_year: cfg.registration && registration === "Registered" && registrationYear ? Number(registrationYear) : null,
+        category: finalCategory as any,
+        title: finalTitle, description: description || null,
+        make: finalCfg.make !== "off" && finalMake ? finalMake.replace(/_/g, " ") : null,
+        model: finalCfg.make !== "off" && finalModel ? finalModel : null,
+        year: finalCfg.year && year ? Number(year) : null,
+        condition: finalCfg.condition && condition ? condition : null,
+        transmission: finalCfg.transmission && transmission ? transmission : null,
+        fuel: finalCfg.fuel && fuel ? fuel : null,
+        mileage: finalCfg.mileage && mileage ? Number(mileage) : null,
+        body_type: finalCfg.bodyType && bodyType ? bodyType : null,
+        colour: finalCfg.colour && colour ? colour : null,
+        engine: finalCfg.engine && engine ? engine : null,
+        registration_status: finalCfg.registration && registration ? registration : null,
+        registration_year: finalCfg.registration && registration === "Registered" && registrationYear ? Number(registrationYear) : null,
         region, district,
         price: Number(price), negotiable,
         contact: contactPhone || null,
@@ -166,26 +204,7 @@ function SubmitListing() {
         status: "pending" as const,
       }).select().single();
       if (insErr) throw insErr;
-
-      // Watermark every photo with "Posted on AutoFie" + shop name before upload
-      const stamped = await watermarkImages(photos, shopName || contactName || "");
-
-      const photoRows: { listing_id: string; url: string; is_cover: boolean; sort_order: number }[] = [];
-      for (let i = 0; i < stamped.length; i++) {
-        const f = stamped[i];
-        const ext = f.name.split(".").pop() || "jpg";
-        const path = `${user.id}/${listing.id}/${i}-${Date.now()}.${ext}`;
-        await uploadFile("listing-photos", path, f);
-        photoRows.push({ listing_id: listing.id, url: path, is_cover: i === coverIndex, sort_order: i });
-      }
-      await supabase.from("listing_photos").insert(photoRows);
-      await supabase.from("listings").update({ cover_photo_url: photoRows[coverIndex]?.url ?? photoRows[0].url }).eq("id", listing.id);
-
-      // Fire-and-forget admin WhatsApp alert (no-op if Twilio not configured)
-      notifyAdminWhatsapp({
-        data: { message: `📋 New listing pending review on AutoFie\n\n"${title}"\nby ${contactName || user.email}\nGH₵${Number(price).toLocaleString("en-GH")}\n\nReview: ${window.location.origin}/admin/listings` },
-      }).catch(() => {});
-
+...
       toast.success("Listing submitted. An admin will review it shortly.");
       navigate({ to: "/my-listings" });
     } catch (e: any) {
