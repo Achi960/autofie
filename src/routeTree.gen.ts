@@ -44,6 +44,7 @@ import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenti
 import { Route as CategoryMakeSlugRouteImport } from './routes/$category.$make.$slug'
 import { Route as AuthenticatedChatListingIdOtherIdRouteImport } from './routes/_authenticated/chat.$listingId.$otherId'
 import { Route as AuthenticatedAdminListingIdRouteImport } from './routes/_authenticated/admin/listing.$id'
+import { Route as AuthenticatedAdminListingHandleSlugRouteImport } from './routes/_authenticated/admin/listing.$handle.$slug'
 
 const VinRoute = VinRouteImport.update({
   id: '/vin',
@@ -232,6 +233,12 @@ const AuthenticatedAdminListingIdRoute =
     path: '/admin/listing/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminListingHandleSlugRoute =
+  AuthenticatedAdminListingHandleSlugRouteImport.update({
+    id: '/admin/listing/$handle/$slug',
+    path: '/admin/listing/$handle/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/dealer/$handle/': typeof DealerHandleIndexRoute
   '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
+  '/admin/listing/$handle/$slug': typeof AuthenticatedAdminListingHandleSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -304,6 +312,7 @@ export interface FileRoutesByTo {
   '/dealer/$handle': typeof DealerHandleIndexRoute
   '/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
+  '/admin/listing/$handle/$slug': typeof AuthenticatedAdminListingHandleSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -342,6 +351,7 @@ export interface FileRoutesById {
   '/dealer/$handle/': typeof DealerHandleIndexRoute
   '/_authenticated/admin/listing/$id': typeof AuthenticatedAdminListingIdRoute
   '/_authenticated/chat/$listingId/$otherId': typeof AuthenticatedChatListingIdOtherIdRoute
+  '/_authenticated/admin/listing/$handle/$slug': typeof AuthenticatedAdminListingHandleSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -380,6 +390,7 @@ export interface FileRouteTypes {
     | '/dealer/$handle/'
     | '/admin/listing/$id'
     | '/chat/$listingId/$otherId'
+    | '/admin/listing/$handle/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -416,6 +427,7 @@ export interface FileRouteTypes {
     | '/dealer/$handle'
     | '/admin/listing/$id'
     | '/chat/$listingId/$otherId'
+    | '/admin/listing/$handle/$slug'
   id:
     | '__root__'
     | '/'
@@ -453,6 +465,7 @@ export interface FileRouteTypes {
     | '/dealer/$handle/'
     | '/_authenticated/admin/listing/$id'
     | '/_authenticated/chat/$listingId/$otherId'
+    | '/_authenticated/admin/listing/$handle/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -724,6 +737,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminListingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/listing/$handle/$slug': {
+      id: '/_authenticated/admin/listing/$handle/$slug'
+      path: '/admin/listing/$handle/$slug'
+      fullPath: '/admin/listing/$handle/$slug'
+      preLoaderRoute: typeof AuthenticatedAdminListingHandleSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -744,6 +764,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEditListingIdRoute: typeof AuthenticatedEditListingIdRoute
   AuthenticatedAdminListingIdRoute: typeof AuthenticatedAdminListingIdRoute
   AuthenticatedChatListingIdOtherIdRoute: typeof AuthenticatedChatListingIdOtherIdRoute
+  AuthenticatedAdminListingHandleSlugRoute: typeof AuthenticatedAdminListingHandleSlugRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -765,6 +786,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminListingIdRoute: AuthenticatedAdminListingIdRoute,
   AuthenticatedChatListingIdOtherIdRoute:
     AuthenticatedChatListingIdOtherIdRoute,
+  AuthenticatedAdminListingHandleSlugRoute:
+    AuthenticatedAdminListingHandleSlugRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
