@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { listingPath, CATEGORY_URL } from "@/lib/urls";
 
 const BASE_URL = "https://autofie.com";
 
