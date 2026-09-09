@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, ALL_BRANDS, CONDITIONS, ALL_REGIONS, REGIONS } from "@/lib/ghana";
+import { URL_CATEGORY } from "@/lib/urls";
 import { shuffleByMinute } from "@/lib/shuffle";
 
 const searchSchema = z.object({
@@ -24,7 +25,8 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/browse/$category")({
   validateSearch: searchSchema,
   head: ({ params }) => {
-    const cat = CATEGORIES.find((c) => c.slug === params.category)?.label ?? "Listings";
+    const dbCat = URL_CATEGORY[params.category] ?? params.category;
+    const cat = CATEGORIES.find((c) => c.slug === dbCat)?.label ?? "Listings";
     const url = `https://autofie.com/browse/${params.category}`;
     return {
       meta: [
@@ -57,7 +59,8 @@ function BrowsePage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const catLabel = useMemo(() => CATEGORIES.find((c) => c.slug === category)?.label ?? "Listings", [category]);
+  const dbCategory = useMemo(() => URL_CATEGORY[category] ?? category, [category]);
+  const catLabel = useMemo(() => CATEGORIES.find((c) => c.slug === dbCategory)?.label ?? "Listings", [dbCategory]);
 
   const [listings, setListings] = useState<ListingCardData[]>([]);
   const [total, setTotal] = useState(0);
@@ -75,7 +78,7 @@ function BrowsePage() {
         .select(`id, slug, title, price, region, condition, transmission, mileage, cover_photo_url, user_id, category, make, year,
                  listing_stats(views)`, { count: "exact" })
         .eq("status", "approved")
-        .eq("category", category as any);
+        .eq("category", dbCategory as any);
 
       if (search.q) q = q.ilike("title", `%${search.q}%`);
       if (search.make) q = q.eq("make", search.make);
@@ -129,7 +132,7 @@ function BrowsePage() {
       setListings((prev) => shuffleByMinute(prev, search.page ?? 1));
     }, 60_000);
     return () => { alive = false; clearInterval(id); };
-  }, [category, search.q, search.make, search.region, search.district, search.condition, search.min_price, search.max_price, search.page]);
+  }, [dbCategory, search.q, search.make, search.region, search.district, search.condition, search.min_price, search.max_price, search.page]);
 
   const setFilter = (key: string, value: string | undefined) => {
     navigate({ search: (s: Record<string, unknown>) => ({ ...s, [key]: value || undefined, page: 1 }) });

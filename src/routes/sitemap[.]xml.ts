@@ -14,10 +14,11 @@ interface SitemapEntry {
 
 const STATIC_ENTRIES: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0" },
-  { path: "/browse/cars", changefreq: "daily", priority: "0.9" },
-  { path: "/browse/trucks", changefreq: "daily", priority: "0.8" },
-  { path: "/browse/motorcycles", changefreq: "daily", priority: "0.8" },
-  { path: "/browse/parts", changefreq: "weekly", priority: "0.7" },
+  ...Object.values(CATEGORY_URL).map((c) => ({
+    path: `/browse/${c}`,
+    changefreq: "daily" as const,
+    priority: c === "cars" ? "0.9" : "0.8",
+  })),
   { path: "/about", changefreq: "monthly", priority: "0.6" },
   { path: "/contact", changefreq: "monthly", priority: "0.5" },
   { path: "/safety-tips", changefreq: "monthly", priority: "0.5" },
