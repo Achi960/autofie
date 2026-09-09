@@ -71,7 +71,6 @@ export function fieldsFor(cat: CategorySlug | ""): CategoryFieldConfig {
         modelLabel: "Model / type",
         transmission: false,
         bodyType: false,
-        colour: false,
         registration: false,
         engineLabel: "Operating hours",
         titlePlaceholder: "e.g. Caterpillar 320D Excavator",

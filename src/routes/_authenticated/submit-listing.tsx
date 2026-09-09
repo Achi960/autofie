@@ -12,7 +12,7 @@ import { ColourPicker } from "@/components/ColourPicker";
 import { ComboBox } from "@/components/ComboBox";
 import { REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, CATEGORIES, type CategorySlug } from "@/lib/ghana";
 import { fieldsFor, brandLibFor, brandsFor } from "@/lib/category-fields";
-import { buildAutoTitle } from "@/lib/listing-title";
+import { buildAutoTitle, requiresStandardVehicleTitle } from "@/lib/listing-title";
 import { reviewListingDetails } from "@/lib/listing-ai.functions";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -190,13 +190,28 @@ function SubmitListing() {
 
       const finalCfg = fieldsFor(finalCategory);
 
+      const standardVehicleTitle = requiresStandardVehicleTitle(finalCategory);
+      if (standardVehicleTitle) {
+        const missing = [
+          !finalMake.trim() && finalCfg.make !== "off" ? finalCfg.makeLabel.toLowerCase() : "",
+          !finalModel.trim() && finalCfg.make !== "off" ? finalCfg.modelLabel.toLowerCase() : "",
+          !finalYear.trim() ? "year" : "",
+          !finalColour.trim() ? "colour" : "",
+        ].filter(Boolean);
+        if (missing.length) {
+          toast.error(`Please add the vehicle ${missing.join(", ")} so we can build the correct title.`);
+          setSubmitting(false);
+          return;
+        }
+      }
+
       // 2. Title is generated from make + model + year + colour
-      const auto = buildAutoTitle({
+      const auto = standardVehicleTitle ? buildAutoTitle({
         make: finalMake,
         model: finalModel,
         year: finalCfg.year ? finalYear : "",
         colour: finalCfg.colour ? finalColour : "",
-      });
+      }) : "";
       const finalTitle = (auto || title || "").trim();
       if (!finalTitle) { toast.error("Add a title, or pick the make and model"); setSubmitting(false); return; }
       setTitle(finalTitle);
