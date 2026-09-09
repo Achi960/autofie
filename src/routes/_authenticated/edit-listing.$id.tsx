@@ -146,31 +146,60 @@ function EditListing() {
     if (totalPhotos === 0) { toast.error("Add at least one photo"); return; }
     setSaving(true);
     try {
-      // Spell-check the make/model the dealer typed before saving
-      if (f.make || f.model) {
+      let finalCategory = ((f.category as CategorySlug) || "car") as CategorySlug;
+      let finalMake = String(f.make ?? "");
+      let finalModel = String(f.model ?? "");
+      let finalYear = f.year ? String(f.year) : "";
+      let finalColour = String(f.colour ?? "");
+
+      // Spell-check, extract missing details and confirm the category before every save.
+      if (finalMake || finalModel || f.title || f.description) {
         try {
           const review = await reviewListingDetails({
             data: {
-              category: (f.category as any) ?? "car",
-              make: f.make ?? "", model: f.model ?? "",
+              category: finalCategory,
+              make: finalMake, model: finalModel,
               title: f.title ?? "", description: f.description ?? "",
-              year: f.year ? String(f.year) : "", colour: f.colour ?? "",
+              year: finalYear, colour: finalColour,
               knownMakes: brands.slice(0, 300),
               knownModels: (models.length ? models : Object.values(brandLib).flat()).slice(0, 300),
             },
           });
+          finalCategory = review.category;
+          finalMake = review.make;
+          finalModel = review.model;
+          finalYear = review.year;
+          finalColour = review.colour;
           const notes = [...review.notes];
-          if (review.make !== (f.make ?? "") || review.model !== (f.model ?? "")) {
-            f.make = review.make;
-            f.model = review.model;
-          }
           if (notes.length) toast.info(notes.slice(0, 3).join(" · "));
         } catch { /* best-effort */ }
       }
-      if (!f.title) {
-        f.title = buildAutoTitle({ make: f.make, model: f.model, year: f.year, colour: f.colour });
-        if (!f.title) { toast.error("Add a title"); setSaving(false); return; }
+
+      const finalCfg = fieldsFor(finalCategory);
+      if (finalCfg.vehicle && finalCfg.year && finalCfg.colour) {
+        const missing = [
+          !finalMake.trim() && finalCfg.make !== "off" ? finalCfg.makeLabel.toLowerCase() : "",
+          !finalModel.trim() && finalCfg.make !== "off" ? finalCfg.modelLabel.toLowerCase() : "",
+          !finalYear.trim() ? "year" : "",
+          !finalColour.trim() ? "colour" : "",
+        ].filter(Boolean);
+        if (missing.length) {
+          toast.error(`Please add the vehicle ${missing.join(", ")} so we can build the correct title.`);
+          setF({ ...f, category: finalCategory, make: finalMake, model: finalModel, year: finalYear, colour: finalColour });
+          setSaving(false);
+          return;
+        }
       }
+
+      // Always replace a typed or old title with the standard vehicle title.
+      const finalTitle = buildAutoTitle({
+        make: finalMake,
+        model: finalModel,
+        year: finalCfg.year ? finalYear : "",
+        colour: finalCfg.colour ? finalColour : "",
+      }) || String(f.title ?? "").trim();
+      if (!finalTitle) { toast.error("Add a title"); setSaving(false); return; }
+      setF({ ...f, category: finalCategory, make: finalMake, model: finalModel, year: finalYear, colour: finalColour, title: finalTitle });
       // Upload any new photos first
       if (newPhotos.length && user) {
         // Resolve shop name for the watermark
@@ -199,12 +228,16 @@ function EditListing() {
       }
 
       const { error } = await supabase.from("listings").update({
-        title: f.title, description: f.description || null,
-        make: f.make || null, model: f.model || null,
-        year: f.year ? Number(f.year) : null,
+        category: finalCategory,
+        title: finalTitle, description: f.description || null,
+        make: finalCfg.make !== "off" && finalMake ? finalMake.replace(/_/g, " ") : null,
+        model: finalCfg.make !== "off" && finalModel ? finalModel : null,
+        year: finalCfg.year && finalYear ? Number(finalYear) : null,
         condition: f.condition || null, transmission: f.transmission || null, fuel: f.fuel || null,
         mileage: f.mileage ? Number(f.mileage) : null,
-        body_type: f.body_type || null, colour: f.colour || null, engine: f.engine || null,
+        body_type: finalCfg.bodyType && f.body_type ? f.body_type : null,
+        colour: finalCfg.colour && finalColour ? finalColour : null,
+        engine: finalCfg.engine && f.engine ? f.engine : null,
         registration_status: f.registration_status || null,
         registration_year: f.registration_status === "Registered" && f.registration_year ? Number(f.registration_year) : null,
         region: f.region, district: f.district,

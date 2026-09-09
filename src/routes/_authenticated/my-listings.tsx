@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -18,6 +18,7 @@ type Row = { id: string; title: string; price: number; status: string; cover_pho
 
 function MyListings() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [tab, setTab] = useState("all");
   const [covers, setCovers] = useState<Record<string, string | null>>({});
@@ -48,9 +49,12 @@ function MyListings() {
     : rows.filter(r => r.status === "closed");
 
   const toggleClose = async (r: Row) => {
-    const next = r.status === "closed" ? "pending" : "closed";
-    await supabase.from("listings").update({ status: next }).eq("id", r.id);
-    toast.success(next === "closed" ? "Listing closed" : "Re-submitted for review");
+    if (r.status === "closed") {
+      navigate({ to: "/edit-listing/$id", params: { id: r.id } });
+      return;
+    }
+    await supabase.from("listings").update({ status: "closed" }).eq("id", r.id);
+    toast.success("Listing closed");
     load();
   };
 
@@ -88,7 +92,7 @@ function MyListings() {
                   <Link to="/listing/$id" params={{ id: r.id }}><Button variant="outline" size="sm">View</Button></Link>
                   <Link to="/edit-listing/$id" params={{ id: r.id }}><Button variant="outline" size="sm">Edit</Button></Link>
                   <Button size="sm" variant={r.status === "closed" ? "default" : "outline"} onClick={() => toggleClose(r)}>
-                    {r.status === "closed" ? "Reactivate" : "Close"}
+                    {r.status === "closed" ? "Review & reactivate" : "Close"}
                   </Button>
                 </div>
               </div>

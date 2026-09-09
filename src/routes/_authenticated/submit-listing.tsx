@@ -190,6 +190,20 @@ function SubmitListing() {
 
       const finalCfg = fieldsFor(finalCategory);
 
+      if (finalCfg.vehicle && finalCfg.year && finalCfg.colour) {
+        const missing = [
+          !finalMake.trim() && finalCfg.make !== "off" ? finalCfg.makeLabel.toLowerCase() : "",
+          !finalModel.trim() && finalCfg.make !== "off" ? finalCfg.modelLabel.toLowerCase() : "",
+          !finalYear.trim() ? "year" : "",
+          !finalColour.trim() ? "colour" : "",
+        ].filter(Boolean);
+        if (missing.length) {
+          toast.error(`Please add the vehicle ${missing.join(", ")} so we can build the correct title.`);
+          setSubmitting(false);
+          return;
+        }
+      }
+
       // 2. Title is generated from make + model + year + colour
       const auto = buildAutoTitle({
         make: finalMake,
