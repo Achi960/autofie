@@ -204,7 +204,26 @@ function SubmitListing() {
         status: "pending" as const,
       }).select().single();
       if (insErr) throw insErr;
-...
+
+      // Watermark every photo with "Posted on AutoFie" + shop name before upload
+      const stamped = await watermarkImages(photos, shopName || contactName || "");
+
+      const photoRows: { listing_id: string; url: string; is_cover: boolean; sort_order: number }[] = [];
+      for (let i = 0; i < stamped.length; i++) {
+        const file = stamped[i];
+        const ext = file.name.split(".").pop() || "jpg";
+        const path = `${user.id}/${listing.id}/${i}-${Date.now()}.${ext}`;
+        await uploadFile("listing-photos", path, file);
+        photoRows.push({ listing_id: listing.id, url: path, is_cover: i === coverIndex, sort_order: i });
+      }
+      await supabase.from("listing_photos").insert(photoRows);
+      await supabase.from("listings").update({ cover_photo_url: photoRows[coverIndex]?.url ?? photoRows[0].url }).eq("id", listing.id);
+
+      // Fire-and-forget admin WhatsApp alert (no-op if Twilio not configured)
+      notifyAdminWhatsapp({
+        data: { message: `📋 New listing pending review on AutoFie\n\n"${finalTitle}"\nby ${contactName || user.email}\nGH₵${Number(price).toLocaleString("en-GH")}\n\nReview: ${window.location.origin}/admin/listings` },
+      }).catch(() => {});
+
       toast.success("Listing submitted. An admin will review it shortly.");
       navigate({ to: "/my-listings" });
     } catch (e: any) {
