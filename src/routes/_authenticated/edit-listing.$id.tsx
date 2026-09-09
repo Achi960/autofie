@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ColourPicker } from "@/components/ColourPicker";
 import { ComboBox } from "@/components/ComboBox";
-import { buildAutoTitle } from "@/lib/listing-title";
+import { buildAutoTitle, requiresStandardVehicleTitle } from "@/lib/listing-title";
 import { reviewListingDetails } from "@/lib/listing-ai.functions";
 import { REGIONS, ALL_REGIONS, CONDITIONS, TRANSMISSIONS, FUELS, BODY_TYPES, REGISTRATION_STATUS, type CategorySlug } from "@/lib/ghana";
 import { fieldsFor, brandLibFor, brandsFor } from "@/lib/category-fields";
@@ -176,7 +176,8 @@ function EditListing() {
       }
 
       const finalCfg = fieldsFor(finalCategory);
-      if (finalCfg.vehicle && finalCfg.year && finalCfg.colour) {
+      const standardVehicleTitle = requiresStandardVehicleTitle(finalCategory);
+      if (standardVehicleTitle) {
         const missing = [
           !finalMake.trim() && finalCfg.make !== "off" ? finalCfg.makeLabel.toLowerCase() : "",
           !finalModel.trim() && finalCfg.make !== "off" ? finalCfg.modelLabel.toLowerCase() : "",
@@ -192,12 +193,12 @@ function EditListing() {
       }
 
       // Always replace a typed or old title with the standard vehicle title.
-      const finalTitle = buildAutoTitle({
+      const finalTitle = (standardVehicleTitle ? buildAutoTitle({
         make: finalMake,
         model: finalModel,
         year: finalCfg.year ? finalYear : "",
         colour: finalCfg.colour ? finalColour : "",
-      }) || String(f.title ?? "").trim();
+      }) : "") || String(f.title ?? "").trim();
       if (!finalTitle) { toast.error("Add a title"); setSaving(false); return; }
       setF({ ...f, category: finalCategory, make: finalMake, model: finalModel, year: finalYear, colour: finalColour, title: finalTitle });
       // Upload any new photos first

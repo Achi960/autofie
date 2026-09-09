@@ -1,3 +1,17 @@
+import type { CategorySlug } from "@/lib/ghana";
+
+const STANDARD_TITLE_CATEGORIES: readonly CategorySlug[] = [
+  "car",
+  "motorcycle",
+  "bus",
+  "truck",
+  "heavy_equipment",
+];
+
+export function requiresStandardVehicleTitle(category: CategorySlug): boolean {
+  return STANDARD_TITLE_CATEGORIES.includes(category);
+}
+
 /** Builds the standard AutoFie listing title: Make Model Year Colour. */
 export function buildAutoTitle(parts: {
   make?: string | null;
