@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Phone, Send, Smile, Keyboard, ShieldAlert, Ban } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
 import EmojiPicker, { type EmojiClickData, Theme as EmojiTheme } from "emoji-picker-react";
+import { ListingLink } from "@/components/ListingLink";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +52,7 @@ function ChatPage() {
   const [sending, setSending] = useState(false);
   const [other, setOther] = useState<{ full_name: string | null; phone: string | null; avatar_url: string | null; last_seen_at: string | null; is_banned: boolean } | null>(null);
   const [otherAvatar, setOtherAvatar] = useState<string | null>(null);
-  const [listing, setListing] = useState<{ id: string; title: string; price: number; cover_photo_url: string | null } | null>(null);
+  const [listing, setListing] = useState<{ id: string; slug: string | null; category: string | null; make: string | null; title: string; price: number; cover_photo_url: string | null } | null>(null);
   const [askPhone, setAskPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
@@ -239,7 +240,7 @@ function ChatPage() {
           <div className="mx-auto max-w-3xl px-4 pb-2">
             <ListingLink listing={listing} className="truncate text-xs text-muted-foreground hover:underline">
               About: {listing.title}
-            </Link>
+            </ListingLink>
           </div>
         )}
       </div>
