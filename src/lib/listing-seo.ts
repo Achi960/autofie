@@ -6,16 +6,27 @@ export interface ListingMeta {
   make: string | null; model: string | null; year: number | null; price: number | null;
   region: string | null; district: string | null; condition: string | null; transmission: string | null;
   fuel: string | null; mileage: number | null; body_type: string | null; colour: string | null;
+  status?: string | null;
 }
 
-const COLS = "id, slug, category, title, description, make, model, year, price, region, district, condition, transmission, fuel, mileage, body_type, colour";
+const COLS = "id, slug, category, title, description, make, model, year, price, region, district, condition, transmission, fuel, mileage, body_type, colour, status";
 
-/** Loads an approved listing by its readable slug (falls back to a raw id). */
+/**
+ * Loads a listing by its readable slug (falls back to a raw id).
+ * Tries approved listings first; otherwise falls back to any status the
+ * current viewer is allowed to read (its owner or an admin, per RLS).
+ */
 export async function loadListingBySlug(slug: string): Promise<ListingMeta | null> {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
-  const q = (supabase.from("listings") as any).select(COLS).eq("status", "approved");
-  const { data } = await (isUuid ? q.eq("id", slug) : q.eq("slug", slug)).maybeSingle();
-  return (data as ListingMeta) ?? null;
+  const match = (q: any) => (isUuid ? q.eq("id", slug) : q.eq("slug", slug));
+
+  const { data: approved } = await match(
+    (supabase.from("listings") as any).select(COLS).eq("status", "approved"),
+  ).maybeSingle();
+  if (approved) return approved as ListingMeta;
+
+  const { data: own } = await match((supabase.from("listings") as any).select(COLS)).maybeSingle();
+  return (own as ListingMeta) ?? null;
 }
 
 /** Builds head() metadata (title, description, canonical, JSON-LD) for a listing page. */
