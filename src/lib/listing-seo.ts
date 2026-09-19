@@ -88,6 +88,9 @@ export function listingHead(m: ListingMeta | null | undefined, fallbackPath: str
       { property: "og:type", content: "product" },
       { property: "og:url", content: url },
       { name: "twitter:card", content: "summary_large_image" },
+      ...(m && m.status && m.status !== "approved"
+        ? [{ name: "robots", content: "noindex" }]
+        : []),
     ],
     links: [{ rel: "canonical", href: url }],
     scripts,
